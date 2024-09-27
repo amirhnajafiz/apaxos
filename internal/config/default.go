@@ -25,6 +25,11 @@ func Default() Config {
 			Pass:     "",
 			Database: "",
 		},
-		Cache: storage.RedisConfig{},
+		Cache: storage.RedisConfig{
+			Host:     "",
+			Port:     0,
+			Password: "",
+			Database: 0,
+		},
 	}
 }
