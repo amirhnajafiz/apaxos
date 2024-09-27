@@ -4,7 +4,4 @@ package http
 type Config struct {
 	// Port will be used for the node's HTTP listener.
 	Port int `koanf:"port"`
-	// Timeout is set for each input request that comes
-	// to the HTTP handler.
-	Timeout int `koanf:"timeout"`
 }

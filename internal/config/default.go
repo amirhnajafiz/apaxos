@@ -11,8 +11,7 @@ func Default() Config {
 		Nodes:  make([]string, 0),
 		Client: "",
 		HTTP: http.Config{
-			Port:    8080,
-			Timeout: 10, // in seconds
+			Port: 8080,
 		},
 		RPC: socket.Config{
 			Port:    8081,
