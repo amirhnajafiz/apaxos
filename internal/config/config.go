@@ -30,7 +30,7 @@ type Config struct {
 	// HTTP configs.
 	HTTP http.Config `koanf:"http"`
 	// RPC configs.
-	RPC socket.Config `koanf:"rpc"`
+	Socket socket.Config `koanf:"socket"`
 }
 
 // New reads configuration with koanf.

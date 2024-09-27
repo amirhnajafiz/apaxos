@@ -13,7 +13,7 @@ func Default() Config {
 		HTTP: http.Config{
 			Port: 8080,
 		},
-		RPC: socket.Config{
+		Socket: socket.Config{
 			Port:    8081,
 			Timeout: 10, // in seconds
 		},
