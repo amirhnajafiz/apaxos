@@ -28,6 +28,9 @@ type Config struct {
 	// Client holds the name of the client that this node should
 	// manage.
 	Client string `koanf:"client"`
+	// Sign is a unique string for each node in order to
+	// track it's data in databases, messages, etc.
+	Sign string `koanf:"sign"`
 	// HTTP configs.
 	HTTP http.Config `koanf:"http"`
 	// RPC configs.

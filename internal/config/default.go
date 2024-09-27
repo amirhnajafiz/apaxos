@@ -11,6 +11,7 @@ func Default() Config {
 	return Config{
 		Nodes:  make([]string, 0),
 		Client: "",
+		Sign:   "",
 		HTTP: http.Config{
 			Port: 8080,
 		},
