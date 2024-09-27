@@ -3,9 +3,10 @@ package metrics
 // Metrics is a struct that is used to track
 // system's performance for each node.
 type Metrics struct {
-	tps      float64   // number of transactions per second
-	latency  []float64 // a single transaction handling time
-	failures int       // number of failed transactions
+	tps         float64   // number of transactions per second
+	latency     []float64 // a single transaction handling time
+	successfuls int       // number of successful transactions
+	failures    int       // number of failed transactions
 }
 
 // NewMetrics return a new metrics instance.
@@ -35,10 +36,15 @@ func (m *Metrics) IncFailure() {
 	m.failures++
 }
 
+func (m *Metrics) IncSuccess() {
+	m.successfuls++
+}
+
 func (m *Metrics) Export() map[string]interface{} {
 	return map[string]interface{}{
 		"latency":                 m.latency,
 		"failures":                m.failures,
+		"succesful transactions":  m.successfuls,
 		"transactions per second": m.tps,
 	}
 }
