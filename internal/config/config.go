@@ -7,6 +7,7 @@ import (
 
 	"github.com/f24-cse535/apaxos/internal/config/http"
 	"github.com/f24-cse535/apaxos/internal/config/socket"
+	"github.com/f24-cse535/apaxos/internal/config/storage"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
@@ -31,6 +32,9 @@ type Config struct {
 	HTTP http.Config `koanf:"http"`
 	// RPC configs.
 	Socket socket.Config `koanf:"socket"`
+	// Storage configs. (MySQL and Redis)
+	Database storage.MySQLConfig `koanf:"mysql"`
+	Cache    storage.RedisConfig `koanf:"redis"`
 }
 
 // New reads configuration with koanf.
