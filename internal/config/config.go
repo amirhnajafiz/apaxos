@@ -5,6 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/f24-cse535/apaxos/internal/config/http"
+	"github.com/f24-cse535/apaxos/internal/config/socket"
+
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -18,6 +21,16 @@ const Prefix = "apax_"
 
 // Config holds all configurations.
 type Config struct {
+	// Nodes is the list of IP addresses for other systems.
+	// These IPs will be used to make rpc calls.
+	Nodes []string `koanf:"nodes"`
+	// Client holds the name of the client that this node should
+	// manage.
+	Client string `koanf:"client"`
+	// HTTP configs.
+	HTTP http.Config `koanf:"http"`
+	// RPC configs.
+	RPC socket.Config `koanf:"rpc"`
 }
 
 // New reads configuration with koanf.
