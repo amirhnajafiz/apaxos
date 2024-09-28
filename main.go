@@ -17,5 +17,5 @@ func main() {
 	go http.Bootstrap(cfg.HTTP)
 
 	// bootstrap socket interface
-	binder.Bootstrap(cfg.Socket, cfg.Client, cfg.Nodes...)
+	go binder.Bootstrap(cfg.Socket, cfg.Client, cfg.Nodes...)
 }
