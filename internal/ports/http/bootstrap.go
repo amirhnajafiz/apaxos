@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/f24-cse535/apaxos/internal/config/http"
-	"github.com/f24-cse535/apaxos/internal/http/v1/handler"
+	"github.com/f24-cse535/apaxos/internal/ports/http/v1/handler"
 
 	"github.com/gofiber/fiber/v2"
 )

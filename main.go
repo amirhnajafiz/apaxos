@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/f24-cse535/apaxos/internal/config"
-	"github.com/f24-cse535/apaxos/internal/http"
-	"github.com/f24-cse535/apaxos/internal/socket"
+	"github.com/f24-cse535/apaxos/internal/ports/http"
+	"github.com/f24-cse535/apaxos/internal/ports/socket/binder"
 )
 
 func main() {
@@ -17,5 +17,5 @@ func main() {
 	go http.Bootstrap(cfg.HTTP)
 
 	// bootstrap socket interface
-	socket.Bootstrap(cfg.Socket, cfg.Client, cfg.Nodes...)
+	binder.Bootstrap(cfg.Socket, cfg.Client, cfg.Nodes...)
 }
