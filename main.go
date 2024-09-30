@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/f24-cse535/apaxos/internal/config"
 	"github.com/f24-cse535/apaxos/internal/ports/http"
-	"github.com/f24-cse535/apaxos/internal/ports/socket/binder"
 )
 
 func main() {
@@ -15,7 +14,4 @@ func main() {
 
 	// bootstrap http server as a goroutine
 	go http.Bootstrap(cfg.HTTP)
-
-	// bootstrap socket interface
-	go binder.Bootstrap(cfg.Socket)
 }
