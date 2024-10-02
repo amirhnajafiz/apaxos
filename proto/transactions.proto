@@ -1,0 +1,11 @@
+syntax = "proto3";
+package transactions;
+
+option go_package = "./transactions";
+
+// creating rpc services for transactions and apaxos.
+// the transactions service is for handling client-server calls.
+service Transactions {}
+// the apaxos service is for handling internal node calls for
+// performing paxos.
+service Apaxos {}
