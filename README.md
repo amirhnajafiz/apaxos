@@ -76,7 +76,7 @@ sends a sync request and the list of blocks that where stored after that block. 
 ## Requirements
 
 - Programming language: `Golang 1.23`
-- Communication: `gRPC v3`
+- Communication: `gRPC v2`, `protoc3`
 - Datastores: `MongoDB` and `Redis`
 
 ## Functions

@@ -3,9 +3,50 @@ package transactions;
 
 option go_package = "./transactions";
 
+import "google/protobuf/empty.proto";
+
 // creating rpc services for transactions and apaxos.
 // the transactions service is for handling client-server calls.
-service Transactions {}
+service Transactions {
+    rpc NewTransaction(Transaction) returns (TransactionResponse) {}
+    rpc PrintBalance(google.protobuf.Empty) returns (PrintBalanceResponse) {}
+    rpc PrintLogs(google.protobuf.Empty) returns (stream Block) {}
+    rpc PrintDB(google.protobuf.Empty) returns (stream Block) {}
+    rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
+    rpc AggregatedBalance(AggregatedBalanceRequest) returns (PrintBalanceResponse) {}
+}
 // the apaxos service is for handling internal node calls for
 // performing paxos.
-service Apaxos {}
+service Apaxos {
+    rpc Propose() returns () {}
+    rpc Promise() returns () {}
+    rpc Accept() returns () {}
+    rpc Accepted() returns () {}
+    rpc Commit() returns() {}
+    rpc Sync() returns() {}
+}
+
+// defining rpc messages, including block, transaction, and ballot number
+message Block {}
+
+message Transaction {}
+
+message BallotNumber {}
+
+// defining client messages requests-responses
+message TransactionResponse {
+    bool Result = 1;
+}
+
+message PrintBalanceResponse {
+    int64 Balance = 1;
+}
+
+message PerformanceResponse {
+    double Throughput = 1;
+    double Latency = 2;
+}
+
+message AggregatedBalanceRequest {
+    string Client = 1;
+}
