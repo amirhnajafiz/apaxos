@@ -1,30 +1,28 @@
 package database
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/f24-cse535/apaxos/internal/config/storage"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Database is a module that handles database queries.
+// Database is a module that uses mongo-driver library to handle MongoDB queries.
 type Database struct {
-	db *gorm.DB
+	conn *mongo.Client
 }
 
 // NewDatabase opens a MySQL connection and returns an instance of
 // database struct.
-func NewDatabase(cfg storage.MySQLConfig) (*Database, error) {
-	// creating the MySQL dns from storage configs
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.Database)
-
-	// open connection to db
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+func NewDatabase(cfg storage.MongoDB) (*Database, error) {
+	// open a new connection to MongoDB cluster
+	conn, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.URI))
 	if err != nil {
-		return nil, fmt.Errorf("failed to open MySQL connection: %v", err)
+		return nil, fmt.Errorf("[storage/database] failed to open a MongoDB connection: %v", err)
 	}
 
-	return &Database{db: db}, nil
+	return &Database{conn: conn}, nil
 }

@@ -26,7 +26,7 @@ func New(cfg storage.Redis) (*Cache, error) {
 
 	// check connection
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
-		return nil, fmt.Errorf("failed to open Redis connection: %v", err)
+		return nil, fmt.Errorf("[storage/cache] failed to open Redis connection: %v", err)
 	}
 
 	return &Cache{conn: rdb}, nil
