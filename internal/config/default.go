@@ -1,32 +1,25 @@
 package config
 
 import (
-	"github.com/f24-cse535/apaxos/internal/config/http"
-	"github.com/f24-cse535/apaxos/internal/config/socket"
+	"github.com/f24-cse535/apaxos/internal/config/grpc"
 	"github.com/f24-cse535/apaxos/internal/config/storage"
 )
 
 // Default return default configuration.
 func Default() Config {
 	return Config{
+		NodeID: "unique",
+		Client: "unique",
 		Nodes:  make([]string, 0),
-		Client: "",
-		Sign:   "",
-		HTTP: http.Config{
-			Port: 8080,
+		GRPC: grpc.GRPC{
+			Host:           "127.0.0.1",
+			Port:           8080,
+			WaitingTimeout: 10, // in milliseconds
 		},
-		Socket: socket.Config{
-			Port:    8081,
-			Timeout: 10, // in seconds
+		MongoDB: storage.MongoDB{
+			URI: "your atlas connection string",
 		},
-		Database: storage.MySQLConfig{
-			Host:     "",
-			Port:     3306,
-			User:     "",
-			Pass:     "",
-			Database: "",
-		},
-		Cache: storage.RedisConfig{
+		Redis: storage.Redis{
 			Host:     "",
 			Port:     0,
 			Password: "",
