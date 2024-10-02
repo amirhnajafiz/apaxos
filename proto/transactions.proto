@@ -1,52 +1,82 @@
 syntax = "proto3";
 package transactions;
 
-option go_package = "./transactions";
-
 import "google/protobuf/empty.proto";
+
+option go_package = "./transactions";
 
 // creating rpc services for transactions and apaxos.
 // the transactions service is for handling client-server calls.
 service Transactions {
-    rpc NewTransaction(Transaction) returns (TransactionResponse) {}
-    rpc PrintBalance(google.protobuf.Empty) returns (PrintBalanceResponse) {}
-    rpc PrintLogs(google.protobuf.Empty) returns (stream Block) {}
-    rpc PrintDB(google.protobuf.Empty) returns (stream Block) {}
-    rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
-    rpc AggregatedBalance(AggregatedBalanceRequest) returns (PrintBalanceResponse) {}
+  rpc NewTransaction(Transaction) returns (TransactionResponse) {}
+  rpc PrintBalance(google.protobuf.Empty) returns (PrintBalanceResponse) {}
+  rpc PrintLogs(google.protobuf.Empty) returns (stream Block) {}
+  rpc PrintDB(google.protobuf.Empty) returns (stream Block) {}
+  rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
+  rpc AggregatedBalance(
+    AggregatedBalanceRequest
+  ) returns (PrintBalanceResponse) {}
 }
 // the apaxos service is for handling internal node calls for
 // performing paxos.
 service Apaxos {
-    rpc Propose() returns () {}
-    rpc Promise() returns () {}
-    rpc Accept() returns () {}
-    rpc Accepted() returns () {}
-    rpc Commit() returns() {}
-    rpc Sync() returns() {}
+  rpc Propose(BallotNumber) returns (google.protobuf.Empty) {}
+  rpc Promise(PromiseMessage) returns (google.protobuf.Empty) {}
+  rpc Accept(AcceptMessage) returns (google.protobuf.Empty) {}
+  rpc Accepted(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc Commit(google.protobuf.Empty) returns(google.protobuf.Empty) {}
+  rpc Sync(stream Block) returns(google.protobuf.Empty) {}
 }
 
 // defining rpc messages, including block, transaction, and ballot number
-message Block {}
+message Block {
+  repeated Transaction transactions = 1;
+  string node_id = 2;
+  string uid = 3;
+  int64 sequence_number = 4;
+  BallotNumber ballot_number = 5;
+}
 
-message Transaction {}
+message Transaction {
+  string sender = 1;
+  string reciever = 2;
+  int64 amount = 3;
+}
 
-message BallotNumber {}
+message BallotNumber {
+  int64 number = 1;
+  string node_id = 2;
+}
+
+message LastCommittedMessage {
+  string block_uid = 1;
+  BallotNumber ballot_number = 2;
+}
+
+message PromiseMessage {
+  BallotNumber ballot_number = 1;
+  repeated Block blocks = 2;
+}
+
+message AcceptMessage {
+  BallotNumber ballot_number = 1;
+  repeated Block blocks = 2;
+}
 
 // defining client messages requests-responses
 message TransactionResponse {
-    bool Result = 1;
+  bool result = 1;
 }
 
 message PrintBalanceResponse {
-    int64 Balance = 1;
+  int64 balance = 1;
 }
 
 message PerformanceResponse {
-    double Throughput = 1;
-    double Latency = 2;
+  double throughput = 1;
+  double latency = 2;
 }
 
 message AggregatedBalanceRequest {
-    string Client = 1;
+  string client = 1;
 }
