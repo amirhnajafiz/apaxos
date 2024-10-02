@@ -34,7 +34,6 @@ message Block {
   string node_id = 2;
   string uid = 3;
   int64 sequence_number = 4;
-  BallotNumber ballot_number = 5;
 }
 
 message Transaction {
@@ -49,8 +48,9 @@ message BallotNumber {
 }
 
 message LastCommittedMessage {
-  string block_uid = 1;
-  BallotNumber ballot_number = 2;
+  string node_id = 1;
+  string uid = 2;
+  int64 sequence_number = 3;
 }
 
 message PromiseMessage {
