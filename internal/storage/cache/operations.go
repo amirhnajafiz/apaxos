@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Set a new key-value pair in Redis.
 func (c Cache) Set(key string, value string) error {
 	ctx := context.Background()
 
@@ -16,6 +17,7 @@ func (c Cache) Set(key string, value string) error {
 	return nil
 }
 
+// Get a value by its key in Redis.
 func (c Cache) Get(key string) (string, error) {
 	ctx := context.Background()
 
