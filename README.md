@@ -115,16 +115,13 @@ sends a sync request and the list of blocks that where stored after that block. 
 
 ```
 client   =>    centeralized process
-                           |
+                          ||
                           \/
-
                    Node S1 gRPC   =>   Dispatcher  => Proposer, Acceptor, Learner
-                           |
+                          ||
                           \/
-
                    Dialer gRPC
-                           |
+                          ||
                           \/
-
   Redis  <=  Other Nodes gRPC  => MongoDB
 ```
