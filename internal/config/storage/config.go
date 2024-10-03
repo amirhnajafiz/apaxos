@@ -11,6 +11,8 @@ type Redis struct {
 
 // MongoDB config contains a uri string
 // which can be provided by a MongoDB cluster.
+// It also includes a database parameter.
 type MongoDB struct {
-	URI string `koanf:"uri"`
+	URI      string `koanf:"uri"`
+	Database string `koanf:"database"`
 }
