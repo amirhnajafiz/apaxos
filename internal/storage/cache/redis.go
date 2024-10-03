@@ -11,12 +11,13 @@ import (
 
 // Cache is a module that use go-redis library to handle Redis operations.
 type Cache struct {
-	conn *redis.Client
+	conn   *redis.Client
+	prefix string
 }
 
 // New creates a new cache instance with the given Redis configs.
 // If the connection fails, it returns an error.
-func New(cfg storage.Redis) (*Cache, error) {
+func New(cfg storage.Redis, nodeId string) (*Cache, error) {
 	// open new redis connection
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
@@ -29,5 +30,8 @@ func New(cfg storage.Redis) (*Cache, error) {
 		return nil, fmt.Errorf("[storage/cache] failed to open Redis connection: %v", err)
 	}
 
-	return &Cache{conn: rdb}, nil
+	return &Cache{
+		conn:   rdb,
+		prefix: nodeId,
+	}, nil
 }

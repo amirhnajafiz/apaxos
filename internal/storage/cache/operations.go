@@ -8,6 +8,7 @@ import (
 // Set a new key-value pair in Redis.
 func (c Cache) Set(key string, value string) error {
 	ctx := context.Background()
+	key = fmt.Sprintf("%s-%s", c.prefix, key)
 
 	response := c.conn.Set(ctx, key, value, 0)
 	if err := response.Err(); err != nil {
@@ -20,6 +21,7 @@ func (c Cache) Set(key string, value string) error {
 // Get a value by its key in Redis.
 func (c Cache) Get(key string) (string, error) {
 	ctx := context.Background()
+	key = fmt.Sprintf("%s-%s", c.prefix, key)
 
 	response := c.conn.Get(ctx, key)
 	if err := response.Err(); err != nil {
