@@ -1,8 +1,14 @@
 # APAXOS
 
-We are going to run `apaxos` when a client sends a request that has an amount more than the current balance of the client.
+This project is a distributed transaction management service. Clients send their transactions to servers (there is user-level sharding that manages each client's account on one single machine). These servers store them inside a local storage as a block of transactions. After that, they try to run each transaction.
+
+They are going to run `apaxos` consensus protocol when a client sends a request that has an amount more than the current balance of the client. By running this protocol, a leader node collects all logs, forms a huge block of transactions (or a list of transaction blocks), and replicates them over servers.
+
+Then, as the majority of servers get that list of blocks, each server starts running these transactions and stores them in a persistante storage.
 
 ## Components
+
+The needed components to implement such system goes as follow:
 
 - gRPC server
   - get's requests from both other nodes and clients
