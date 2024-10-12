@@ -5,6 +5,7 @@ import "github.com/f24-cse535/apaxos/pkg/transactions"
 // Transaction model is a struct that acts as
 // a data-model for MongoDB database.
 type Transaction struct {
+	Uid      string `bson:"uid"`
 	Sender   string `bson:"sender"`
 	Reciever string `bson:"reciever"`
 	Amount   int64  `bson:"amount"`
@@ -17,6 +18,7 @@ type Transaction struct {
 
 func (t *Transaction) ToProtoModel() *transactions.Transaction {
 	return &transactions.Transaction{
+		Uid:      t.Uid,
 		Sender:   t.Sender,
 		Reciever: t.Reciever,
 		Amount:   t.Amount,
@@ -24,6 +26,7 @@ func (t *Transaction) ToProtoModel() *transactions.Transaction {
 }
 
 func (t *Transaction) FromProtoModel(instance *transactions.Transaction) {
+	t.Uid = instance.GetUid()
 	t.Sender = instance.GetSender()
 	t.Reciever = instance.GetReciever()
 	t.Amount = instance.GetAmount()
