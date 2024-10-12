@@ -15,7 +15,7 @@ service Transactions {
   rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
   rpc AggregatedBalance(
     AggregatedBalanceRequest
-  ) returns (PrintBalanceResponse) {}
+  ) returns (stream AggregatedBalanceResponse) {}
 }
 // the apaxos service is for handling internal node calls for
 // performing paxos.
@@ -25,21 +25,23 @@ service Apaxos {
   rpc Accept(AcceptMessage) returns (google.protobuf.Empty) {}
   rpc Accepted(google.protobuf.Empty) returns (google.protobuf.Empty) {}
   rpc Commit(google.protobuf.Empty) returns(google.protobuf.Empty) {}
-  rpc Sync(stream Block) returns(google.protobuf.Empty) {}
+  rpc Sync(stream SyncMessage) returns(google.protobuf.Empty) {}
 }
 
 // defining rpc messages, including block, transaction, and ballot number
 message Block {
-  repeated Transaction transactions = 1;
+  string uid = 1;
   string node_id = 2;
-  string uid = 3;
-  int64 sequence_number = 4;
+  int64 sequence_number = 3;
+  BallotNumber ballot_number = 4;
+  repeated Transaction transactions = 5;
 }
 
 message Transaction {
-  string sender = 1;
-  string reciever = 2;
-  int64 amount = 3;
+  string uid = 1;
+  string sender = 2;
+  string reciever = 3;
+  int64 amount = 4;
 }
 
 message BallotNumber {
@@ -48,19 +50,23 @@ message BallotNumber {
 }
 
 message LastCommittedMessage {
-  string node_id = 1;
-  string uid = 2;
-  int64 sequence_number = 3;
+  string uid = 1;
 }
 
 message PromiseMessage {
   BallotNumber ballot_number = 1;
-  repeated Block blocks = 2;
+  LastCommittedMessage last_comitted_message = 2;
+  repeated Block blocks = 3;
 }
 
 message AcceptMessage {
   BallotNumber ballot_number = 1;
   repeated Block blocks = 2;
+}
+
+message SyncMessage {
+  string client = 1;
+  int64 balance = 2;
 }
 
 // defining client messages requests-responses
@@ -79,4 +85,10 @@ message PerformanceResponse {
 
 message AggregatedBalanceRequest {
   string client = 1;
+}
+
+message AggregatedBalanceResponse {
+  string client = 1;
+  string node_id = 2;
+  int64 balance = 3;
 }
