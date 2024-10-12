@@ -6,6 +6,7 @@ import "github.com/f24-cse535/apaxos/pkg/models"
 // for each node.
 type Memory struct {
 	sequenceNumber int64
+	clients        map[string]int64
 	ballotNumber   *models.BallotNumber
 	acceptedNum    *models.BallotNumber
 	acceptedVal    []*models.Block
@@ -13,10 +14,21 @@ type Memory struct {
 }
 
 // NewMemory returns an instance of the memory struct.
-func NewMemory() *Memory {
+// It accepts the node_id, an initiali balance value, and the list of clients.
+func NewMemory(nodeId string, initBalanceValue int64, clients ...string) *Memory {
+	clientsHashmap := make(map[string]int64, len(clients))
+	for _, client := range clients {
+		clientsHashmap[client] = initBalanceValue
+	}
+
 	return &Memory{
 		sequenceNumber: 0,
+		clients:        clientsHashmap,
 		acceptedVal:    make([]*models.Block, 0),
 		datastore:      make([]*models.Transaction, 0),
+		ballotNumber: &models.BallotNumber{
+			Number: 0,
+			NodeId: nodeId,
+		},
 	}
 }

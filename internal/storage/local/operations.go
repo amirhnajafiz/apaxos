@@ -11,6 +11,15 @@ func (m *Memory) IncSequenceNumber() {
 	m.sequenceNumber++
 }
 
+// Memory operations for clients.
+func (m *Memory) SetBalance(client string, balance int64) {
+	m.clients[client] = balance
+}
+
+func (m *Memory) GetBalance(client string) int64 {
+	return m.clients[client]
+}
+
 // Memory operations for ballot_number.
 func (m *Memory) SetBallotNumber(instance *models.BallotNumber) {
 	m.ballotNumber = instance
