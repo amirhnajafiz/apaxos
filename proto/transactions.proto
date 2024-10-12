@@ -28,13 +28,18 @@ service Apaxos {
   rpc Sync(stream SyncMessage) returns(google.protobuf.Empty) {}
 }
 
-// defining rpc messages, including block, transaction, and ballot number
-message Block {
+// defining rpc messages, including block,
+// block metadata, transaction, and ballot number
+message BlockMetaData {
   string uid = 1;
   string node_id = 2;
   int64 sequence_number = 3;
   BallotNumber ballot_number = 4;
-  repeated Transaction transactions = 5;
+}
+
+message Block {
+  BlockMetaData metadata = 1;
+  repeated Transaction transactions = 2;
 }
 
 message Transaction {
@@ -49,16 +54,9 @@ message BallotNumber {
   string node_id = 2;
 }
 
-message LastCommittedMessage {
-  string uid = 1;
-  string node_id = 2;
-  int64 sequence_number = 3;
-  BallotNumber ballot_number = 4;
-}
-
 message PromiseMessage {
   BallotNumber ballot_number = 1;
-  LastCommittedMessage last_comitted_message = 2;
+  BlockMetaData last_comitted_message = 2;
   repeated Block blocks = 3;
 }
 
