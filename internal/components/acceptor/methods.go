@@ -1,6 +1,6 @@
 package acceptor
 
-func (a Acceptor) promise() error {
+func (a Acceptor) prepare() error {
 	// check the ballot number
 	// return the promise message
 }

@@ -5,6 +5,7 @@ type PacketType int
 
 const (
 	PacketPropose PacketType = iota + 1
+	PacketPrepare
 	PacketPromise
 	PacketAccept
 	PacketAccepted
