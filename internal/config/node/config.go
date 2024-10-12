@@ -1,12 +1,12 @@
-package config
+package node
 
 import (
 	"encoding/json"
 	"log"
 	"strings"
 
-	"github.com/f24-cse535/apaxos/internal/config/grpc"
-	"github.com/f24-cse535/apaxos/internal/config/mongodb"
+	"github.com/f24-cse535/apaxos/internal/config/node/grpc"
+	"github.com/f24-cse535/apaxos/internal/config/node/mongodb"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"

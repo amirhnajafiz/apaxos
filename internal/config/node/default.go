@@ -1,8 +1,8 @@
-package config
+package node
 
 import (
-	"github.com/f24-cse535/apaxos/internal/config/grpc"
-	"github.com/f24-cse535/apaxos/internal/config/mongodb"
+	"github.com/f24-cse535/apaxos/internal/config/node/grpc"
+	"github.com/f24-cse535/apaxos/internal/config/node/mongodb"
 )
 
 // Default return default configuration.
