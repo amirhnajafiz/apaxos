@@ -1,7 +1,9 @@
 package acceptor
 
+import "github.com/f24-cse535/apaxos/pkg/messages"
+
 type Acceptor struct {
-	GRPCChannel chan bool
+	GRPCChannel chan *messages.Packet
 }
 
 func (a Acceptor) Start() {

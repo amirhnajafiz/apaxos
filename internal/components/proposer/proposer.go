@@ -1,7 +1,9 @@
 package proposer
 
+import "github.com/f24-cse535/apaxos/pkg/messages"
+
 type Proposer struct {
-	GRPCChannel chan bool
+	GRPCChannel chan *messages.Packet
 }
 
 func (p Proposer) Start() {
