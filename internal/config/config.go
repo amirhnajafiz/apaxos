@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/f24-cse535/apaxos/internal/config/grpc"
-	"github.com/f24-cse535/apaxos/internal/config/storage"
+	"github.com/f24-cse535/apaxos/internal/config/mongodb"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
@@ -21,14 +21,13 @@ const Prefix = "apax_"
 
 // Config struct is a major module that stores system configs.
 // For each node, we have a unique node_id and a client.
-// Other configs include gRPC, MongoDB, Redis, and other nodes gRPC addresses.
+// Other configs include gRPC, MongoDB, and other nodes gRPC addresses.
 type Config struct {
-	NodeID  string          `koanf:"node_id"`
-	Client  string          `koanf:"client"`
-	Nodes   []string        `koanf:"nodes"`
-	GRPC    grpc.GRPC       `koanf:"grpc"`
-	MongoDB storage.MongoDB `koanf:"mongodb"`
-	Redis   storage.Redis   `koanf:"redis"`
+	NodeID  string         `koanf:"node_id"`
+	Client  string         `koanf:"client"`
+	Nodes   []string       `koanf:"nodes"`
+	GRPC    grpc.Config    `koanf:"grpc"`
+	MongoDB mongodb.Config `koanf:"mongodb"`
 }
 
 // New reads configuration with koanf, by loading a yaml config path into the Config struct.

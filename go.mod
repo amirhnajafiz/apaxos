@@ -8,15 +8,12 @@ require (
 	github.com/knadh/koanf/providers/file v1.1.0
 	github.com/knadh/koanf/providers/structs v0.1.0
 	github.com/knadh/koanf/v2 v2.1.1
-	github.com/redis/go-redis/v9 v9.6.1
 	github.com/tidwall/pretty v1.2.1
 	go.mongodb.org/mongo-driver v1.17.1
 	google.golang.org/protobuf v1.34.2
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect

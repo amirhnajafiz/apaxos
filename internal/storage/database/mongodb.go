@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/f24-cse535/apaxos/internal/config/storage"
+	"github.com/f24-cse535/apaxos/internal/config/mongodb"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,7 +25,7 @@ type Database struct {
 
 // NewDatabase opens a MySQL connection and returns an instance of
 // database struct.
-func NewDatabase(cfg storage.MongoDB, prefix string) (*Database, error) {
+func NewDatabase(cfg mongodb.Config, prefix string) (*Database, error) {
 	// open a new connection to MongoDB cluster
 	conn, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.URI))
 	if err != nil {

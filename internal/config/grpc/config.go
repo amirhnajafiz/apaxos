@@ -1,10 +1,10 @@
 package grpc
 
-// GRPC config contains a host and a port
+// Config contains a host and a port
 // in order to start a gRPC server for each node.
 // Moreover, it has a waiting_timeout in milliseconds
 // that waits for a response from gRPC calls to other nodes.
-type GRPC struct {
+type Config struct {
 	Host           string `koanf:"host"`
 	Port           int    `koanf:"port"`
 	WaitingTimeout int    `koanf:"waiting_timeout"`
