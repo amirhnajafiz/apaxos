@@ -20,6 +20,10 @@ func (m *Memory) GetBalance(client string) int64 {
 	return m.clients[client]
 }
 
+func (m *Memory) GetClients() map[string]int64 {
+	return m.clients
+}
+
 // Memory operations for ballot_number.
 func (m *Memory) SetBallotNumber(instance *models.BallotNumber) {
 	m.ballotNumber = instance
