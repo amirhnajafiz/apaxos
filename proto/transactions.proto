@@ -51,6 +51,9 @@ message BallotNumber {
 
 message LastCommittedMessage {
   string uid = 1;
+  string node_id = 2;
+  int64 sequence_number = 3;
+  BallotNumber ballot_number = 4;
 }
 
 message PromiseMessage {
