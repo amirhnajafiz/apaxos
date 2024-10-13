@@ -60,6 +60,6 @@ func (m *Memory) GetDatastore() []*models.Transaction {
 	return m.datastore
 }
 
-func (m *Memory) ResetDatastore() {
-	m.datastore = make([]*models.Transaction, 0)
+func (m *Memory) SetDatastore(instance []*models.Transaction) {
+	m.datastore = instance
 }
