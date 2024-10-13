@@ -6,18 +6,18 @@ import "github.com/f24-cse535/apaxos/pkg/transactions"
 // a data-model for MongoDB database. It is also used
 // for internal processing.
 type BlockMetadata struct {
-	Uid            string        `bson:"uid"`
-	NodeId         string        `bson:"node_id"`
-	SequenceNumber int64         `bson:"sequence_number"`
-	BallotNumber   *BallotNumber `bson:"ballot_number"`
+	Uid            string       `bson:"uid"`
+	NodeId         string       `bson:"node_id"`
+	SequenceNumber int64        `bson:"sequence_number"`
+	BallotNumber   BallotNumber `bson:"ballot_number"`
 }
 
 // Block model is a struct that acts as
 // a data-model for MongoDB database. It is also used
 // for internal processing.
 type Block struct {
-	Metadata     *BlockMetadata
-	Transactions []*Transaction `bson:"transactions"`
+	Metadata     BlockMetadata
+	Transactions []Transaction `bson:"transactions"`
 }
 
 // The following methods are being used to cast our data-model
@@ -25,7 +25,7 @@ type Block struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b *BlockMetadata) ToProtoModel() *transactions.BlockMetaData {
+func (b BlockMetadata) ToProtoModel() *transactions.BlockMetaData {
 	return &transactions.BlockMetaData{
 		Uid:            b.Uid,
 		NodeId:         b.NodeId,
@@ -34,7 +34,7 @@ func (b *BlockMetadata) ToProtoModel() *transactions.BlockMetaData {
 	}
 }
 
-func (b *Block) ToProtoModel() *transactions.Block {
+func (b Block) ToProtoModel() *transactions.Block {
 	list := make([]*transactions.Transaction, len(b.Transactions))
 	for index, value := range b.Transactions {
 		list[index] = value.ToProtoModel()
@@ -46,28 +46,24 @@ func (b *Block) ToProtoModel() *transactions.Block {
 	}
 }
 
-func (b *BlockMetadata) FromProtoModel(instance *transactions.BlockMetaData) {
-	ballotNumber := &BallotNumber{}
-	ballotNumber.FromProtoModel(instance.BallotNumber)
-
+func (b BlockMetadata) FromProtoModel(instance *transactions.BlockMetaData) BlockMetadata {
 	b.NodeId = instance.GetNodeId()
 	b.Uid = instance.GetUid()
 	b.SequenceNumber = instance.GetSequenceNumber()
-	b.BallotNumber = ballotNumber
+	b.BallotNumber = BallotNumber{}.FromProtoModel(instance.BallotNumber)
+
+	return b
 }
 
-func (b *Block) FromProtoModel(instance *transactions.Block) {
-	list := make([]*Transaction, len(instance.Transactions))
-	for index, value := range instance.Transactions {
-		tmp := &Transaction{}
-		tmp.FromProtoModel(value)
+func (b Block) FromProtoModel(instance *transactions.Block) Block {
+	list := make([]Transaction, len(instance.Transactions))
 
-		list[index] = tmp
+	for index, value := range instance.Transactions {
+		list[index] = Transaction{}.FromProtoModel(value)
 	}
 
-	blockMetaData := &BlockMetadata{}
-	blockMetaData.FromProtoModel(instance.Metadata)
-
-	b.Metadata = blockMetaData
 	b.Transactions = list
+	b.Metadata = BlockMetadata{}.FromProtoModel(instance.GetMetadata())
+
+	return b
 }
