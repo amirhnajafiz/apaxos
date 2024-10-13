@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/f24-cse535/apaxos/cmd"
+	"github.com/f24-cse535/apaxos/internal/config"
 )
 
 const (
@@ -26,12 +27,15 @@ func main() {
 	// parse flags
 	flag.Parse()
 
+	// load configs
+	cfg := config.New(*configPath)
+
 	// create cmd instances and pass the config file path
 	ctl := cmd.Controller{
 		ConfigPath: *configPath,
 	}
 	node := cmd.Node{
-		ConfigPath: *configPath,
+		Cfg: cfg,
 	}
 
 	// command is the first argument variable

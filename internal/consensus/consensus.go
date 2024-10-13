@@ -15,8 +15,9 @@ type Consensus struct {
 	Clients map[string]string
 	Nodes   map[string]string
 
-	RequestTimeout  int `koanf:"request_timeout"`
-	MajorityTimeout int `koanf:"majority_timeout"`
+	Majority        int
+	RequestTimeout  int
+	MajorityTimeout int
 }
 
 // Signal is used by the upper layer (gRPC functions) to send their
