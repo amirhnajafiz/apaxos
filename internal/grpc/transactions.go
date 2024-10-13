@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/f24-cse535/apaxos/pkg/transactions"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -15,7 +16,7 @@ type transactionsServer struct {
 	transactions.UnimplementedTransactionsServer
 }
 
-func (s *transactionsServer) NewTransaction(ctx context.Context, req *transactions.Transaction) (*transactions.TransactionResponse, error) {
+func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
 	log.Printf("NewTransaction called with: %+v", req)
 
 	// Placeholder logic - always return success
@@ -36,12 +37,12 @@ func (s *transactionsServer) PrintLogs(req *emptypb.Empty, stream transactions.T
 
 	// Placeholder logic - stream 3 sample blocks
 	for i := 0; i < 3; i++ {
-		block := &transactions.Block{
-			Metadata: &transactions.BlockMetaData{
+		block := &apaxos.Block{
+			Metadata: &apaxos.BlockMetaData{
 				Uid:            "block-uid",
 				NodeId:         "node-123",
 				SequenceNumber: int64(i),
-				BallotNumber:   &transactions.BallotNumber{Number: int64(i), NodeId: "node-123"},
+				BallotNumber:   &apaxos.BallotNumber{Number: int64(i), NodeId: "node-123"},
 			},
 		}
 		if err := stream.Send(block); err != nil {
@@ -58,12 +59,12 @@ func (s *transactionsServer) PrintDB(req *emptypb.Empty, stream transactions.Tra
 
 	// Placeholder logic - stream 3 sample blocks
 	for i := 0; i < 3; i++ {
-		block := &transactions.Block{
-			Metadata: &transactions.BlockMetaData{
+		block := &apaxos.Block{
+			Metadata: &apaxos.BlockMetaData{
 				Uid:            "block-uid",
 				NodeId:         "node-123",
 				SequenceNumber: int64(i),
-				BallotNumber:   &transactions.BallotNumber{Number: int64(i), NodeId: "node-123"},
+				BallotNumber:   &apaxos.BallotNumber{Number: int64(i), NodeId: "node-123"},
 			},
 		}
 		if err := stream.Send(block); err != nil {

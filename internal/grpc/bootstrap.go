@@ -5,7 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/f24-cse535/apaxos/pkg/transactions"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
 	"google.golang.org/grpc"
 )
@@ -29,7 +30,7 @@ func (b Bootstrap) ListenAnsServer() error {
 	server := grpc.NewServer()
 
 	// register both servers
-	transactions.RegisterApaxosServer(server, &apaxosServer{})
+	apaxos.RegisterApaxosServer(server, &apaxosServer{})
 	transactions.RegisterTransactionsServer(server, &transactionsServer{})
 
 	// starting the server

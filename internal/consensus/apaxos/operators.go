@@ -1,12 +1,12 @@
 package apaxos
 
 import (
-	"github.com/f24-cse535/apaxos/pkg/transactions"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
 func (a Apaxos) broadcastPropose() {
 	for _, node := range a.Nodes {
-		a.Dialer.Propose(node, &transactions.PrepareMessage{
+		a.Dialer.Propose(node, &apaxos.PrepareMessage{
 			BallotNumber: a.Memory.GetBallotNumber().ToProtoModel(),
 			// LastComittedMessage:
 		})
@@ -15,7 +15,7 @@ func (a Apaxos) broadcastPropose() {
 
 func (a Apaxos) broadcastAccept() {
 	for _, node := range a.Nodes {
-		a.Dialer.Accept(node, &transactions.AcceptMessage{
+		a.Dialer.Accept(node, &apaxos.AcceptMessage{
 			BallotNumber: a.Memory.GetBallotNumber().ToProtoModel(),
 			// Blocks:
 		})

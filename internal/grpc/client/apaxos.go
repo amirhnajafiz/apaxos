@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/f24-cse535/apaxos/pkg/transactions"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -27,7 +27,7 @@ func (a *ApaxosDialer) connect(address string) (*grpc.ClientConn, error) {
 }
 
 // Propose message is sent by a proposer.
-func (a *ApaxosDialer) Propose(address string, message *transactions.PrepareMessage) {
+func (a *ApaxosDialer) Propose(address string, message *apaxos.PrepareMessage) {
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -35,11 +35,11 @@ func (a *ApaxosDialer) Propose(address string, message *transactions.PrepareMess
 	}
 	defer conn.Close()
 
-	_, _ = transactions.NewApaxosClient(conn).Propose(context.Background(), message)
+	_, _ = apaxos.NewApaxosClient(conn).Propose(context.Background(), message)
 }
 
 // Promise message is sent by an acceptor.
-func (a *ApaxosDialer) Promise(address string, message *transactions.PromiseMessage) {
+func (a *ApaxosDialer) Promise(address string, message *apaxos.PromiseMessage) {
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -47,11 +47,11 @@ func (a *ApaxosDialer) Promise(address string, message *transactions.PromiseMess
 	}
 	defer conn.Close()
 
-	_, _ = transactions.NewApaxosClient(conn).Promise(context.Background(), message)
+	_, _ = apaxos.NewApaxosClient(conn).Promise(context.Background(), message)
 }
 
 // Accept message is sent by a proposer.
-func (a *ApaxosDialer) Accept(address string, message *transactions.AcceptMessage) {
+func (a *ApaxosDialer) Accept(address string, message *apaxos.AcceptMessage) {
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -59,7 +59,7 @@ func (a *ApaxosDialer) Accept(address string, message *transactions.AcceptMessag
 	}
 	defer conn.Close()
 
-	_, _ = transactions.NewApaxosClient(conn).Accept(context.Background(), message)
+	_, _ = apaxos.NewApaxosClient(conn).Accept(context.Background(), message)
 }
 
 // Accepted message is sent by an acceptor.
@@ -71,7 +71,7 @@ func (a *ApaxosDialer) Accepted(address string) {
 	}
 	defer conn.Close()
 
-	_, _ = transactions.NewApaxosClient(conn).Accepted(context.Background(), &emptypb.Empty{})
+	_, _ = apaxos.NewApaxosClient(conn).Accepted(context.Background(), &emptypb.Empty{})
 }
 
 // Commit message is sent by a proposer.
@@ -83,12 +83,12 @@ func (a *ApaxosDialer) Commit(address string) {
 	}
 	defer conn.Close()
 
-	_, _ = transactions.NewApaxosClient(conn).Commit(context.Background(), &emptypb.Empty{})
+	_, _ = apaxos.NewApaxosClient(conn).Commit(context.Background(), &emptypb.Empty{})
 }
 
 // Sync message is sent by a proposer to a felt-behind acceptor
 // or by an acceptor to a felt-behind proposer
-func (a *ApaxosDialer) Sync(address string, messages []*transactions.SyncMessage) {
+func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -96,7 +96,7 @@ func (a *ApaxosDialer) Sync(address string, messages []*transactions.SyncMessage
 	}
 	defer conn.Close()
 
-	stream, err := transactions.NewApaxosClient(conn).Sync(context.Background())
+	stream, err := apaxos.NewApaxosClient(conn).Sync(context.Background())
 	if err != nil {
 		log.Printf("failed to open an stream to %s: %v\n", address, err)
 		return
