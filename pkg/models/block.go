@@ -1,6 +1,6 @@
 package models
 
-import "github.com/f24-cse535/apaxos/pkg/transactions"
+import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 // Block metadata model is a struct that acts as
 // a data-model for MongoDB database. It is also used
@@ -25,8 +25,8 @@ type Block struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b BlockMetadata) ToProtoModel() *transactions.BlockMetaData {
-	return &transactions.BlockMetaData{
+func (b BlockMetadata) ToProtoModel() *apaxos.BlockMetaData {
+	return &apaxos.BlockMetaData{
 		Uid:            b.Uid,
 		NodeId:         b.NodeId,
 		SequenceNumber: b.SequenceNumber,
@@ -34,19 +34,19 @@ func (b BlockMetadata) ToProtoModel() *transactions.BlockMetaData {
 	}
 }
 
-func (b Block) ToProtoModel() *transactions.Block {
-	list := make([]*transactions.Transaction, len(b.Transactions))
+func (b Block) ToProtoModel() *apaxos.Block {
+	list := make([]*apaxos.Transaction, len(b.Transactions))
 	for index, value := range b.Transactions {
 		list[index] = value.ToProtoModel()
 	}
 
-	return &transactions.Block{
+	return &apaxos.Block{
 		Metadata:     b.Metadata.ToProtoModel(),
 		Transactions: list,
 	}
 }
 
-func (b BlockMetadata) FromProtoModel(instance *transactions.BlockMetaData) BlockMetadata {
+func (b BlockMetadata) FromProtoModel(instance *apaxos.BlockMetaData) BlockMetadata {
 	b.NodeId = instance.GetNodeId()
 	b.Uid = instance.GetUid()
 	b.SequenceNumber = instance.GetSequenceNumber()
@@ -55,7 +55,7 @@ func (b BlockMetadata) FromProtoModel(instance *transactions.BlockMetaData) Bloc
 	return b
 }
 
-func (b Block) FromProtoModel(instance *transactions.Block) Block {
+func (b Block) FromProtoModel(instance *apaxos.Block) Block {
 	list := make([]Transaction, len(instance.Transactions))
 
 	for index, value := range instance.Transactions {

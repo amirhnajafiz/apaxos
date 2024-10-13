@@ -1,6 +1,6 @@
 package models
 
-import "github.com/f24-cse535/apaxos/pkg/transactions"
+import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 // BallotNumber model is a struct that presents
 // PAXOS ballot_number.
@@ -14,14 +14,14 @@ type BallotNumber struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b BallotNumber) ToProtoModel() *transactions.BallotNumber {
-	return &transactions.BallotNumber{
+func (b BallotNumber) ToProtoModel() *apaxos.BallotNumber {
+	return &apaxos.BallotNumber{
 		Number: b.Number,
 		NodeId: b.NodeId,
 	}
 }
 
-func (b BallotNumber) FromProtoModel(instance *transactions.BallotNumber) BallotNumber {
+func (b BallotNumber) FromProtoModel(instance *apaxos.BallotNumber) BallotNumber {
 	b.Number = instance.GetNumber()
 	b.NodeId = instance.GetNodeId()
 

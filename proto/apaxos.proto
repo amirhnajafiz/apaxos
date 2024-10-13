@@ -1,0 +1,65 @@
+syntax = "proto3";
+package apaxos;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./rpc/apaxos";
+
+// creating rpc services for transactions and apaxos.
+// the apaxos service is for handling internal node calls for
+// performing paxos.
+service Apaxos {
+  rpc Propose(PrepareMessage) returns (google.protobuf.Empty) {}
+  rpc Promise(PromiseMessage) returns (google.protobuf.Empty) {}
+  rpc Accept(AcceptMessage) returns (google.protobuf.Empty) {}
+  rpc Accepted(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc Commit(google.protobuf.Empty) returns(google.protobuf.Empty) {}
+  rpc Sync(stream SyncMessage) returns(google.protobuf.Empty) {}
+}
+
+// defining rpc messages, including block,
+// block metadata, transaction, and ballot number
+message BlockMetaData {
+  string uid = 1;
+  string node_id = 2;
+  int64 sequence_number = 3;
+  BallotNumber ballot_number = 4;
+}
+
+message Block {
+  BlockMetaData metadata = 1;
+  repeated Transaction transactions = 2;
+}
+
+message Transaction {
+  string uid = 1;
+  string sender = 2;
+  string reciever = 3;
+  int64 amount = 4;
+}
+
+message BallotNumber {
+  int64 number = 1;
+  string node_id = 2;
+}
+
+message PrepareMessage {
+  BallotNumber ballot_number = 1;
+  BlockMetaData last_comitted_message = 2;
+}
+
+message PromiseMessage {
+  BallotNumber ballot_number = 1;
+  BlockMetaData last_comitted_message = 2;
+  repeated Block blocks = 3;
+}
+
+message AcceptMessage {
+  BallotNumber ballot_number = 1;
+  repeated Block blocks = 2;
+}
+
+message SyncMessage {
+  string client = 1;
+  int64 balance = 2;
+}

@@ -1,6 +1,6 @@
 package models
 
-import "github.com/f24-cse535/apaxos/pkg/transactions"
+import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 // Transaction model is a struct that acts as
 // a data-model for MongoDB database.
@@ -16,8 +16,8 @@ type Transaction struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (t Transaction) ToProtoModel() *transactions.Transaction {
-	return &transactions.Transaction{
+func (t Transaction) ToProtoModel() *apaxos.Transaction {
+	return &apaxos.Transaction{
 		Uid:      t.Uid,
 		Sender:   t.Sender,
 		Reciever: t.Reciever,
@@ -25,7 +25,7 @@ func (t Transaction) ToProtoModel() *transactions.Transaction {
 	}
 }
 
-func (t Transaction) FromProtoModel(instance *transactions.Transaction) Transaction {
+func (t Transaction) FromProtoModel(instance *apaxos.Transaction) Transaction {
 	t.Uid = instance.GetUid()
 	t.Sender = instance.GetSender()
 	t.Reciever = instance.GetReciever()
