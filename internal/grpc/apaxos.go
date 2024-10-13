@@ -18,6 +18,7 @@ type apaxosServer struct {
 	Consensus *consensus.Consensus
 }
 
+// Propose will be called by the proposer's consensus module and waits for a call on promise.
 func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*emptypb.Empty, error) {
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketPrepare,
@@ -27,6 +28,7 @@ func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage
 	return &emptypb.Empty{}, nil
 }
 
+// Promise will be called by the acceptor's consensus module.
 func (a *apaxosServer) Promise(ctx context.Context, input *apaxos.PromiseMessage) (*emptypb.Empty, error) {
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketPromise,
@@ -36,6 +38,7 @@ func (a *apaxosServer) Promise(ctx context.Context, input *apaxos.PromiseMessage
 	return &emptypb.Empty{}, nil
 }
 
+// Accept will be called by the proposer's consensus module and waits for a call on accepted.
 func (a *apaxosServer) Accept(ctx context.Context, input *apaxos.AcceptMessage) (*emptypb.Empty, error) {
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketAccept,
@@ -45,6 +48,7 @@ func (a *apaxosServer) Accept(ctx context.Context, input *apaxos.AcceptMessage) 
 	return &emptypb.Empty{}, nil
 }
 
+// Accepted will be called by the acceptor's consensus module.
 func (a *apaxosServer) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	a.Consensus.Signal(&messages.Packet{
 		Type: enum.PacketAccepted,
@@ -53,6 +57,7 @@ func (a *apaxosServer) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb
 	return &emptypb.Empty{}, nil
 }
 
+// Commit will be called by the proposer's consensus module.
 func (a *apaxosServer) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	a.Consensus.Signal(&messages.Packet{
 		Type: enum.PacketCommit,
@@ -61,6 +66,9 @@ func (a *apaxosServer) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.E
 	return &emptypb.Empty{}, nil
 }
 
+// Sync will be called by the proposer's or acceptor's consensus module.
+// If the proposer is slow, one acceptor will call this sync.
+// If the acceptor is slow, the proposer will call this after getting a call on promise.
 func (a *apaxosServer) Sync(stream apaxos.Apaxos_SyncServer) error {
 	sync := make(map[string]int64)
 
