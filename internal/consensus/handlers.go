@@ -27,3 +27,9 @@ func (c Consensus) commitHandler() error {
 func (c Consensus) syncHandler() error {
 	return nil
 }
+
+// aggregatedBalanceHandler get's a request of client id and runs a RPC call
+// to get an answer from each node.
+func (c Consensus) aggregatedBalanceHandler() error {
+	return nil
+}

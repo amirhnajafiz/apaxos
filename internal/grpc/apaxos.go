@@ -3,6 +3,9 @@ package grpc
 import (
 	"context"
 
+	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/storage/database"
+	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -11,6 +14,9 @@ import (
 // apaxos server handles internal RPC calls for apaxos protocol.
 type apaxosServer struct {
 	apaxos.UnimplementedApaxosServer
+	Memory    *local.Memory
+	Database  *database.Database
+	Consensus *consensus.Consensus
 }
 
 func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*emptypb.Empty, error) {

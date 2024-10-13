@@ -5,6 +5,9 @@ import (
 	"log"
 	"net"
 
+	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/storage/database"
+	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
@@ -14,7 +17,10 @@ import (
 // Bootstrap is a wrapper that holds
 // every required thing for the gRPC server starting.
 type Bootstrap struct {
-	Port int
+	Port      int
+	Memory    *local.Memory
+	Database  *database.Database
+	Consensus *consensus.Consensus
 }
 
 // ListenAnsServer creates a new gRPC instance
@@ -30,8 +36,16 @@ func (b Bootstrap) ListenAnsServer() error {
 	server := grpc.NewServer()
 
 	// register both servers
-	apaxos.RegisterApaxosServer(server, &apaxosServer{})
-	transactions.RegisterTransactionsServer(server, &transactionsServer{})
+	apaxos.RegisterApaxosServer(server, &apaxosServer{
+		Consensus: b.Consensus,
+		Memory:    b.Memory,
+		Database:  b.Database,
+	})
+	transactions.RegisterTransactionsServer(server, &transactionsServer{
+		Consensus: b.Consensus,
+		Memory:    b.Memory,
+		Database:  b.Database,
+	})
 
 	// starting the server
 	log.Println("grpc server started ...")

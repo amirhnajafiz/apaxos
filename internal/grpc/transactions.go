@@ -5,6 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/storage/database"
+	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
@@ -14,6 +17,9 @@ import (
 // transactions server handles the clients RPC calls.
 type transactionsServer struct {
 	transactions.UnimplementedTransactionsServer
+	Memory    *local.Memory
+	Database  *database.Database
+	Consensus *consensus.Consensus
 }
 
 func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
