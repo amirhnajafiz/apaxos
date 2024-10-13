@@ -28,6 +28,6 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 
 // Demand is used by components to use the consensus logic to perform an
 // operation. When calling demand, the caller waits for consensus to return something.
-func (c Consensus) Demand(pkt *messages.Packet) (*messages.Packet, error) {
-	return nil, nil
+func (c Consensus) Demand(pkt *messages.Packet) chan *messages.Packet {
+	return nil
 }

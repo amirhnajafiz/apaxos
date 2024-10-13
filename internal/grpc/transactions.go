@@ -27,12 +27,13 @@ type transactionsServer struct {
 func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
 	response := transactions.TransactionResponse{Result: false}
 
-	pkt, err := s.Consensus.Demand(&messages.Packet{
+	pkt := <-s.Consensus.Demand(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
-	if err != nil {
-		return &response, err
+
+	if pkt.Type == enum.PacketError {
+		return &response, pkt.Payload.(error)
 	}
 
 	response.Result = pkt.Payload.(bool)
