@@ -38,8 +38,6 @@ func (b Bootstrap) ListenAnsServer() error {
 	// register both servers
 	apaxos.RegisterApaxosServer(server, &apaxosServer{
 		Consensus: b.Consensus,
-		Memory:    b.Memory,
-		Database:  b.Database,
 	})
 	transactions.RegisterTransactionsServer(server, &transactionsServer{
 		Consensus: b.Consensus,
