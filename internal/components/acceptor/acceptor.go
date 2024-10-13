@@ -5,15 +5,22 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/messages"
 )
 
+// Acceptor state-machine handles the cases for
+// prepare messages and accept messages.
 type Acceptor struct {
-	GRPCChannel chan *messages.Packet
+	Channel chan *messages.Packet
 }
 
+// Signal method is used to send a message to this machine.
+func (a Acceptor) Signal(pkt *messages.Packet) {
+	a.Channel <- pkt
+}
+
+// Start method, the machine waits for messages from the dispatcher.
 func (a Acceptor) Start() {
-	// on start method, the acceptor waits for messages from the gRPC server.
 	for {
-		// wait on gRPC notify channel
-		pkt := <-a.GRPCChannel
+		// wait on its input notify channel
+		pkt := <-a.Channel
 
 		// a switch case for pkt type
 		// the acceptor only get's prepare and accept.
