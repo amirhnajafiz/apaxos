@@ -36,17 +36,11 @@ func (m *Memory) ReadFromState(state *models.State) {
 }
 
 // NewMemory returns an instance of the memory struct.
-// It accepts the node_id, an initiali balance value, and the list of clients.
-func NewMemory(nodeId string, initBalanceValue int64, clients ...string) *Memory {
-	// this hashmap is used to store clients and their balance
-	clientsHashmap := make(map[string]int64, len(clients))
-	for _, client := range clients {
-		clientsHashmap[client] = initBalanceValue
-	}
-
+// It accepts the node_id, an initiali balance value within the list of clients.
+func NewMemory(nodeId string, balances map[string]int64) *Memory {
 	return &Memory{
 		sequenceNumber: time.Now().UnixMilli(), // initalized by the system booting timestamp
-		clients:        clientsHashmap,
+		clients:        balances,
 
 		acceptedNum: nil,
 		acceptedVal: make([]*models.Block, 0),
