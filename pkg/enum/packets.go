@@ -12,5 +12,4 @@ const (
 	PacketCommit
 	PacketSync
 	PacketTransaction
-	PacketError
 )

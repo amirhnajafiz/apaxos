@@ -27,16 +27,24 @@ type transactionsServer struct {
 func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
 	response := transactions.TransactionResponse{Result: false}
 
-	pkt := <-s.Consensus.Demand(&messages.Packet{
+	// send a message to consensus to process a transaction
+	channel, err := s.Consensus.Demand(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
-
-	if pkt.Type == enum.PacketError {
-		return &response, pkt.Payload.(error)
+	if err != nil {
+		return &response, err
 	}
 
-	response.Result = pkt.Payload.(bool)
+	if channel == nil {
+		// if channel is nil, it means the transaction was successful and no need to wait
+		// for consensus protocl
+		response.Result = true
+	} else {
+		// wait on the consensus response
+		pkt := <-channel
+		response.Result = pkt.Payload.(bool)
+	}
 
 	return &response, nil
 }

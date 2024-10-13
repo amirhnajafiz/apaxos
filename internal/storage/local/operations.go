@@ -4,7 +4,12 @@ import "github.com/f24-cse535/apaxos/pkg/models"
 
 // Memory operations for sequence_number.
 func (m *Memory) GetSequenceNumber() int64 {
-	return m.sequenceNumber
+	tmp := m.sequenceNumber
+
+	// inc sequence number after each read
+	m.IncSequenceNumber()
+
+	return tmp
 }
 
 func (m *Memory) IncSequenceNumber() {

@@ -34,6 +34,7 @@ func (n Node) Main() error {
 	instance := consensus.Consensus{
 		Database:        db,
 		Memory:          mem,
+		Client:          n.Cfg.Client,
 		Clients:         n.Cfg.GetClients(),
 		Nodes:           n.Cfg.GetNodes(),
 		RequestTimeout:  n.Cfg.GRPC.RequestTimeout,

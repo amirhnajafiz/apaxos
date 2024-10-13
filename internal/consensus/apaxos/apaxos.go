@@ -20,8 +20,8 @@ type Apaxos struct {
 	Timeout         int
 	MajorityTimeout int
 
-	InChannel  chan messages.Packet
-	OutChannel chan messages.Packet
+	InChannel  chan *messages.Packet
+	OutChannel chan *messages.Packet
 }
 
 // Start will trigger a new apaxos protocol.
