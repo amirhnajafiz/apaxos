@@ -343,7 +343,7 @@ const (
 // the apaxos service is for handling internal node calls for
 // performing paxos.
 type ApaxosClient interface {
-	Propose(ctx context.Context, in *BallotNumber, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Propose(ctx context.Context, in *PrepareMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Promise(ctx context.Context, in *PromiseMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Accept(ctx context.Context, in *AcceptMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Accepted(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -359,7 +359,7 @@ func NewApaxosClient(cc grpc.ClientConnInterface) ApaxosClient {
 	return &apaxosClient{cc}
 }
 
-func (c *apaxosClient) Propose(ctx context.Context, in *BallotNumber, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *apaxosClient) Propose(ctx context.Context, in *PrepareMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Apaxos_Propose_FullMethodName, in, out, cOpts...)
@@ -429,7 +429,7 @@ type Apaxos_SyncClient = grpc.ClientStreamingClient[SyncMessage, emptypb.Empty]
 // the apaxos service is for handling internal node calls for
 // performing paxos.
 type ApaxosServer interface {
-	Propose(context.Context, *BallotNumber) (*emptypb.Empty, error)
+	Propose(context.Context, *PrepareMessage) (*emptypb.Empty, error)
 	Promise(context.Context, *PromiseMessage) (*emptypb.Empty, error)
 	Accept(context.Context, *AcceptMessage) (*emptypb.Empty, error)
 	Accepted(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
@@ -445,7 +445,7 @@ type ApaxosServer interface {
 // pointer dereference when methods are called.
 type UnimplementedApaxosServer struct{}
 
-func (UnimplementedApaxosServer) Propose(context.Context, *BallotNumber) (*emptypb.Empty, error) {
+func (UnimplementedApaxosServer) Propose(context.Context, *PrepareMessage) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Propose not implemented")
 }
 func (UnimplementedApaxosServer) Promise(context.Context, *PromiseMessage) (*emptypb.Empty, error) {
@@ -485,7 +485,7 @@ func RegisterApaxosServer(s grpc.ServiceRegistrar, srv ApaxosServer) {
 }
 
 func _Apaxos_Propose_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BallotNumber)
+	in := new(PrepareMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -497,7 +497,7 @@ func _Apaxos_Propose_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: Apaxos_Propose_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApaxosServer).Propose(ctx, req.(*BallotNumber))
+		return srv.(ApaxosServer).Propose(ctx, req.(*PrepareMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }

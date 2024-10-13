@@ -13,7 +13,7 @@ type apaxosServer struct {
 	transactions.UnimplementedApaxosServer
 }
 
-func (a *apaxosServer) Propose(ctx context.Context, input *transactions.BallotNumber) (*emptypb.Empty, error) {
+func (a *apaxosServer) Propose(ctx context.Context, input *transactions.PrepareMessage) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }
 
