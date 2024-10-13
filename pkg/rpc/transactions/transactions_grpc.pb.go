@@ -21,12 +21,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Transactions_NewTransaction_FullMethodName    = "/transactions.Transactions/NewTransaction"
-	Transactions_PrintBalance_FullMethodName      = "/transactions.Transactions/PrintBalance"
-	Transactions_PrintLogs_FullMethodName         = "/transactions.Transactions/PrintLogs"
-	Transactions_PrintDB_FullMethodName           = "/transactions.Transactions/PrintDB"
-	Transactions_Performance_FullMethodName       = "/transactions.Transactions/Performance"
-	Transactions_AggregatedBalance_FullMethodName = "/transactions.Transactions/AggregatedBalance"
+	Transactions_NewTransaction_FullMethodName = "/transactions.Transactions/NewTransaction"
+	Transactions_PrintBalance_FullMethodName   = "/transactions.Transactions/PrintBalance"
+	Transactions_PrintLogs_FullMethodName      = "/transactions.Transactions/PrintLogs"
+	Transactions_PrintDB_FullMethodName        = "/transactions.Transactions/PrintDB"
+	Transactions_Performance_FullMethodName    = "/transactions.Transactions/Performance"
 )
 
 // TransactionsClient is the client API for Transactions service.
@@ -41,7 +40,6 @@ type TransactionsClient interface {
 	PrintLogs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[apaxos.Block], error)
 	PrintDB(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[apaxos.Block], error)
 	Performance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PerformanceResponse, error)
-	AggregatedBalance(ctx context.Context, in *AggregatedBalanceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[AggregatedBalanceResponse], error)
 }
 
 type transactionsClient struct {
@@ -120,25 +118,6 @@ func (c *transactionsClient) Performance(ctx context.Context, in *emptypb.Empty,
 	return out, nil
 }
 
-func (c *transactionsClient) AggregatedBalance(ctx context.Context, in *AggregatedBalanceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[AggregatedBalanceResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Transactions_ServiceDesc.Streams[2], Transactions_AggregatedBalance_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[AggregatedBalanceRequest, AggregatedBalanceResponse]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Transactions_AggregatedBalanceClient = grpc.ServerStreamingClient[AggregatedBalanceResponse]
-
 // TransactionsServer is the server API for Transactions service.
 // All implementations must embed UnimplementedTransactionsServer
 // for forward compatibility.
@@ -151,7 +130,6 @@ type TransactionsServer interface {
 	PrintLogs(*emptypb.Empty, grpc.ServerStreamingServer[apaxos.Block]) error
 	PrintDB(*emptypb.Empty, grpc.ServerStreamingServer[apaxos.Block]) error
 	Performance(context.Context, *emptypb.Empty) (*PerformanceResponse, error)
-	AggregatedBalance(*AggregatedBalanceRequest, grpc.ServerStreamingServer[AggregatedBalanceResponse]) error
 	mustEmbedUnimplementedTransactionsServer()
 }
 
@@ -176,9 +154,6 @@ func (UnimplementedTransactionsServer) PrintDB(*emptypb.Empty, grpc.ServerStream
 }
 func (UnimplementedTransactionsServer) Performance(context.Context, *emptypb.Empty) (*PerformanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Performance not implemented")
-}
-func (UnimplementedTransactionsServer) AggregatedBalance(*AggregatedBalanceRequest, grpc.ServerStreamingServer[AggregatedBalanceResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method AggregatedBalance not implemented")
 }
 func (UnimplementedTransactionsServer) mustEmbedUnimplementedTransactionsServer() {}
 func (UnimplementedTransactionsServer) testEmbeddedByValue()                      {}
@@ -277,17 +252,6 @@ func _Transactions_Performance_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Transactions_AggregatedBalance_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(AggregatedBalanceRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TransactionsServer).AggregatedBalance(m, &grpc.GenericServerStream[AggregatedBalanceRequest, AggregatedBalanceResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Transactions_AggregatedBalanceServer = grpc.ServerStreamingServer[AggregatedBalanceResponse]
-
 // Transactions_ServiceDesc is the grpc.ServiceDesc for Transactions service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -317,11 +281,6 @@ var Transactions_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "PrintDB",
 			Handler:       _Transactions_PrintDB_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "AggregatedBalance",
-			Handler:       _Transactions_AggregatedBalance_Handler,
 			ServerStreams: true,
 		},
 	},

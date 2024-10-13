@@ -14,9 +14,6 @@ service Transactions {
   rpc PrintLogs(google.protobuf.Empty) returns (stream apaxos.Block) {}
   rpc PrintDB(google.protobuf.Empty) returns (stream apaxos.Block) {}
   rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
-  rpc AggregatedBalance(
-    AggregatedBalanceRequest
-  ) returns (stream AggregatedBalanceResponse) {}
 }
 
 // defining client messages requests-responses
@@ -35,14 +32,4 @@ message PrintBalanceResponse {
 message PerformanceResponse {
   double throughput = 1;
   double latency = 2;
-}
-
-message AggregatedBalanceRequest {
-  string client = 1;
-}
-
-message AggregatedBalanceResponse {
-  string client = 1;
-  string node_id = 2;
-  int64 balance = 3;
 }

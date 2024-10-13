@@ -11,4 +11,5 @@ const (
 	PacketAccepted
 	PacketCommit
 	PacketSync
+	PacketTransaction
 )

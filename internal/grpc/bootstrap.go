@@ -17,7 +17,8 @@ import (
 // Bootstrap is a wrapper that holds
 // every required thing for the gRPC server starting.
 type Bootstrap struct {
-	Port      int
+	Port int
+
 	Memory    *local.Memory
 	Database  *database.Database
 	Consensus *consensus.Consensus
