@@ -5,10 +5,11 @@ import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 // Transaction model is a struct that acts as
 // a data-model for MongoDB database.
 type Transaction struct {
-	Uid      string `bson:"uid"`
-	Sender   string `bson:"sender"`
-	Reciever string `bson:"reciever"`
-	Amount   int64  `bson:"amount"`
+	Uid            string `bson:"uid"`
+	Sender         string `bson:"sender"`
+	Reciever       string `bson:"reciever"`
+	Amount         int64  `bson:"amount"`
+	SequenceNumber int64  `bson:"sequence_number"`
 }
 
 // The following methods are being used to cast our data-model
@@ -18,10 +19,11 @@ type Transaction struct {
 
 func (t Transaction) ToProtoModel() *apaxos.Transaction {
 	return &apaxos.Transaction{
-		Uid:      t.Uid,
-		Sender:   t.Sender,
-		Reciever: t.Reciever,
-		Amount:   t.Amount,
+		Uid:            t.Uid,
+		Sender:         t.Sender,
+		Reciever:       t.Reciever,
+		Amount:         t.Amount,
+		SequenceNumber: t.SequenceNumber,
 	}
 }
 
@@ -30,6 +32,7 @@ func (t Transaction) FromProtoModel(instance *apaxos.Transaction) Transaction {
 	t.Sender = instance.GetSender()
 	t.Reciever = instance.GetReciever()
 	t.Amount = instance.GetAmount()
+	t.SequenceNumber = instance.GetSequenceNumber()
 
 	return t
 }

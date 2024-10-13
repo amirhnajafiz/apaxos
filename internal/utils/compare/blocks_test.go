@@ -3,7 +3,7 @@ package compare_test
 import (
 	"testing"
 
-	"github.com/f24-cse535/apaxos/pkg/compare"
+	"github.com/f24-cse535/apaxos/internal/utils/compare"
 	"github.com/f24-cse535/apaxos/pkg/models"
 )
 

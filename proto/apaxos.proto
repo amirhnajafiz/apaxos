@@ -36,6 +36,7 @@ message Transaction {
   string sender = 2;
   string reciever = 3;
   int64 amount = 4;
+  int64 sequence_number = 5;
 }
 
 message BallotNumber {
