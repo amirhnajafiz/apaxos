@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/f24-cse535/apaxos/internal/config/node/mongodb"
+	"github.com/f24-cse535/apaxos/internal/config/mongodb"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

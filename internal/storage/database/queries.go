@@ -12,7 +12,7 @@ import (
 // InsertBlocks accepts an array of Block model and inserts them
 // inside MongoDB.
 func (d *Database) InsertBlocks(instances []*models.Block) error {
-	ctx := context.TODO()
+	ctx := context.Background()
 
 	// convert models.Block to interface type
 	var interfaceObjects []interface{}
@@ -30,7 +30,7 @@ func (d *Database) InsertBlocks(instances []*models.Block) error {
 
 // GetBlocks returns a list the current committed blocks.
 func (d *Database) GetBlocks() ([]*models.Block, error) {
-	ctx := context.TODO()
+	ctx := context.Background()
 
 	// fetch all blocks
 	cursor, err := d.history.Find(ctx, bson.M{})

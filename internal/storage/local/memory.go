@@ -18,6 +18,23 @@ type Memory struct {
 	datastore []*models.Transaction // local transactions datastore for each node
 }
 
+// ReadFromState is used to load a backup state into the current memory.
+func (m *Memory) ReadFromState(state *models.State) {
+	m.clients = state.Clients
+	m.ballotNumber = &state.BallotNumber
+	m.acceptedNum = &state.AcceptedNum
+
+	m.acceptedVal = make([]*models.Block, len(state.AcceptedVal))
+	for index, item := range state.AcceptedVal {
+		m.acceptedVal[index] = &item
+	}
+
+	m.datastore = make([]*models.Transaction, len(state.Datastore))
+	for index, item := range state.Datastore {
+		m.datastore[index] = &item
+	}
+}
+
 // NewMemory returns an instance of the memory struct.
 // It accepts the node_id, an initiali balance value, and the list of clients.
 func NewMemory(nodeId string, initBalanceValue int64, clients ...string) *Memory {
