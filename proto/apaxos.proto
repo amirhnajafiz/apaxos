@@ -44,19 +44,22 @@ message BallotNumber {
 }
 
 message PrepareMessage {
-  BallotNumber ballot_number = 1;
-  BlockMetaData last_comitted_message = 2;
+  string node_id = 1;
+  BallotNumber ballot_number = 2;
+  BlockMetaData last_comitted_message = 3;
 }
 
 message PromiseMessage {
-  BallotNumber ballot_number = 1;
-  BlockMetaData last_comitted_message = 2;
-  repeated Block blocks = 3;
+  string node_id = 1;
+  BallotNumber ballot_number = 2;
+  BlockMetaData last_comitted_message = 3;
+  repeated Block blocks = 4;
 }
 
 message AcceptMessage {
-  BallotNumber ballot_number = 1;
-  repeated Block blocks = 2;
+  string node_id = 1;
+  BallotNumber ballot_number = 2;
+  repeated Block blocks = 3;
 }
 
 message SyncMessage {
