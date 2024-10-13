@@ -13,12 +13,14 @@ import (
 // These const values are the collection names in the MongoDB cluster.
 const (
 	historyCollection = "history"
+	statesCollection  = "states"
 )
 
 // Database is a module that uses mongo-driver library to handle MongoDB queries.
 type Database struct {
 	conn    *mongo.Client
 	history *mongo.Collection
+	states  *mongo.Collection
 }
 
 // NewDatabase opens a MySQL connection and returns an instance of
@@ -32,9 +34,11 @@ func NewDatabase(cfg mongodb.Config, prefix string) (*Database, error) {
 
 	// create pointers to collections
 	hpr := conn.Database(cfg.Database).Collection(fmt.Sprintf("%s_%s", prefix, historyCollection))
+	sts := conn.Database(cfg.Database).Collection(fmt.Sprintf("%s_%s", prefix, statesCollection))
 
 	return &Database{
 		conn:    conn,
 		history: hpr,
+		states:  sts,
 	}, nil
 }
