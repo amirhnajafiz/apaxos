@@ -1,6 +1,7 @@
 package learner
 
 import (
+	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/enum"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 )
@@ -8,12 +9,16 @@ import (
 // Learner state-machine handles the cases for
 // sync messages and commit messages.
 type Learner struct {
+	Memory  *local.Memory
 	Channel chan *messages.Packet
+	State   enum.StateType
 }
 
 // Signal method is used to send a message to this machine.
-func (l Learner) Signal(pkt *messages.Packet) {
+func (l Learner) Signal(pkt *messages.Packet) (enum.StateType, error) {
 	l.Channel <- pkt
+
+	return l.State, nil
 }
 
 // Start method, the learner waits for messages from the dispatcher.

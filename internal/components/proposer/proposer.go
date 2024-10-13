@@ -11,11 +11,14 @@ import (
 type Proposer struct {
 	Memory  *local.Memory
 	Channel chan *messages.Packet
+	State   enum.StateType
 }
 
 // Signal method is used to send a message to this machine.
-func (p Proposer) Signal(pkt *messages.Packet) {
+func (p Proposer) Signal(pkt *messages.Packet) (enum.StateType, error) {
 	p.Channel <- pkt
+
+	return p.State, nil
 }
 
 // Start method, the learner waits for messages from the dispatcher.
