@@ -58,6 +58,10 @@ func (m *Memory) GetAcceptedVal() []*models.Block {
 
 // Memory operations for datastore.
 func (m *Memory) AddTransactionToDatastore(instance *models.Transaction) {
+	// process the transaction before adding it to the datastore
+	m.clients[instance.Sender] = m.clients[instance.Sender] - instance.Amount
+	m.clients[instance.Reciever] = m.clients[instance.Reciever] + instance.Amount
+
 	m.datastore = append(m.datastore, instance)
 }
 
