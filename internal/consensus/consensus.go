@@ -7,6 +7,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
+	"github.com/f24-cse535/apaxos/pkg/enum"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
@@ -34,7 +35,20 @@ type Consensus struct {
 func (c Consensus) Signal(pkt *messages.Packet) {
 	// switch case on pkt types to see if you should handle them or
 	// they should go into the channel of apaxos instance.
-	c.channel <- pkt
+	switch pkt.Type {
+	case enum.PacketPrepare:
+		c.prepareHandler()
+	case enum.PacketAccept:
+		c.acceptHandler()
+	case enum.PacketCommit:
+		c.commitHandler()
+	case enum.PacketSync:
+		c.syncHandler()
+	default:
+		if c.channel != nil {
+			c.channel <- pkt
+		}
+	}
 }
 
 // Demand is used by components to use the consensus logic to perform an
