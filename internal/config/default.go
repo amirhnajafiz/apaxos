@@ -1,4 +1,4 @@
-package node
+package config
 
 import (
 	"github.com/f24-cse535/apaxos/internal/config/grpc"
@@ -12,8 +12,8 @@ func Default() Config {
 		Client:          "unique",
 		InitBalance:     10,
 		WorkersInterval: 10, // in seconds
-		Nodes:           make([]map[string]string, 0),
-		Clients:         make([]map[string]string, 0),
+		Nodes:           make([]Pair, 0),
+		Clients:         make([]Pair, 0),
 		GRPC: grpc.Config{
 			Host:            "127.0.0.1",
 			Port:            8080,
