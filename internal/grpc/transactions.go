@@ -30,7 +30,7 @@ func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Tra
 }
 
 // Implement PrintBalance RPC
-func (s *transactionsServer) PrintBalance(ctx context.Context, req *emptypb.Empty) (*transactions.PrintBalanceResponse, error) {
+func (s *transactionsServer) PrintBalance(ctx context.Context, req *transactions.PrintBalanceRequest) (*transactions.PrintBalanceResponse, error) {
 	log.Println("PrintBalance called")
 
 	// Placeholder logic - return some balance

@@ -10,7 +10,7 @@ option go_package = "./rpc/transactions";
 // the transactions service is for handling client-server calls.
 service Transactions {
   rpc NewTransaction(apaxos.Transaction) returns (TransactionResponse) {}
-  rpc PrintBalance(google.protobuf.Empty) returns (PrintBalanceResponse) {}
+  rpc PrintBalance(PrintBalanceRequest) returns (PrintBalanceResponse) {}
   rpc PrintLogs(google.protobuf.Empty) returns (stream apaxos.Block) {}
   rpc PrintDB(google.protobuf.Empty) returns (stream apaxos.Block) {}
   rpc Performance(google.protobuf.Empty) returns (PerformanceResponse) {}
@@ -22,6 +22,10 @@ service Transactions {
 // defining client messages requests-responses
 message TransactionResponse {
   bool result = 1;
+}
+
+message PrintBalanceRequest {
+  string client = 1;
 }
 
 message PrintBalanceResponse {

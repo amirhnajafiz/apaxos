@@ -37,7 +37,7 @@ const (
 // the transactions service is for handling client-server calls.
 type TransactionsClient interface {
 	NewTransaction(ctx context.Context, in *apaxos.Transaction, opts ...grpc.CallOption) (*TransactionResponse, error)
-	PrintBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PrintBalanceResponse, error)
+	PrintBalance(ctx context.Context, in *PrintBalanceRequest, opts ...grpc.CallOption) (*PrintBalanceResponse, error)
 	PrintLogs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[apaxos.Block], error)
 	PrintDB(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[apaxos.Block], error)
 	Performance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PerformanceResponse, error)
@@ -62,7 +62,7 @@ func (c *transactionsClient) NewTransaction(ctx context.Context, in *apaxos.Tran
 	return out, nil
 }
 
-func (c *transactionsClient) PrintBalance(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PrintBalanceResponse, error) {
+func (c *transactionsClient) PrintBalance(ctx context.Context, in *PrintBalanceRequest, opts ...grpc.CallOption) (*PrintBalanceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PrintBalanceResponse)
 	err := c.cc.Invoke(ctx, Transactions_PrintBalance_FullMethodName, in, out, cOpts...)
@@ -147,7 +147,7 @@ type Transactions_AggregatedBalanceClient = grpc.ServerStreamingClient[Aggregate
 // the transactions service is for handling client-server calls.
 type TransactionsServer interface {
 	NewTransaction(context.Context, *apaxos.Transaction) (*TransactionResponse, error)
-	PrintBalance(context.Context, *emptypb.Empty) (*PrintBalanceResponse, error)
+	PrintBalance(context.Context, *PrintBalanceRequest) (*PrintBalanceResponse, error)
 	PrintLogs(*emptypb.Empty, grpc.ServerStreamingServer[apaxos.Block]) error
 	PrintDB(*emptypb.Empty, grpc.ServerStreamingServer[apaxos.Block]) error
 	Performance(context.Context, *emptypb.Empty) (*PerformanceResponse, error)
@@ -165,7 +165,7 @@ type UnimplementedTransactionsServer struct{}
 func (UnimplementedTransactionsServer) NewTransaction(context.Context, *apaxos.Transaction) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewTransaction not implemented")
 }
-func (UnimplementedTransactionsServer) PrintBalance(context.Context, *emptypb.Empty) (*PrintBalanceResponse, error) {
+func (UnimplementedTransactionsServer) PrintBalance(context.Context, *PrintBalanceRequest) (*PrintBalanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrintBalance not implemented")
 }
 func (UnimplementedTransactionsServer) PrintLogs(*emptypb.Empty, grpc.ServerStreamingServer[apaxos.Block]) error {
@@ -220,7 +220,7 @@ func _Transactions_NewTransaction_Handler(srv interface{}, ctx context.Context, 
 }
 
 func _Transactions_PrintBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(PrintBalanceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func _Transactions_PrintBalance_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: Transactions_PrintBalance_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionsServer).PrintBalance(ctx, req.(*emptypb.Empty))
+		return srv.(TransactionsServer).PrintBalance(ctx, req.(*PrintBalanceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
