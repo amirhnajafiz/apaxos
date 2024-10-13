@@ -8,10 +8,11 @@ import (
 // Default return default configuration.
 func Default() Config {
 	return Config{
-		NodeID:  "unique",
-		Client:  "unique",
-		Nodes:   make([]map[string]string, 0),
-		Clients: make([]map[string]string, 0),
+		NodeID:      "unique",
+		Client:      "unique",
+		InitBalance: 10,
+		Nodes:       make([]map[string]string, 0),
+		Clients:     make([]map[string]string, 0),
 		GRPC: grpc.Config{
 			Host:            "127.0.0.1",
 			Port:            8080,
