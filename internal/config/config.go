@@ -27,6 +27,8 @@ type Config struct {
 	Client      string `koanf:"client"`       // the client id for each node
 	InitBalance int64  `koanf:"init_balance"` // clients init balance
 
+	WorkersInterval int `koanf:"workers_interval"` // node jobs' interval in seconds
+
 	Nodes   []map[string]string `koanf:"nodes"`   // a map of all nodes and addresses
 	Clients []map[string]string `koanf:"clients"` // a map of all clients and nodes
 
