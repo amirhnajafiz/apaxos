@@ -20,7 +20,13 @@ type Consensus struct {
 }
 
 // Signal is used by the upper layer (gRPC functions) to send their
-// packets to the consensus module.
-func (c Consensus) Signal(pkt *messages.Packet) error {
-	return nil
+// packets to the consensus module without getting any response.
+func (c Consensus) Signal(pkt *messages.Packet) {
+
+}
+
+// Demand is used by components to use the consensus logic to perform an
+// operation. When calling demand, the caller waits for consensus to return something.
+func (c Consensus) Demand(pkt *messages.Packet) (*messages.Packet, error) {
+	return nil, nil
 }

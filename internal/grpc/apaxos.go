@@ -6,6 +6,8 @@ import (
 	"github.com/f24-cse535/apaxos/internal/consensus"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
+	"github.com/f24-cse535/apaxos/pkg/enum"
+	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -20,6 +22,11 @@ type apaxosServer struct {
 }
 
 func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*emptypb.Empty, error) {
+	a.Consensus.Signal(&messages.Packet{
+		Type:    enum.PacketPrepare,
+		Payload: input,
+	})
+
 	return &emptypb.Empty{}, nil
 }
 
