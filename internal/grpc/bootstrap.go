@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/f24-cse535/apaxos/internal/consensus"
 	"github.com/f24-cse535/apaxos/pkg/transactions"
 
 	"google.golang.org/grpc"
@@ -13,7 +14,8 @@ import (
 // Bootstrap is a wrapper that holds
 // every required thing for the gRPC server starting.
 type Bootstrap struct {
-	Port int
+	Port            int
+	ConsensusModule consensus.Consensus
 }
 
 // ListenAnsServer creates a new gRPC instance
