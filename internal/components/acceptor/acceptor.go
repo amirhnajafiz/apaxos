@@ -31,11 +31,11 @@ func (a Acceptor) Start() {
 		// the acceptor only get's prepare and accept.
 		switch pkt.Type {
 		case enum.PacketPrepare: // sent by the proposer
-			return
+			a.prepare()
 		case enum.PacketAccept: // sent by the proposer
-			return
+			a.accepted()
 		default: // drop the message if none
-			return
+			continue
 		}
 	}
 }

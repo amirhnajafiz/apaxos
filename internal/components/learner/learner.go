@@ -31,11 +31,11 @@ func (l Learner) Start() {
 		// the learner only get's sync and commit.
 		switch pkt.Type {
 		case enum.PacketSync: // sent by the proposer
-			return
+			l.sync()
 		case enum.PacketCommit: // sent by the proposer
-			return
+			l.commit()
 		default: // drop the message if none
-			return
+			continue
 		}
 	}
 }

@@ -31,13 +31,13 @@ func (p Proposer) Start() {
 		// the proposer only get's propose, promise, and accepted.
 		switch pkt.Type {
 		case enum.PacketPropose: // sent by the gRPC server
-			return
+			p.propose()
 		case enum.PacketPromise: // sent by the acceptors
-			return
+			p.accept()
 		case enum.PacketAccepted: // sent by the accptors
-			return
+			p.commit()
 		default: // drop the message if none
-			return
+			continue
 		}
 	}
 }
