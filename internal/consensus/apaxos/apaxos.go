@@ -1,7 +1,6 @@
 package apaxos
 
 import (
-	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 
@@ -14,17 +13,16 @@ import (
 // channels. The InChannel which the data from consensus will be received.
 // And, the OutChannel which the data will be sent to consensus.
 type Apaxos struct {
-	Dialer client.ApaxosDialer
-	Logger *zap.Logger
-	Memory *local.Memory
+	Logger *zap.Logger   // logger is needed for tracing
+	Memory *local.Memory // memory will be used for reading states
 
-	Nodes           map[string]string
+	// These parameters are used for apaxos protocol
 	Majority        int
 	Timeout         int
 	MajorityTimeout int
 
-	InChannel  chan *messages.Packet
-	OutChannel chan *messages.Packet
+	InChannel  chan *messages.Packet // in channel is used to get inputs from the consensus module
+	OutChannel chan *messages.Packet // out channel is used to return response to the client
 }
 
 // Start will trigger a new apaxos protocol.

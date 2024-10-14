@@ -18,21 +18,36 @@ import (
 // Consensus module is the core module that runs consensus protocols
 // by getting the gRPC level packets.
 type Consensus struct {
-	Memory   *local.Memory
-	Database *database.Database
-	Logger   *zap.Logger
-	Dialer   client.ApaxosDialer
+	Memory   *local.Memory      // memory is needed to update the node state
+	Database *database.Database // database is needed to store blocks
 
-	Client  string
-	NodeId  string
-	Clients map[string]string
-	Nodes   map[string]string
+	Logger *zap.Logger          // logger is needed for tracing
+	Dialer *client.ApaxosDialer // apaxos dialer is needed in handler methods
 
+	Client string // client is needed to identify input transactions
+	NodeId string // nodeId is needed for making RPC calls
+
+	Nodes map[string]string // list of nodes and their addresses is needed for RPC calls
+
+	// these parameters needed to use in apaxos
 	Majority        int
 	RequestTimeout  int
 	MajorityTimeout int
 
-	channel chan *messages.Packet
+	// each consensus should keep track of the protocol instance
+	instance *protocol.Apaxos
+}
+
+// forward to instance is a helper function to pass packets in apaxos instance channel
+func (c Consensus) forwardToInstance(pkt *messages.Packet) {
+	if c.instance != nil {
+		c.instance.InChannel <- pkt
+	}
+}
+
+// instance exists return true if the apaxos instance is started and running
+func (c Consensus) instanceExists() bool {
+	return c.instance == nil
 }
 
 // Signal is used by the upper layer (gRPC functions) to send their
@@ -49,17 +64,16 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 		c.commitHandler()
 	case enum.PacketSync:
 		c.syncHandler(pkt.Payload.(*apaxos.SyncMessage))
+		c.forwardToInstance(pkt)
 	default:
-		if c.channel != nil {
-			c.channel <- pkt
-		}
+		c.forwardToInstance(pkt)
 	}
 }
 
 // Demand is used by components to use the consensus logic to perform an
 // operation. When calling demand, the caller waits for consensus to return something.
 func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, error) {
-	// get the payload
+	// get the payload of input request
 	transaction := pkt.Payload.(*apaxos.Transaction)
 
 	// if channel is nil without any errors, it means that the transaction should not handle on this machine
@@ -70,10 +84,13 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 
 	// if the receiver is our client then no need to run consensus protocol
 	if transaction.Reciever == c.Client {
-		// create a new transaction
-		t := models.Transaction{
-			SequenceNumber: c.Memory.GetSequenceNumber(),
-		}.FromProtoModel(transaction)
+		// save the transaction into datastore
+		t := models.Transaction{}.FromProtoModel(transaction)
+		t.SequenceNumber = c.Memory.GetSequenceNumber()
+
+		// make changes into memory for client's balances
+		c.Memory.UpdateBalance(t.Sender, t.Amount*-1)
+		c.Memory.UpdateBalance(t.Reciever, t.Amount)
 
 		// save it into datastore
 		c.Memory.AddTransactionToDatastore(t)
@@ -82,34 +99,33 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 	}
 
 	// now we check to see if we can run the consensus protocol
-	if c.channel != nil {
+	if c.instanceExists() {
 		return nil, enum.ResponseServerFailed, errors.New("cannot run multiple consensus protocols at the same time on this machine")
 	}
 
-	// now running consensus by creating a new apaxos instance
-	c.channel = make(chan *messages.Packet)
-	channel := make(chan *messages.Packet)
+	// if no instances exist, we create a new apaxos instance
+	c.instance = &protocol.Apaxos{
+		Memory:          c.Memory,
+		Majority:        c.Majority,
+		MajorityTimeout: c.MajorityTimeout,
+		Timeout:         c.RequestTimeout,
+		InChannel:       make(chan *messages.Packet),
+		OutChannel:      make(chan *messages.Packet),
+	}
 
-	// start a new go-routine
+	// start a new go-routine for apaxos instance
 	go func() {
-		// creating a new instance of apaxos protocol
-		protocol.Apaxos{
-			Dialer:          c.Dialer,
-			Memory:          c.Memory,
-			Nodes:           c.Nodes,
-			Majority:        c.Majority,
-			MajorityTimeout: c.MajorityTimeout,
-			Timeout:         c.RequestTimeout,
-			InChannel:       c.channel,
-			OutChannel:      channel,
-		}.Start()
+		c.Logger.Debug("apaxos started")
 
-		// close both channels
-		close(channel)
-		close(c.channel)
+		// start apaxos
+		if err := c.instance.Start(); err != nil {
+			c.Logger.Error("apaxos failed", zap.Error(err))
+		}
 
-		c.channel = nil
+		// reset the instance
+		c.instance = nil
 	}()
 
-	return channel, nil
+	// send an accepted response, so the client waits for a response
+	return c.instance.OutChannel, enum.ResponseAccepted, nil
 }
