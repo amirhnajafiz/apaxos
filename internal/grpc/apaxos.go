@@ -21,6 +21,8 @@ type apaxosServer struct {
 
 // Propose will be called by the proposer's consensus module and waits for a call on promise.
 func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called propose", zap.String("caller", input.NodeId))
+
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketPrepare,
 		Payload: input,
@@ -31,6 +33,8 @@ func (a *apaxosServer) Propose(ctx context.Context, input *apaxos.PrepareMessage
 
 // Promise will be called by the acceptor's consensus module.
 func (a *apaxosServer) Promise(ctx context.Context, input *apaxos.PromiseMessage) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called promise", zap.String("caller", input.NodeId))
+
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketPromise,
 		Payload: input,
@@ -41,6 +45,8 @@ func (a *apaxosServer) Promise(ctx context.Context, input *apaxos.PromiseMessage
 
 // Accept will be called by the proposer's consensus module and waits for a call on accepted.
 func (a *apaxosServer) Accept(ctx context.Context, input *apaxos.AcceptMessage) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called accept", zap.String("caller", input.NodeId))
+
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketAccept,
 		Payload: input,
@@ -51,6 +57,8 @@ func (a *apaxosServer) Accept(ctx context.Context, input *apaxos.AcceptMessage) 
 
 // Accepted will be called by the acceptor's consensus module.
 func (a *apaxosServer) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called accepted")
+
 	a.Consensus.Signal(&messages.Packet{
 		Type: enum.PacketAccepted,
 	})
@@ -60,6 +68,8 @@ func (a *apaxosServer) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb
 
 // Commit will be called by the proposer's consensus module.
 func (a *apaxosServer) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called commit")
+
 	a.Consensus.Signal(&messages.Packet{
 		Type: enum.PacketCommit,
 	})
@@ -71,6 +81,8 @@ func (a *apaxosServer) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.E
 // If the proposer is slow, one acceptor will call this sync.
 // If the acceptor is slow, the proposer will call this after getting a call on promise.
 func (a *apaxosServer) Sync(ctx context.Context, input *apaxos.SyncMessage) (*emptypb.Empty, error) {
+	a.Logger.Debug("rpc called sync")
+
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketSync,
 		Payload: input,
