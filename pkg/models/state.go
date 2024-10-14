@@ -7,6 +7,6 @@ type State struct {
 	LastCommittedMessage BallotNumber     `bson:"ballot_number"`
 	BallotNumber         BallotNumber     `bson:"ballot_number"`
 	AcceptedNum          BallotNumber     `bson:"accepted_num"`
+	Datastore            Block            `bson:"datastore"`
 	AcceptedVal          []Block          `bson:"accepted_val"`
-	Datastore            []Transaction    `bson:"datastore"`
 }

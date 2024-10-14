@@ -33,9 +33,7 @@ func (m *Memory) ReadFromState(state *models.State) {
 		m.acceptedVal[index] = &item
 	}
 
-	m.datastore = &models.Block{
-		Transactions: state.Datastore,
-	}
+	m.datastore = &state.Datastore
 }
 
 // NewMemory returns an instance of the memory struct.
