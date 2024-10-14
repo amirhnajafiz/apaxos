@@ -1,6 +1,7 @@
 package apaxos
 
 import (
+	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 
@@ -15,6 +16,10 @@ import (
 type Apaxos struct {
 	Logger *zap.Logger   // logger is needed for tracing
 	Memory *local.Memory // memory will be used for reading states
+
+	// Dialer and nodes are needed to make RPC calls
+	Dialer *client.ApaxosDialer
+	Nodes  map[string]string // list of nodes and their addresses is needed for RPC calls
 
 	// These parameters are used for apaxos protocol
 	Majority        int
