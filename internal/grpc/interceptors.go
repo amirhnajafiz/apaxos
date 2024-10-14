@@ -29,5 +29,5 @@ func (b *Bootstrap) selectiveStatusCheckUnaryInterceptor(
 	}
 
 	// block all other services
-	return nil, status.Error(13, "service not responsing") // return an error for blocked services
+	return nil, status.Error(13, "service is not responding") // return an error for blocked services
 }

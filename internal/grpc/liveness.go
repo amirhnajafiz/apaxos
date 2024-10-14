@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"errors"
 
 	"github.com/f24-cse535/apaxos/pkg/rpc/liveness"
 )
@@ -21,7 +20,7 @@ func (l *livenessServer) Ping(ctx context.Context, input *liveness.LivePingMessa
 		}, nil
 	}
 
-	return &liveness.LivePingMessage{Random: -1}, errors.New("server is blocked")
+	return &liveness.LivePingMessage{Random: -1}, nil
 }
 
 // ChangeStatus is used to update the liveness of the gRPC server.
