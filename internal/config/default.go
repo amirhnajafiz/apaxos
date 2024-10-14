@@ -10,7 +10,6 @@ func Default() Config {
 	return Config{
 		NodeID:          "unique",
 		Client:          "unique",
-		InitBalance:     10,
 		Majority:        0,
 		WorkersInterval: 10, // in seconds
 		LogLevel:        "debug",

@@ -1,5 +1,7 @@
 package config
 
+import "strconv"
+
 // GetNodes converts the nodes pair to a simple map of strings.
 func (c Config) GetNodes() map[string]string {
 	hashMap := make(map[string]string)
@@ -16,7 +18,8 @@ func (c Config) GetBalances() map[string]int64 {
 	hashMap := make(map[string]int64)
 
 	for _, pair := range c.Clients {
-		hashMap[pair.Key] = c.InitBalance
+		val, _ := strconv.Atoi(pair.Value)
+		hashMap[pair.Key] = int64(val)
 	}
 
 	return hashMap

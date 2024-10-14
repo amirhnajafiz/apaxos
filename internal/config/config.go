@@ -23,10 +23,9 @@ const Prefix = "apax_"
 // For each node, we have a unique node_id and a client to manage.
 // Other configs include gRPC, MongoDB, and other nodes gRPC addresses.
 type Config struct {
-	NodeID      string `koanf:"node_id"`      // a unique id for each node
-	Client      string `koanf:"client"`       // the client id for each node
-	InitBalance int64  `koanf:"init_balance"` // clients init balance
-	Majority    int    `koanf:"majority"`     // number of nodes to consider as majority
+	NodeID   string `koanf:"node_id"`  // a unique id for each node
+	Client   string `koanf:"client"`   // the client id for each node
+	Majority int    `koanf:"majority"` // number of nodes to consider as majority
 
 	WorkersInterval int    `koanf:"workers_interval"` // node jobs' interval in seconds
 	LogLevel        string `koanf:"log_level"`        // node logging level (debug, info, warn, error, panic, fatal)

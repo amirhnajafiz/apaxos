@@ -105,6 +105,8 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 
 	// if no instances exist, we create a new apaxos instance
 	c.instance = &protocol.Apaxos{
+		Dialer:          c.Dialer,
+		Nodes:           c.Nodes,
 		Memory:          c.Memory,
 		Majority:        c.Majority,
 		MajorityTimeout: c.MajorityTimeout,

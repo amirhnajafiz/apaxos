@@ -36,19 +36,18 @@ func (n Node) Main() error {
 
 	// create a new consensus module
 	instance := consensus.Consensus{
-		Database: db,
-		Memory:   mem,
-		Logger:   n.Logger.Named("consensus"),
-		Dialer: client.ApaxosDialer{
-			Logger: n.Logger.Named("apaxos-dialer"),
-		},
+		Database:        db,
+		Memory:          mem,
 		Client:          n.Cfg.Client,
 		NodeId:          n.Cfg.NodeID,
-		Clients:         n.Cfg.GetClients(),
 		Nodes:           n.Cfg.GetNodes(),
 		RequestTimeout:  n.Cfg.GRPC.RequestTimeout,
 		MajorityTimeout: n.Cfg.GRPC.MajorityTimeout,
 		Majority:        n.Cfg.Majority,
+		Logger:          n.Logger.Named("consensus"),
+		Dialer: &client.ApaxosDialer{
+			Logger: n.Logger.Named("apaxos-dialer"),
+		},
 	}
 
 	// create a worker instance and execute it in a new sub-process
