@@ -18,6 +18,7 @@ import (
 type Consensus struct {
 	Memory   *local.Memory
 	Database *database.Database
+	Dialer   client.ApaxosDialer
 
 	Client  string
 	Clients map[string]string
@@ -37,7 +38,7 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 	// they should go into the channel of apaxos instance.
 	switch pkt.Type {
 	case enum.PacketPrepare:
-		c.prepareHandler()
+		c.prepareHandler(pkt.Payload.(*apaxos.PrepareMessage))
 	case enum.PacketAccept:
 		c.acceptHandler()
 	case enum.PacketCommit:
@@ -89,7 +90,7 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, error) {
 	go func() {
 		// creating a new instance of apaxos protocol
 		protocol.Apaxos{
-			Dialer:          client.ApaxosDialer{},
+			Dialer:          c.Dialer,
 			Memory:          c.Memory,
 			Nodes:           c.Nodes,
 			Majority:        c.Majority,

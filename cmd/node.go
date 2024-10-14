@@ -4,6 +4,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/config"
 	"github.com/f24-cse535/apaxos/internal/consensus"
 	"github.com/f24-cse535/apaxos/internal/grpc"
+	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/internal/worker"
@@ -34,6 +35,7 @@ func (n Node) Main() error {
 	instance := consensus.Consensus{
 		Database:        db,
 		Memory:          mem,
+		Dialer:          client.ApaxosDialer{},
 		Client:          n.Cfg.Client,
 		Clients:         n.Cfg.GetClients(),
 		Nodes:           n.Cfg.GetNodes(),
