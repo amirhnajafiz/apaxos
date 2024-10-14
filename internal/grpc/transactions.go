@@ -30,7 +30,7 @@ func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Tra
 	s.Logger.Debug("rpc called NewTransaction")
 
 	// create a response instance
-	response := transactions.TransactionResponse{Result: false}
+	response := transactions.TransactionResponse{}
 
 	// send a message to consensus to process a transaction
 	channel, err := s.Consensus.Demand(&messages.Packet{
@@ -44,11 +44,9 @@ func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Tra
 	if channel == nil {
 		// if channel is nil, it means the transaction was successful and no need to wait
 		// for consensus protocl
-		response.Result = true
 	} else {
 		// wait on the consensus response
 		pkt := <-channel
-		response.Result = pkt.Payload.(bool)
 	}
 
 	return &response, nil
