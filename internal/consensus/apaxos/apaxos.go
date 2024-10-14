@@ -33,13 +33,25 @@ type Apaxos struct {
 
 // Start will trigger a new apaxos protocol.
 func (a Apaxos) Start() error {
-	// Send prepare messages
-	a.broadcastPropose()
-	// Wait for promise messages (first on majority, then on a timeout)
-	a.waitForPromise()
+	// in a for loop send prepare messages to get the majority or sync
+	for {
+		// increase ballot number on each attempt
+		ballotNumber := a.Memory.GetBallotNumber()
+		ballotNumber.Number++
+
+		// send propose message to all
+		a.broadcastPropose(ballotNumber)
+
+		// wait for promise messages (first on majority, then on a timeout)
+		a.waitForPromise()
+
+		// set new ballot-number for retry
+		a.Memory.SetBallotNumber(ballotNumber)
+	}
+
 	// Create a message
 	// Send accept messages
-	a.broadcastAccept()
+	a.broadcastAccept(nil, nil)
 	// Wait for accepted messages (first on majority, then on a timeout)
 	a.waitForAccepted()
 	// Send commit message
