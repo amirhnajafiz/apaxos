@@ -20,6 +20,7 @@ type Apaxos struct {
 	// Dialer and nodes are needed to make RPC calls
 	Dialer *client.ApaxosDialer
 	Nodes  map[string]string // list of nodes and their addresses is needed for RPC calls
+	NodeId string
 
 	// These parameters are used for apaxos protocol
 	Majority        int

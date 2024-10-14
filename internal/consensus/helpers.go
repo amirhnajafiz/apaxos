@@ -35,6 +35,7 @@ func (c Consensus) submitTransaction(transaction *apaxos.Transaction) {
 // beginConsensus builds and starts a new apaxos instance.
 func (c Consensus) beginConsensus(transaction *apaxos.Transaction) {
 	c.instance = &protocol.Apaxos{
+		NodeId:          c.NodeId,
 		Dialer:          c.Dialer,
 		Nodes:           c.Nodes,
 		Memory:          c.Memory,
