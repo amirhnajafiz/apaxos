@@ -17,8 +17,7 @@ import (
 // Bootstrap is a wrapper that holds
 // every required thing for the gRPC server starting.
 type Bootstrap struct {
-	Port int
-
+	Port      int
 	Memory    *local.Memory
 	Database  *database.Database
 	Consensus *consensus.Consensus
@@ -36,7 +35,7 @@ func (b Bootstrap) ListenAnsServer() error {
 	// create a new grpc instance
 	server := grpc.NewServer()
 
-	// register both servers
+	// register both gRPC services
 	apaxos.RegisterApaxosServer(server, &apaxosServer{
 		Consensus: b.Consensus,
 	})
@@ -47,7 +46,7 @@ func (b Bootstrap) ListenAnsServer() error {
 	})
 
 	// starting the server
-	log.Println("grpc server started ...")
+	log.Printf("grpc server started on %d ...\n", b.Port)
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("[grpc] failed to start the server: %v", err)
 	}

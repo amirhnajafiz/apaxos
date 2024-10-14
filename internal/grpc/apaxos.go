@@ -70,23 +70,28 @@ func (a *apaxosServer) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.E
 // If the proposer is slow, one acceptor will call this sync.
 // If the acceptor is slow, the proposer will call this after getting a call on promise.
 func (a *apaxosServer) Sync(stream apaxos.Apaxos_SyncServer) error {
+	// create a sync temp map to get items from stream
 	sync := make(map[string]int64)
 
 	for {
+		// get sync streams one by one
 		in, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF { // send a response once the stream is closed
+				// send a sync packet to consensus module
 				a.Consensus.Signal(&messages.Packet{
 					Type:    enum.PacketSync,
 					Payload: sync,
 				})
 
+				// notify that messages are recieved
 				return stream.SendAndClose(&emptypb.Empty{})
 			}
 
 			return err
 		}
 
+		// update the clients map
 		sync[in.Client] = in.Balance
 	}
 }
