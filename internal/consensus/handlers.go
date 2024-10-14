@@ -16,7 +16,7 @@ func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) {
 	// if they matched, then we are probably having a synced proposer.
 	// if they didn't, we check if we had that message committed or not. if we had committed that
 	// message, it means that the proposer should get a sync request.
-	if utils.CompareBallotNumbers(&lastCommitted, c.Memory.GetLastCommitedMessage()) == 0 {
+	if utils.CompareBallotNumbers(&lastCommitted, c.Memory.GetLastCommittedMessage()) == 0 {
 		// if the last committed messages match, we follow the promise
 		c.promiseHandler(c.Nodes[msg.NodeId], ballotNumber)
 	} else {
@@ -41,7 +41,7 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 	// then we create a promise message with init fields of our node_id and our last_committed_message
 	promiseMessage := &apaxos.PromiseMessage{
 		NodeId:              c.NodeId,
-		LastComittedMessage: c.Memory.GetLastCommitedMessage().ToProtoModel(),
+		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
 	}
 
 	// then we check to see if we have accepted something from another proposer before, and it is not committed.

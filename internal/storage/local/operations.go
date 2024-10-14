@@ -88,6 +88,10 @@ func (m *Memory) SetDatastore(instance []*models.Transaction) {
 }
 
 // Last Committed Message operations
-func (m *Memory) GetLastCommitedMessage() *models.BallotNumber {
+func (m *Memory) SetLastCommittedMessage(instance *models.BallotNumber) {
+	m.lastCommitted = instance
+}
+
+func (m *Memory) GetLastCommittedMessage() *models.BallotNumber {
 	return m.lastCommitted
 }
