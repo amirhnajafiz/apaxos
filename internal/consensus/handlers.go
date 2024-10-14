@@ -122,8 +122,8 @@ func (c Consensus) commitHandler() {
 	acceptedVal := c.Memory.GetAcceptedVal()
 
 	// sort the blocks by their ballot-numbers
-	sort.Slice(acceptedVal, func(i, j int) bool {
-		return utils.CompareBlocks(&acceptedVal[i].Metadata, &acceptedVal[j].Metadata)
+	sort.Slice(acceptedVal, func(i, j int) bool { // we switch the places of i and j to sort the list in decreasing order
+		return utils.CompareBlocks(&acceptedVal[j].Metadata, &acceptedVal[i].Metadata)
 	})
 
 	// now we should execute the transactions
@@ -134,7 +134,7 @@ func (c Consensus) commitHandler() {
 		} else {
 			// get transactions and sort them by sequence number
 			tlist := block.Transactions
-			sort.Slice(tlist, func(i, j int) bool {
+			sort.Slice(tlist, func(i, j int) bool { // transactions are sorted in increasing order
 				return tlist[i].SequenceNumber < tlist[j].SequenceNumber
 			})
 
