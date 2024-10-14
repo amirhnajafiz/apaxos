@@ -29,7 +29,7 @@ type Bootstrap struct {
 
 // ListenAnsServer creates a new gRPC instance
 // and registers both apaxos and transactions servers.
-func (b Bootstrap) ListenAnsServer() error {
+func (b *Bootstrap) ListenAnsServer() error {
 	// on the local network, listen to a port
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", b.Port))
 	if err != nil {
@@ -37,7 +37,9 @@ func (b Bootstrap) ListenAnsServer() error {
 	}
 
 	// create a new grpc instance
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(b.selectiveStatusCheckUnaryInterceptor), // set an unary interceptor for liveness service
+	)
 
 	// create a new liveness server
 	b.livenessInstance = &livenessServer{

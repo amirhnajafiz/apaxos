@@ -12,7 +12,7 @@ const livenessServicePrefix = "/liveness."
 
 // selectiveStatusCheck interceptor checks the status
 // of a service before running the gRPC function.
-func (b Bootstrap) selectiveStatusCheckUnaryInterceptor(
+func (b *Bootstrap) selectiveStatusCheckUnaryInterceptor(
 	ctx context.Context,
 	req interface{},
 	info *grpc.UnaryServerInfo,
