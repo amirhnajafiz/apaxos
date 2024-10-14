@@ -13,6 +13,7 @@ func Default() Config {
 		InitBalance:     10,
 		Majority:        0,
 		WorkersInterval: 10, // in seconds
+		LogLevel:        "debug",
 		Nodes:           make([]Pair, 0),
 		Clients:         make([]Pair, 0),
 		GRPC: grpc.Config{

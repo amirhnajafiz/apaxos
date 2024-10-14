@@ -28,7 +28,8 @@ type Config struct {
 	InitBalance int64  `koanf:"init_balance"` // clients init balance
 	Majority    int    `koanf:"majority"`     // number of nodes to consider as majority
 
-	WorkersInterval int `koanf:"workers_interval"` // node jobs' interval in seconds
+	WorkersInterval int    `koanf:"workers_interval"` // node jobs' interval in seconds
+	LogLevel        string `koanf:"log_level"`        // node logging level (debug, info, warn, error, panic, fatal)
 
 	Nodes   []Pair `koanf:"nodes"`   // a map of all nodes and addresses
 	Clients []Pair `koanf:"clients"` // a map of all clients and nodes
