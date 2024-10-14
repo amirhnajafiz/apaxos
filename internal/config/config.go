@@ -31,7 +31,7 @@ type Config struct {
 	LogLevel        string `koanf:"log_level"`        // node logging level (debug, info, warn, error, panic, fatal)
 
 	Nodes   []Pair `koanf:"nodes"`   // a map of all nodes and addresses
-	Clients []Pair `koanf:"clients"` // a map of all clients and nodes
+	Clients []Pair `koanf:"clients"` // a map of all clients and balances
 
 	GRPC    grpc.Config    `koanf:"grpc"`    // gRPC configs
 	MongoDB mongodb.Config `koanf:"mongodb"` // MongoDB configs
