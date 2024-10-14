@@ -8,20 +8,22 @@ import (
 
 // Memory is a local storage that is used for each node. It keeps the state of each node.
 type Memory struct {
-	sequenceNumber int64                // is used for ordering transactions within each block
-	clients        map[string]int64     // a map of all clients with their balances
-	ballotNumber   *models.BallotNumber // the ballot number of each node
+	sequenceNumber int64 // is used for ordering transactions within each block
 
+	clients map[string]int64 // a map of all clients with their balances
+
+	ballotNumber  *models.BallotNumber // the ballot number of each node
 	lastCommitted *models.BallotNumber // apaxos last committed message for sync
 	acceptedNum   *models.BallotNumber // apaxos accepted num
-	acceptedVal   []*models.Block      // apaxos accepted var
 
-	datastore []*models.Transaction // local transactions datastore for each node
+	datastore   *models.Block   // local transactions datastore for each node
+	acceptedVal []*models.Block // apaxos accepted var
 }
 
 // ReadFromState is used to load a backup state into the current memory.
 func (m *Memory) ReadFromState(state *models.State) {
 	m.clients = state.Clients
+
 	m.lastCommitted = &state.LastCommittedMessage
 	m.ballotNumber = &state.BallotNumber
 	m.acceptedNum = &state.AcceptedNum
@@ -31,9 +33,8 @@ func (m *Memory) ReadFromState(state *models.State) {
 		m.acceptedVal[index] = &item
 	}
 
-	m.datastore = make([]*models.Transaction, len(state.Datastore))
-	for index, item := range state.Datastore {
-		m.datastore[index] = &item
+	m.datastore = &models.Block{
+		Transactions: state.Datastore,
 	}
 }
 
@@ -45,9 +46,16 @@ func NewMemory(nodeId string, balances map[string]int64) *Memory {
 		clients:        balances,
 
 		acceptedNum: nil,
-		acceptedVal: make([]*models.Block, 0),
 
-		datastore: make([]*models.Transaction, 0),
+		acceptedVal: make([]*models.Block, 0),
+		datastore: &models.Block{
+			Transactions: make([]models.Transaction, 0),
+		},
+
+		lastCommitted: &models.BallotNumber{
+			Number: 0,
+			NodeId: "",
+		},
 
 		ballotNumber: &models.BallotNumber{ // initialize the ballot number for each node
 			Number: 0,
