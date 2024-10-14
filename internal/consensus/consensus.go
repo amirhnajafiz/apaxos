@@ -20,8 +20,9 @@ type Consensus struct {
 	Memory   *local.Memory      // memory is needed to update the node state
 	Database *database.Database // database is needed to store blocks
 
-	Logger *zap.Logger          // logger is needed for tracing
-	Dialer *client.ApaxosDialer // apaxos dialer is needed in handler methods
+	Logger         *zap.Logger          // logger is needed for tracing
+	Dialer         *client.ApaxosDialer // apaxos dialer is needed in handler methods
+	LivenessDialer *client.LivenessDialer
 
 	Client string // client is needed to identify input transactions
 	NodeId string // nodeId is needed for making RPC calls

@@ -4,6 +4,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/utils"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+	"go.uber.org/zap"
 )
 
 // prepareHandler get's a prepare message from the proposer.
@@ -175,4 +176,19 @@ func (c Consensus) syncHandler(msg *apaxos.SyncMessage) {
 	// update last committed message
 	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetLastComittedMessage())
 	c.Memory.SetLastCommittedMessage(&ballotNumber)
+}
+
+// liveness handler checks to see if there are enough live servers or not.
+func (c Consensus) livenessHandler() bool {
+	count := 0
+
+	// send ping messages to servers
+	for key, value := range c.Nodes {
+		if c.LivenessDialer.Ping(value) {
+			c.Logger.Debug("found alive server", zap.String("node", key))
+			count++
+		}
+	}
+
+	return count >= c.Majority
 }
