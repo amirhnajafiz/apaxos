@@ -21,6 +21,10 @@ func (m *Memory) SetBalance(client string, balance int64) {
 	m.clients[client] = balance
 }
 
+func (m *Memory) UpdateBalance(client string, amount int64) {
+	m.clients[client] = m.clients[client] + amount
+}
+
 func (m *Memory) GetBalance(client string) int64 {
 	return m.clients[client]
 }
@@ -77,6 +81,26 @@ func (m *Memory) GetDatastoreAsBlock() *models.Block {
 	}
 
 	return &instance
+}
+
+func (m *Memory) ResetDatastores(instance *models.Block) {
+	// create a map to store elements of block for quick lookup
+	hashMap := make(map[int64]bool)
+	for _, transaction := range instance.Transactions {
+		hashMap[transaction.SequenceNumber] = true
+	}
+
+	// create a new datastore
+	datastore := make([]*models.Transaction, 0)
+	for _, transaction := range m.datastore {
+		// add transactions that are not in the given block
+		if !hashMap[transaction.SequenceNumber] {
+			datastore = append(datastore, transaction)
+		}
+	}
+
+	// reset the datastore
+	m.SetDatastore(datastore)
 }
 
 func (m *Memory) GetDatastore() []*models.Transaction {

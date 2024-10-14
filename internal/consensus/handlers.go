@@ -116,8 +116,30 @@ func (c Consensus) acceptHandler(msg *apaxos.AcceptMessage) {
 
 // commitHandler get's a commit message and emptys the datastore by executing
 // the transactions, and storing them inside database.
-func (c Consensus) commitHandler() error {
-	return nil
+func (c Consensus) commitHandler() {
+	// get our accepted_val
+	acceptedVal := c.Memory.GetAcceptedVal()
+
+	// now we should execute the transactions
+	for _, block := range acceptedVal {
+		// update our own blocks in memory, to remove previous transactions
+		if block.Metadata.NodeId == c.NodeId {
+			c.Memory.ResetDatastores(block)
+		} else {
+			// loop in transactions and execute them
+			for _, transaction := range block.Transactions {
+				c.Memory.UpdateBalance(transaction.Sender, transaction.Amount*-1)
+				c.Memory.UpdateBalance(transaction.Reciever, transaction.Amount)
+			}
+		}
+	}
+
+	// now we store the blocks inside MongoDB
+	_ = c.Database.InsertBlocks(acceptedVal)
+
+	// finally, we clear our accepted_num and accepted_val
+	c.Memory.SetAcceptedNum(nil)
+	c.Memory.SetAcceptedVal(nil)
 }
 
 // transmitSync will be called by the prepare handler to update the proposer.
