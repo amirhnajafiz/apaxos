@@ -1,4 +1,4 @@
-package compare
+package utils
 
 import "github.com/f24-cse535/apaxos/pkg/models"
 

@@ -1,9 +1,8 @@
-package compare_test
+package utils
 
 import (
 	"testing"
 
-	"github.com/f24-cse535/apaxos/internal/utils/compare"
 	"github.com/f24-cse535/apaxos/pkg/models"
 )
 
@@ -48,7 +47,7 @@ func TestCompareBallotNumbers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := compare.CompareBallotNumbers(tt.a, tt.b)
+			result := CompareBallotNumbers(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("expected %d, got %d", tt.expected, result)
 			}

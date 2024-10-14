@@ -1,9 +1,8 @@
-package compare_test
+package utils
 
 import (
 	"testing"
 
-	"github.com/f24-cse535/apaxos/internal/utils/compare"
 	"github.com/f24-cse535/apaxos/pkg/models"
 )
 
@@ -88,7 +87,7 @@ func TestCompareBlocks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := compare.CompareBlocks(tt.blockA, tt.blockB)
+			result := CompareBlocks(tt.blockA, tt.blockB)
 			if result != tt.expected {
 				t.Errorf("CompareBlocks() = %v, expected %v", result, tt.expected)
 			}

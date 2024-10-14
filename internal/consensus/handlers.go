@@ -1,7 +1,7 @@
 package consensus
 
 import (
-	"github.com/f24-cse535/apaxos/internal/utils/compare"
+	"github.com/f24-cse535/apaxos/internal/utils"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
@@ -16,7 +16,7 @@ func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) {
 	// if they matched, then we are probably having a synced proposer.
 	// if they didn't, we check if we had that message committed or not. if we had committed that
 	// message, it means that the proposer should get a sync request.
-	if compare.CompareBallotNumbers(&lastCommitted, c.Memory.GetLastCommitedMessage()) == 0 {
+	if utils.CompareBallotNumbers(&lastCommitted, c.Memory.GetLastCommitedMessage()) == 0 {
 		// if the last committed messages match, we follow the promise
 		c.promiseHandler(c.Nodes[msg.NodeId], ballotNumber)
 	} else {
@@ -48,7 +48,7 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 	// if we had something, first we should check the ballot-numbers.
 	if acceptedNum != nil {
 		// the ballot-number should be absolute greater than accepted_num
-		if compare.CompareBallotNumbers(&ballotNumber, acceptedNum) == 1 {
+		if utils.CompareBallotNumbers(&ballotNumber, acceptedNum) == 1 {
 			// first we create a blocklist of our accepted_vals
 			blockList := make([]*apaxos.Block, len(acceptedVal))
 			for index, item := range acceptedVal {
