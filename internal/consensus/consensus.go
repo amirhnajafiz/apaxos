@@ -90,31 +90,9 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 		return nil, enum.ResponseServerFailed, errors.New("cannot run multiple consensus protocols at the same time on this machine")
 	}
 
-	// if no instances exist, we create a new apaxos instance
-	c.instance = &protocol.Apaxos{
-		Dialer:          c.Dialer,
-		Nodes:           c.Nodes,
-		Memory:          c.Memory,
-		Majority:        c.Majority,
-		MajorityTimeout: c.MajorityTimeout,
-		Timeout:         c.RequestTimeout,
-		InChannel:       make(chan *messages.Packet),
-		OutChannel:      make(chan *messages.Packet),
-	}
+	// if no instances exist, we create a new apaxos instance by running begin consensus
+	c.beginConsensus(transaction)
 
-	// start a new go-routine for apaxos instance
-	go func() {
-		c.Logger.Debug("apaxos started")
-
-		// start apaxos
-		if err := c.instance.Start(); err != nil {
-			c.Logger.Error("apaxos failed", zap.Error(err))
-		}
-
-		// reset the instance
-		c.instance = nil
-	}()
-
-	// send an accepted response, so the client waits for a response
+	// send an accepted response, so the client waits for a response over the instance out channel
 	return c.instance.OutChannel, enum.ResponseAccepted, nil
 }
