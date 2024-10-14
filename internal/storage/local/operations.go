@@ -65,10 +65,29 @@ func (m *Memory) AddTransactionToDatastore(instance *models.Transaction) {
 	m.datastore = append(m.datastore, instance)
 }
 
+func (m *Memory) GetDatastoreAsBlock() *models.Block {
+	transactionList := m.datastore
+
+	instance := models.Block{
+		Transactions: make([]models.Transaction, len(transactionList)),
+	}
+
+	for index, item := range transactionList {
+		instance.Transactions[index] = *item
+	}
+
+	return &instance
+}
+
 func (m *Memory) GetDatastore() []*models.Transaction {
 	return m.datastore
 }
 
 func (m *Memory) SetDatastore(instance []*models.Transaction) {
 	m.datastore = instance
+}
+
+// Last Committed Message operations
+func (m *Memory) GetLastCommitedMessage() *models.BlockMetadata {
+	return m.lastCommittedMessage
 }

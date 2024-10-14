@@ -59,30 +59,11 @@ func (s *transactionsServer) PrintBalance(ctx context.Context, req *transactions
 // PrintLogs returns the node datastore and accepted val.
 func (s *transactionsServer) PrintLogs(req *emptypb.Empty, stream transactions.Transactions_PrintLogsServer) error {
 	// first send datastore block
-	// creating transactions list
-	transactions := s.Memory.GetDatastore()
-
-	// creating datastore block
-	ds := &apaxos.Block{
-		Metadata: &apaxos.BlockMetaData{
-			NodeId:         s.Memory.GetBallotNumber().NodeId,
-			SequenceNumber: s.Memory.GetSequenceNumber(),
-			BallotNumber:   s.Memory.GetBallotNumber().ToProtoModel(),
-		},
-		Transactions: make([]*apaxos.Transaction, len(transactions)),
-	}
-
-	// modify transactions
-	for index, item := range transactions {
-		ds.Transactions[index] = item.ToProtoModel()
-	}
-
-	// send the datastore block
-	if err := stream.Send(ds); err != nil {
+	if err := stream.Send(s.Memory.GetDatastoreAsBlock().ToProtoModel()); err != nil {
 		return err
 	}
 
-	// send accepted var blocks
+	// send accepted vau blocks
 	for _, block := range s.Memory.GetAcceptedVal() {
 		if err := stream.Send(block.ToProtoModel()); err != nil {
 			return err

@@ -2,6 +2,7 @@ package consensus
 
 import (
 	"github.com/f24-cse535/apaxos/internal/utils/compare"
+	"github.com/f24-cse535/apaxos/internal/utils/hashing"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
@@ -13,20 +14,60 @@ import (
 // if it should sync the node that proposed a value.
 func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) error {
 	acceptedNum := c.Memory.GetAcceptedNum()
+	acceptedVal := c.Memory.GetAcceptedVal()
+
 	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetBallotNumber())
+	lastCommitted := models.BallotNumber{}.FromProtoModel(msg.LastComittedMessage.BallotNumber)
 
 	// the given accepted num should be absolute bigger than the current ballot-number
 	if acceptedNum != nil && compare.CompareBallotNumbers(&ballotNumber, acceptedNum) != 1 {
 		return nil
 	} else {
-		if exist, err := c.Database.IsBlockExists(&ballotNumber); err == nil && exist {
-			// send back sync request
-			// c.Dialer.Sync(msg.NodeId, )
+		if exist, err := c.Database.IsBlockExists(&lastCommitted); err == nil && exist {
+			// send back sync request to the node that sent the propose message
+			clients := c.Memory.GetClients()
+			messages := make([]*apaxos.SyncMessage, len(clients))
+
+			for key, value := range clients {
+				messages = append(messages, &apaxos.SyncMessage{
+					Client:  key,
+					Balance: value,
+				})
+			}
+
+			c.Dialer.Sync(msg.NodeId, messages)
 		} else {
 			// send promise message
-			// c.Dialer.Promise(c.Nodes[msg.NodeId], &apaxos.PromiseMessage{
+			// if already had anything, send the accepted val and accepted num
+			if acceptedVal != nil {
+				blocks := make([]*apaxos.Block, len(acceptedVal))
+				for index, block := range acceptedVal {
+					blocks[index] = block.ToProtoModel()
+				}
 
-			// })
+				c.Dialer.Promise(c.Nodes[msg.NodeId], &apaxos.PromiseMessage{
+					NodeId:              c.NodeId,
+					BallotNumber:        acceptedNum.ToProtoModel(),
+					LastComittedMessage: c.Memory.GetLastCommitedMessage().ToProtoModel(),
+					Blocks:              blocks,
+				})
+			} else { // else, send your block
+				block := c.Memory.GetDatastoreAsBlock()
+				block.Metadata = models.BlockMetadata{
+					NodeId:         c.NodeId,
+					BallotNumber:   ballotNumber,
+					SequenceNumber: c.Memory.GetSequenceNumber(),
+				}
+
+				block.Metadata.Uid = hashing.HashBlock(block)
+
+				c.Dialer.Promise(c.Nodes[msg.NodeId], &apaxos.PromiseMessage{
+					NodeId:              c.NodeId,
+					BallotNumber:        msg.BallotNumber,
+					LastComittedMessage: c.Memory.GetLastCommitedMessage().ToProtoModel(),
+					Blocks:              []*apaxos.Block{block.ToProtoModel()},
+				})
+			}
 		}
 	}
 

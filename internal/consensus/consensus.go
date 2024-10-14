@@ -21,6 +21,7 @@ type Consensus struct {
 	Dialer   client.ApaxosDialer
 
 	Client  string
+	NodeId  string
 	Clients map[string]string
 	Nodes   map[string]string
 

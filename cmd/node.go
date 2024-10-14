@@ -37,6 +37,7 @@ func (n Node) Main() error {
 		Memory:          mem,
 		Dialer:          client.ApaxosDialer{},
 		Client:          n.Cfg.Client,
+		NodeId:          n.Cfg.NodeID,
 		Clients:         n.Cfg.GetClients(),
 		Nodes:           n.Cfg.GetNodes(),
 		RequestTimeout:  n.Cfg.GRPC.RequestTimeout,

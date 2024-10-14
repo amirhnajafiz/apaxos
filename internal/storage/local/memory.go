@@ -15,6 +15,8 @@ type Memory struct {
 	acceptedNum *models.BallotNumber // apaxos accepted num
 	acceptedVal []*models.Block      // apaxos accepted var
 
+	lastCommittedMessage *models.BlockMetadata // apaxos last committed message for sync
+
 	datastore []*models.Transaction // local transactions datastore for each node
 }
 
