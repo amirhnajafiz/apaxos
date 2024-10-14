@@ -8,11 +8,14 @@ import (
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/internal/worker"
+
+	"go.uber.org/zap"
 )
 
 // Each node of our transaction system runs using this main function.
 type Node struct {
-	Cfg config.Config
+	Cfg    config.Config
+	Logger *zap.Logger
 }
 
 func (n Node) Main() error {
@@ -33,9 +36,12 @@ func (n Node) Main() error {
 
 	// create a new consensus module
 	instance := consensus.Consensus{
-		Database:        db,
-		Memory:          mem,
-		Dialer:          client.ApaxosDialer{},
+		Database: db,
+		Memory:   mem,
+		Logger:   n.Logger.Named("consensus"),
+		Dialer: client.ApaxosDialer{
+			Logger: n.Logger.Named("apaxos-dialer"),
+		},
 		Client:          n.Cfg.Client,
 		NodeId:          n.Cfg.NodeID,
 		Clients:         n.Cfg.GetClients(),
@@ -50,6 +56,7 @@ func (n Node) Main() error {
 		Memory:   mem,
 		Database: db,
 		Interval: n.Cfg.WorkersInterval,
+		Logger:   n.Logger.Named("worker"),
 	}.Start()
 
 	// create a new gRPC bootstrap instance and execute the server by running the boot commands
@@ -58,5 +65,6 @@ func (n Node) Main() error {
 		Memory:    mem,
 		Database:  db,
 		Consensus: &instance,
+		Logger:    n.Logger.Named("grpc"),
 	}.ListenAnsServer()
 }

@@ -7,6 +7,9 @@ import (
 
 	"github.com/f24-cse535/apaxos/cmd"
 	"github.com/f24-cse535/apaxos/internal/config"
+	"github.com/f24-cse535/apaxos/internal/logger"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -31,13 +34,18 @@ func main() {
 	// load configs
 	cfg := config.New(*configPath)
 
-	// create cmd instances and pass the config file path
+	// create a new zap logger
+	logr := logger.NewLogger(cfg.LogLevel)
+
+	// create cmd instances and pass needed parameters
 	ctl := cmd.Controller{
-		ConfigPath: *configPath,
-		CSVPath:    *csvPath,
+		Cfg:     cfg,
+		Logger:  logr.Named("controller"),
+		CSVPath: *csvPath,
 	}
 	node := cmd.Node{
-		Cfg: cfg,
+		Cfg:    cfg,
+		Logger: logr.Named("node"),
 	}
 
 	// command is the first argument variable
@@ -49,7 +57,9 @@ func main() {
 	case ControllerCmdName:
 		ctl.Main()
 	case NodeCmdName:
-		node.Main()
+		if err := node.Main(); err != nil {
+			logr.Panic("failed to run node", zap.Error(err))
+		}
 	default:
 		panic(
 			fmt.Sprintf(
