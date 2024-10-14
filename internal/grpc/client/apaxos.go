@@ -20,14 +20,15 @@ func (a *ApaxosDialer) connect(address string) (*grpc.ClientConn, error) {
 
 	conn, err := grpc.NewClient(address, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("[grpc/client/apaxosdialer] failed to make rpc call: %v", err)
+		return nil, fmt.Errorf("[grpc/client/apaxosDialer] failed to open connection to %s: %v", address, err)
 	}
 
 	return conn, nil
 }
 
-// Propose message is sent by a proposer.
+// Propose sends a prepare message to the given address.
 func (a *ApaxosDialer) Propose(address string, message *apaxos.PrepareMessage) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -35,11 +36,13 @@ func (a *ApaxosDialer) Propose(address string, message *apaxos.PrepareMessage) {
 	}
 	defer conn.Close()
 
+	// call Propose RPC
 	_, _ = apaxos.NewApaxosClient(conn).Propose(context.Background(), message)
 }
 
-// Promise message is sent by an acceptor.
+// Promise sends a promise message to the give address.
 func (a *ApaxosDialer) Promise(address string, message *apaxos.PromiseMessage) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -47,11 +50,13 @@ func (a *ApaxosDialer) Promise(address string, message *apaxos.PromiseMessage) {
 	}
 	defer conn.Close()
 
+	// call Promise RPC
 	_, _ = apaxos.NewApaxosClient(conn).Promise(context.Background(), message)
 }
 
-// Accept message is sent by a proposer.
+// Accept sends an accept message to the given address.
 func (a *ApaxosDialer) Accept(address string, message *apaxos.AcceptMessage) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -59,11 +64,13 @@ func (a *ApaxosDialer) Accept(address string, message *apaxos.AcceptMessage) {
 	}
 	defer conn.Close()
 
+	// call Accept RPC
 	_, _ = apaxos.NewApaxosClient(conn).Accept(context.Background(), message)
 }
 
-// Accepted message is sent by an acceptor.
+// Accepted just calls the accepted RPC on the given address.
 func (a *ApaxosDialer) Accepted(address string) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -71,11 +78,13 @@ func (a *ApaxosDialer) Accepted(address string) {
 	}
 	defer conn.Close()
 
+	// call Accepted RPC
 	_, _ = apaxos.NewApaxosClient(conn).Accepted(context.Background(), &emptypb.Empty{})
 }
 
-// Commit message is sent by a proposer.
+// Commit just calls the commit RPC on the given address.
 func (a *ApaxosDialer) Commit(address string) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -83,12 +92,13 @@ func (a *ApaxosDialer) Commit(address string) {
 	}
 	defer conn.Close()
 
+	// call Commit RPC
 	_, _ = apaxos.NewApaxosClient(conn).Commit(context.Background(), &emptypb.Empty{})
 }
 
-// Sync message is sent by a proposer to a felt-behind acceptor
-// or by an acceptor to a felt-behind proposer
+// Sync sends sync-messages over an stream to the given address.
 func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
+	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
 		log.Printf("failed to call %s: %v\n", address, err)
@@ -96,12 +106,14 @@ func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
 	}
 	defer conn.Close()
 
+	// open a sync-message stream
 	stream, err := apaxos.NewApaxosClient(conn).Sync(context.Background())
 	if err != nil {
-		log.Printf("failed to open an stream to %s: %v\n", address, err)
+		log.Printf("failed to open a stream to %s: %v\n", address, err)
 		return
 	}
 
+	// send sync-messages over the stream
 	for _, message := range messages {
 		if err := stream.Send(message); err != nil {
 			log.Printf("failed to send sync message to %s: %v\n", address, err)
@@ -109,5 +121,6 @@ func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
 		}
 	}
 
+	// close the stream
 	_, _ = stream.CloseAndRecv()
 }
