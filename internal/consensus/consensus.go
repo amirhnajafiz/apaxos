@@ -73,7 +73,7 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, error) {
 		}.FromProtoModel(transaction)
 
 		// save it into datastore
-		c.Memory.AddTransactionToDatastore(&t)
+		c.Memory.AddTransactionToDatastore(t)
 
 		return nil, nil
 	}

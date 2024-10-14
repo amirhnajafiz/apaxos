@@ -68,12 +68,9 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 		promiseMessage.Blocks = blockList                        // set accepted_val as blocks
 		promiseMessage.BallotNumber = acceptedNum.ToProtoModel() // set accepted_num as ballot-number
 	} else { // if nothing was in accepted fields, we send our own log block
-		// get the current datastore as a block and set the block metadata
-		block := c.Memory.GetDatastoreAsBlock()
-		block.Metadata = models.BlockMetadata{
-			NodeId:       c.NodeId,     // set node-id to identify the node's block in future
-			BallotNumber: ballotNumber, // ballot-number is the same as what the proposer said
-		}
+		// get the current datastore as a block and set the block ballot-number
+		block := c.Memory.GetDatastore()
+		block.Metadata.BallotNumber = ballotNumber // ballot-number is the same as what the proposer said
 
 		// then update the promise message
 		promiseMessage.Blocks = []*apaxos.Block{block.ToProtoModel()} // set node's block as blocks
@@ -124,7 +121,7 @@ func (c Consensus) commitHandler() {
 	for _, block := range acceptedVal {
 		// update our own blocks in memory, to remove previous transactions
 		if block.Metadata.NodeId == c.NodeId {
-			c.Memory.ResetDatastores(block)
+			c.Memory.ClearDatastore(block)
 		} else {
 			// loop in transactions and execute them
 			for _, transaction := range block.Transactions {
