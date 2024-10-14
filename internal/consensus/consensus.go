@@ -58,14 +58,14 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 
 // Demand is used by components to use the consensus logic to perform an
 // operation. When calling demand, the caller waits for consensus to return something.
-func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, error) {
+func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, error) {
 	// get the payload
 	transaction := pkt.Payload.(*apaxos.Transaction)
 
 	// if channel is nil without any errors, it means that the transaction should not handle on this machine
 	// this should be check on apaxos only. In multiplaxos, we don't care about this.
 	if transaction.Sender != c.Client && transaction.Reciever != c.Client {
-		return nil, errors.New("your client request does not belong to this machine")
+		return nil, enum.ResponseRequestFailed, errors.New("your client request does not belong to this machine")
 	}
 
 	// if the receiver is our client then no need to run consensus protocol
@@ -78,12 +78,12 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, error) {
 		// save it into datastore
 		c.Memory.AddTransactionToDatastore(t)
 
-		return nil, nil
+		return nil, enum.ResponseOK, nil
 	}
 
 	// now we check to see if we can run the consensus protocol
 	if c.channel != nil {
-		return nil, errors.New("cannot run multiple consensus protocols at the same time on this machine")
+		return nil, enum.ResponseServerFailed, errors.New("cannot run multiple consensus protocols at the same time on this machine")
 	}
 
 	// now running consensus by creating a new apaxos instance

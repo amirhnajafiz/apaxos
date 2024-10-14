@@ -29,27 +29,34 @@ type transactionsServer struct {
 func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
 	s.Logger.Debug("rpc called NewTransaction")
 
-	// create a response instance
-	response := transactions.TransactionResponse{}
-
-	// send a message to consensus to process a transaction
-	channel, err := s.Consensus.Demand(&messages.Packet{
+	// send a message to the consensus module to process a new transaction
+	channel, code, err := s.Consensus.Demand(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
-	if err != nil {
-		return &response, err
-	}
 
-	if channel == nil {
-		// if channel is nil, it means the transaction was successful and no need to wait
-		// for consensus protocl
-	} else {
-		// wait on the consensus response
-		pkt := <-channel
-	}
+	s.Logger.Debug("consensus responed", zap.Int("code", code))
 
-	return &response, nil
+	// if the consensus didn't accept our transaction, we return an error
+	if code != enum.ResponseAccepted {
+		return &transactions.TransactionResponse{
+			Status: int64(code),
+			Text:   err.Error(),
+		}, err
+	} else { // else, it means that the consensus module has accepted our transaction
+		// now we have to see that we should wait for a response, or the transaction is submitted
+		response := transactions.TransactionResponse{
+			Status: int64(code),
+		}
+
+		// wait for consensus module response
+		if code != enum.ResponseOK {
+			resp := <-channel
+			response.Text = resp.Payload.(string)
+		}
+
+		return &response, nil
+	}
 }
 
 // PrintBalance is a simple operation that reads the client balance from node's memory.
