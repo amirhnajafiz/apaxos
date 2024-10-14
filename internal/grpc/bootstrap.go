@@ -8,6 +8,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+	"github.com/f24-cse535/apaxos/pkg/rpc/liveness"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
 	"go.uber.org/zap"
@@ -22,6 +23,8 @@ type Bootstrap struct {
 	Database  *database.Database
 	Consensus *consensus.Consensus
 	Logger    *zap.Logger
+
+	livenessInstance *livenessServer
 }
 
 // ListenAnsServer creates a new gRPC instance
@@ -36,7 +39,13 @@ func (b Bootstrap) ListenAnsServer() error {
 	// create a new grpc instance
 	server := grpc.NewServer()
 
-	// register both gRPC services
+	// create a new liveness server
+	b.livenessInstance = &livenessServer{
+		state: true,
+	}
+
+	// register gRPC services
+	liveness.RegisterLivenessServer(server, b.livenessInstance)
 	apaxos.RegisterApaxosServer(server, &apaxosServer{
 		Consensus: b.Consensus,
 		Logger:    b.Logger.Named("apaxos"),
