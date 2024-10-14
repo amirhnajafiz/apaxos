@@ -9,7 +9,6 @@ import (
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/enum"
 	"github.com/f24-cse535/apaxos/pkg/messages"
-	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
@@ -72,19 +71,19 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 
 	// if the receiver is our client then no need to run consensus protocol
 	if transaction.Reciever == c.Client {
-		// save the transaction into datastore
-		t := models.Transaction{}.FromProtoModel(transaction)
-		t.SequenceNumber = c.Memory.GetSequenceNumber()
+		// just submit the transaction
+		c.submitTransaction(transaction)
 
-		// make changes into memory for client's balances
-		c.Memory.UpdateBalance(t.Sender, t.Amount*-1)
-		c.Memory.UpdateBalance(t.Reciever, t.Amount)
-
-		// save it into datastore
-		c.Memory.AddTransactionToDatastore(t)
+		return nil, enum.ResponseOK, nil
+	} else if c.Memory.GetBalance(c.Client) > transaction.Amount { // if sender is our client, it should have enough balance
+		// agains, we can submit the transaction
+		c.submitTransaction(transaction)
 
 		return nil, enum.ResponseOK, nil
 	}
+
+	// if we get here, it means that our client wants to send money, but its balance is not enough
+	// so we should run a consensus instance to update our client balance.
 
 	// now we check to see if we can run the consensus protocol
 	if c.instanceExists() {
