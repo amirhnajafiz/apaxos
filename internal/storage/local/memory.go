@@ -47,6 +47,9 @@ func NewMemory(nodeId string, balances map[string]int64) *Memory {
 
 		acceptedVal: make([]*models.Block, 0),
 		datastore: &models.Block{
+			Metadata: models.BlockMetadata{
+				NodeId: nodeId,
+			},
 			Transactions: make([]models.Transaction, 0),
 		},
 

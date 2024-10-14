@@ -58,8 +58,8 @@ func (s *transactionsServer) PrintBalance(ctx context.Context, req *transactions
 
 // PrintLogs returns the node datastore and accepted val.
 func (s *transactionsServer) PrintLogs(req *emptypb.Empty, stream transactions.Transactions_PrintLogsServer) error {
-	// first send datastore block
-	if err := stream.Send(s.Memory.GetDatastoreAsBlock().ToProtoModel()); err != nil {
+	// first send the datastore block
+	if err := stream.Send(s.Memory.GetDatastore().ToProtoModel()); err != nil {
 		return err
 	}
 
