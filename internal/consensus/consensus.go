@@ -38,18 +38,6 @@ type Consensus struct {
 	instance *protocol.Apaxos
 }
 
-// forward to instance is a helper function to pass packets in apaxos instance channel
-func (c Consensus) forwardToInstance(pkt *messages.Packet) {
-	if c.instance != nil {
-		c.instance.InChannel <- pkt
-	}
-}
-
-// instance exists return true if the apaxos instance is started and running
-func (c Consensus) instanceExists() bool {
-	return c.instance == nil
-}
-
 // Signal is used by the upper layer (gRPC functions) to send their
 // packets to the consensus module without getting any response.
 func (c Consensus) Signal(pkt *messages.Packet) {
