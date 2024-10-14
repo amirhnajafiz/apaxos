@@ -14,7 +14,7 @@ service Apaxos {
   rpc Accept(AcceptMessage) returns (google.protobuf.Empty) {}
   rpc Accepted(google.protobuf.Empty) returns (google.protobuf.Empty) {}
   rpc Commit(google.protobuf.Empty) returns(google.protobuf.Empty) {}
-  rpc Sync(stream SyncMessage) returns(google.protobuf.Empty) {}
+  rpc Sync(SyncMessage) returns(google.protobuf.Empty) {}
 }
 
 // defining rpc messages, including block,
@@ -61,6 +61,11 @@ message AcceptMessage {
 }
 
 message SyncMessage {
+  BallotNumber last_comitted_message = 1;
+  repeated ClientBalancePair pairs = 2;
+}
+
+message ClientBalancePair {
   string client = 1;
   int64 balance = 2;
 }

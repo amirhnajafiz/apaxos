@@ -41,7 +41,7 @@ type ApaxosClient interface {
 	Accept(ctx context.Context, in *AcceptMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Accepted(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Commit(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Sync(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SyncMessage, emptypb.Empty], error)
+	Sync(ctx context.Context, in *SyncMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type apaxosClient struct {
@@ -102,18 +102,15 @@ func (c *apaxosClient) Commit(ctx context.Context, in *emptypb.Empty, opts ...gr
 	return out, nil
 }
 
-func (c *apaxosClient) Sync(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SyncMessage, emptypb.Empty], error) {
+func (c *apaxosClient) Sync(ctx context.Context, in *SyncMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Apaxos_ServiceDesc.Streams[0], Apaxos_Sync_FullMethodName, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Apaxos_Sync_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[SyncMessage, emptypb.Empty]{ClientStream: stream}
-	return x, nil
+	return out, nil
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Apaxos_SyncClient = grpc.ClientStreamingClient[SyncMessage, emptypb.Empty]
 
 // ApaxosServer is the server API for Apaxos service.
 // All implementations must embed UnimplementedApaxosServer
@@ -128,7 +125,7 @@ type ApaxosServer interface {
 	Accept(context.Context, *AcceptMessage) (*emptypb.Empty, error)
 	Accepted(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	Commit(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	Sync(grpc.ClientStreamingServer[SyncMessage, emptypb.Empty]) error
+	Sync(context.Context, *SyncMessage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApaxosServer()
 }
 
@@ -154,8 +151,8 @@ func (UnimplementedApaxosServer) Accepted(context.Context, *emptypb.Empty) (*emp
 func (UnimplementedApaxosServer) Commit(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Commit not implemented")
 }
-func (UnimplementedApaxosServer) Sync(grpc.ClientStreamingServer[SyncMessage, emptypb.Empty]) error {
-	return status.Errorf(codes.Unimplemented, "method Sync not implemented")
+func (UnimplementedApaxosServer) Sync(context.Context, *SyncMessage) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
 }
 func (UnimplementedApaxosServer) mustEmbedUnimplementedApaxosServer() {}
 func (UnimplementedApaxosServer) testEmbeddedByValue()                {}
@@ -268,12 +265,23 @@ func _Apaxos_Commit_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Apaxos_Sync_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ApaxosServer).Sync(&grpc.GenericServerStream[SyncMessage, emptypb.Empty]{ServerStream: stream})
+func _Apaxos_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApaxosServer).Sync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Apaxos_Sync_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApaxosServer).Sync(ctx, req.(*SyncMessage))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Apaxos_SyncServer = grpc.ClientStreamingServer[SyncMessage, emptypb.Empty]
 
 // Apaxos_ServiceDesc is the grpc.ServiceDesc for Apaxos service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -302,13 +310,11 @@ var Apaxos_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Commit",
 			Handler:    _Apaxos_Commit_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Sync",
-			Handler:       _Apaxos_Sync_Handler,
-			ClientStreams: true,
+			MethodName: "Sync",
+			Handler:    _Apaxos_Sync_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "apaxos.proto",
 }
