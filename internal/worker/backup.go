@@ -11,19 +11,22 @@ func (w Worker) snapshotNodeState() error {
 		BallotNumber:         *w.Memory.GetBallotNumber(),
 		AcceptedNum:          *w.Memory.GetAcceptedNum(),
 	}
+
+	// copy accepted_val and current datastore
 	vals := w.Memory.GetAcceptedVal()
 	ds := w.Memory.GetDatastore()
 
-	// converting address to object
+	// converting addresses to values
 	state.AcceptedVal = make([]models.Block, len(vals))
 	for index, item := range vals {
 		state.AcceptedVal[index] = *item
 	}
+
 	state.Datastore = make([]models.Transaction, len(ds))
 	for index, item := range ds {
 		state.Datastore[index] = *item
 	}
 
-	// store in MongoDB
+	// store the snapshot in MongoDB
 	return w.Database.InsertState(&state)
 }
