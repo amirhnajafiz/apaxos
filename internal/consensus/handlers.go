@@ -169,6 +169,13 @@ func (c Consensus) transmitSync(address string) {
 }
 
 // syncHandler get's a sync message and updates itself to catch up with others.
-func (c Consensus) syncHandler() error {
-	return nil
+func (c Consensus) syncHandler(msg *apaxos.SyncMessage) {
+	// update clients' balances
+	for _, item := range msg.GetPairs() {
+		c.Memory.SetBalance(item.GetClient(), item.GetBalance())
+	}
+
+	// update last committed message
+	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetLastComittedMessage())
+	c.Memory.SetLastCommittedMessage(&ballotNumber)
 }
