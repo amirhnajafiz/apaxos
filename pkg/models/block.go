@@ -6,10 +6,8 @@ import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 // a data-model for MongoDB database. It is also used
 // for internal processing.
 type BlockMetadata struct {
-	Uid            string       `bson:"uid"`
-	NodeId         string       `bson:"node_id"`
-	SequenceNumber int64        `bson:"sequence_number"`
-	BallotNumber   BallotNumber `bson:"ballot_number"`
+	NodeId       string       `bson:"node_id"`
+	BallotNumber BallotNumber `bson:"ballot_number"`
 }
 
 // Block model is a struct that acts as
@@ -27,10 +25,8 @@ type Block struct {
 
 func (b BlockMetadata) ToProtoModel() *apaxos.BlockMetaData {
 	return &apaxos.BlockMetaData{
-		Uid:            b.Uid,
-		NodeId:         b.NodeId,
-		SequenceNumber: b.SequenceNumber,
-		BallotNumber:   b.BallotNumber.ToProtoModel(),
+		NodeId:       b.NodeId,
+		BallotNumber: b.BallotNumber.ToProtoModel(),
 	}
 }
 
@@ -48,8 +44,6 @@ func (b Block) ToProtoModel() *apaxos.Block {
 
 func (b BlockMetadata) FromProtoModel(instance *apaxos.BlockMetaData) BlockMetadata {
 	b.NodeId = instance.GetNodeId()
-	b.Uid = instance.GetUid()
-	b.SequenceNumber = instance.GetSequenceNumber()
 	b.BallotNumber = BallotNumber{}.FromProtoModel(instance.BallotNumber)
 
 	return b

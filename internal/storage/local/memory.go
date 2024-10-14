@@ -12,10 +12,9 @@ type Memory struct {
 	clients        map[string]int64     // a map of all clients with their balances
 	ballotNumber   *models.BallotNumber // the ballot number of each node
 
-	acceptedNum *models.BallotNumber // apaxos accepted num
-	acceptedVal []*models.Block      // apaxos accepted var
-
-	lastCommittedMessage *models.BlockMetadata // apaxos last committed message for sync
+	lastCommitted *models.BallotNumber // apaxos last committed message for sync
+	acceptedNum   *models.BallotNumber // apaxos accepted num
+	acceptedVal   []*models.Block      // apaxos accepted var
 
 	datastore []*models.Transaction // local transactions datastore for each node
 }

@@ -17,84 +17,70 @@ func TestCompareBlocks(t *testing.T) {
 		{
 			name: "Higher BallotNumber.Number in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 2, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 2, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: false,
 		},
 		{
 			name: "Higher BallotNumber.NodeId in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "2"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "2"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: false,
 		},
 		{
 			name: "Higher SequenceNumber in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 2,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: false,
 		},
 		{
 			name: "Same BallotNumber and SequenceNumber",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: true,
 		},
 		{
 			name: "Lower BallotNumber.Number in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 2, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 2, NodeId: "1"},
 			},
 			expected: true,
 		},
 		{
 			name: "Lower BallotNumber.NodeId in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "2"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "2"},
 			},
 			expected: true,
 		},
 		{
 			name: "Lower SequenceNumber in blockA",
 			blockA: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 1,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			blockB: &models.BlockMetadata{
-				BallotNumber:   models.BallotNumber{Number: 1, NodeId: "1"},
-				SequenceNumber: 2,
+				BallotNumber: models.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: true,
 		},
@@ -102,7 +88,7 @@ func TestCompareBlocks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := compare.SortBlocks(tt.blockA, tt.blockB)
+			result := compare.CompareBlocks(tt.blockA, tt.blockB)
 			if result != tt.expected {
 				t.Errorf("CompareBlocks() = %v, expected %v", result, tt.expected)
 			}

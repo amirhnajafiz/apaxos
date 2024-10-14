@@ -20,10 +20,8 @@ service Apaxos {
 // defining rpc messages, including block,
 // block metadata, transaction, and ballot number
 message BlockMetaData {
-  string uid = 1;
-  string node_id = 2;
-  int64 sequence_number = 3;
-  BallotNumber ballot_number = 4;
+  string node_id = 1;
+  BallotNumber ballot_number = 2;
 }
 
 message Block {
@@ -32,11 +30,10 @@ message Block {
 }
 
 message Transaction {
-  string uid = 1;
-  string sender = 2;
-  string reciever = 3;
-  int64 amount = 4;
-  int64 sequence_number = 5;
+  string sender = 1;
+  string reciever = 2;
+  int64 amount = 3;
+  int64 sequence_number = 4;
 }
 
 message BallotNumber {
@@ -47,13 +44,13 @@ message BallotNumber {
 message PrepareMessage {
   string node_id = 1;
   BallotNumber ballot_number = 2;
-  BlockMetaData last_comitted_message = 3;
+  BallotNumber last_comitted_message = 3;
 }
 
 message PromiseMessage {
   string node_id = 1;
   BallotNumber ballot_number = 2;
-  BlockMetaData last_comitted_message = 3;
+  BallotNumber last_comitted_message = 3;
   repeated Block blocks = 4;
 }
 

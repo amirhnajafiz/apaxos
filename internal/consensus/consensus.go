@@ -38,14 +38,14 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 	// switch case on pkt types to see if you should handle them or
 	// they should go into the channel of apaxos instance.
 	switch pkt.Type {
-	case enum.PacketPrepare:
+	case enum.PacketPrepare: // on prepare packet arrival, call prepare handler
 		c.prepareHandler(pkt.Payload.(*apaxos.PrepareMessage))
 	case enum.PacketAccept:
 		c.acceptHandler()
 	case enum.PacketCommit:
 		c.commitHandler()
 	case enum.PacketSync:
-		c.syncHandler()
+		c.receiveSyncHandler()
 	default:
 		if c.channel != nil {
 			c.channel <- pkt

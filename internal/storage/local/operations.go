@@ -88,6 +88,6 @@ func (m *Memory) SetDatastore(instance []*models.Transaction) {
 }
 
 // Last Committed Message operations
-func (m *Memory) GetLastCommitedMessage() *models.BlockMetadata {
-	return m.lastCommittedMessage
+func (m *Memory) GetLastCommitedMessage() *models.BallotNumber {
+	return m.lastCommitted
 }
