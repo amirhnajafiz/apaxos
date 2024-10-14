@@ -34,9 +34,17 @@ func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) {
 
 // promiseHandler will be called by the prepare handler, to send back a promise message.
 func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumber) {
-	// first we get our accepted_num, accepted_val
-	acceptedNum := c.Memory.GetAcceptedNum()
-	acceptedVal := c.Memory.GetAcceptedVal()
+	// first we get our ballot-number
+	savedBallotNumber := c.Memory.GetBallotNumber()
+
+	// now we check the proposer's ballot-number with our own ballot-number.
+	// the ballot-number should be absolute greater than ours.
+	if utils.CompareBallotNumbers(&ballotNumber, savedBallotNumber) < 1 {
+		return
+	}
+
+	// if the proposer's ballot-number was absolute greater, we update our ballot-number
+	c.Memory.SetBallotNumber(&ballotNumber)
 
 	// then we create a promise message with init fields of our node_id and our last_committed_message
 	promiseMessage := &apaxos.PromiseMessage{
@@ -44,22 +52,22 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
 	}
 
-	// then we check to see if we have accepted something from another proposer before, and it is not committed.
-	// if we had something, first we should check the ballot-numbers.
-	if acceptedNum != nil {
-		// the ballot-number should be absolute greater than accepted_num
-		if utils.CompareBallotNumbers(&ballotNumber, acceptedNum) == 1 {
-			// first we create a blocklist of our accepted_vals
-			blockList := make([]*apaxos.Block, len(acceptedVal))
-			for index, item := range acceptedVal {
-				blockList[index] = item.ToProtoModel()
-			}
+	// now we need to get our current accepted_num and accepted_val
+	acceptedNum := c.Memory.GetAcceptedNum()
+	acceptedVal := c.Memory.GetAcceptedVal()
 
-			// then we update the promise message
-			promiseMessage.Blocks = blockList                        // set accepted_val as blocks
-			promiseMessage.BallotNumber = acceptedNum.ToProtoModel() // set accepted_num as ballot-number
+	// then we check to see if we have accepted something from another proposer before, and it is not committed.
+	if acceptedNum != nil {
+		// first we create a blocklist of our accepted_vals
+		blockList := make([]*apaxos.Block, len(acceptedVal))
+		for index, item := range acceptedVal {
+			blockList[index] = item.ToProtoModel()
 		}
-	} else {
+
+		// then we update the promise message
+		promiseMessage.Blocks = blockList                        // set accepted_val as blocks
+		promiseMessage.BallotNumber = acceptedNum.ToProtoModel() // set accepted_num as ballot-number
+	} else { // if nothing was in accepted fields, we send our own log block
 		// get the current datastore as a block and set the block metadata
 		block := c.Memory.GetDatastoreAsBlock()
 		block.Metadata = models.BlockMetadata{
@@ -76,11 +84,34 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 	c.Dialer.Promise(address, promiseMessage)
 }
 
-// acceptHandler get's an accept message and compares the ballot-number
-// with it's own ballot-number.
-// If everything was ok, it updates its accepted num and accepted var, and
-// emits an accepted message.
-func (c Consensus) acceptHandler() {
+// acceptHandler get's a accept message from the proposer.
+func (c Consensus) acceptHandler(msg *apaxos.AcceptMessage) {
+	// first we extract data of the input message
+	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetBallotNumber())
+
+	// then we get our ballot-number
+	savedBallotNumber := c.Memory.GetBallotNumber()
+
+	// now we check the proposer's ballot-number with our own ballot-number.
+	// the ballot-number should be greater than ours.
+	if utils.CompareBallotNumbers(&ballotNumber, savedBallotNumber) < 0 {
+		return
+	}
+
+	// update accepted_num with proposer's ballot number
+	c.Memory.SetAcceptedNum(&ballotNumber)
+
+	// update accepted_val with proposer's give blocks
+	blocks := make([]*models.Block, len(msg.Blocks))
+	for index, block := range msg.Blocks {
+		tmp := models.Block{}.FromProtoModel(block)
+		blocks[index] = &tmp
+	}
+
+	c.Memory.SetAcceptedVal(blocks)
+
+	// send accepted message
+	c.Dialer.Accepted(c.Nodes[msg.NodeId])
 }
 
 // commitHandler get's a commit message and emptys the datastore by executing

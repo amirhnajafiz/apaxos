@@ -41,7 +41,7 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 	case enum.PacketPrepare: // on prepare packet arrival, call prepare handler
 		c.prepareHandler(pkt.Payload.(*apaxos.PrepareMessage))
 	case enum.PacketAccept:
-		c.acceptHandler()
+		c.acceptHandler(pkt.Payload.(*apaxos.AcceptMessage))
 	case enum.PacketCommit:
 		c.commitHandler()
 	case enum.PacketSync:
