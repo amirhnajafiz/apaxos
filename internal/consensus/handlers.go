@@ -24,7 +24,7 @@ func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) {
 		// message committed sometime in past or not.
 		if exist, err := c.Database.IsBlockExists(&lastCommitted); err == nil && exist {
 			// if the message exists, we send a sync message to update the node
-			c.sendSyncHandler(c.Nodes[msg.NodeId])
+			c.transmitSync(c.Nodes[msg.NodeId])
 		} else {
 			// if the message was not committed before, we follow the promise
 			c.promiseHandler(c.Nodes[msg.NodeId], ballotNumber)
@@ -89,25 +89,33 @@ func (c Consensus) commitHandler() error {
 	return nil
 }
 
-// sendSyncHandler will be called by the prepare handler to update the proposer.
-func (c Consensus) sendSyncHandler(address string) {
+// transmitSync will be called by the prepare handler to update the proposer.
+func (c Consensus) transmitSync(address string) {
 	// get a clone of the clients
 	clients := c.Memory.GetClients()
 
-	// create sync messages
-	messages := make([]*apaxos.SyncMessage, len(clients))
+	// create an instance of sync message
+	message := &apaxos.SyncMessage{
+		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
+		Pairs:               make([]*apaxos.ClientBalancePair, len(clients)),
+	}
+
+	// add client and their balances
+	index := 0
 	for key, value := range clients {
-		messages = append(messages, &apaxos.SyncMessage{
+		message.Pairs[index] = &apaxos.ClientBalancePair{
 			Client:  key,
 			Balance: value,
-		})
+		}
+
+		index++
 	}
 
 	// send the sync message
-	c.Dialer.Sync(address, messages)
+	c.Dialer.Sync(address, message)
 }
 
-// receiveSyncHandler get's a sync message and updates itself to catch up with others.
-func (c Consensus) receiveSyncHandler() error {
+// syncHandler get's a sync message and updates itself to catch up with others.
+func (c Consensus) syncHandler() error {
 	return nil
 }

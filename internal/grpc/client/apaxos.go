@@ -96,8 +96,8 @@ func (a *ApaxosDialer) Commit(address string) {
 	_, _ = apaxos.NewApaxosClient(conn).Commit(context.Background(), &emptypb.Empty{})
 }
 
-// Sync sends sync-messages over an stream to the given address.
-func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
+// Sync sends a sync message to the given address.
+func (a *ApaxosDialer) Sync(address string, messages *apaxos.SyncMessage) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
@@ -106,21 +106,6 @@ func (a *ApaxosDialer) Sync(address string, messages []*apaxos.SyncMessage) {
 	}
 	defer conn.Close()
 
-	// open a sync-message stream
-	stream, err := apaxos.NewApaxosClient(conn).Sync(context.Background())
-	if err != nil {
-		log.Printf("failed to open a stream to %s: %v\n", address, err)
-		return
-	}
-
-	// send sync-messages over the stream
-	for _, message := range messages {
-		if err := stream.Send(message); err != nil {
-			log.Printf("failed to send sync message to %s: %v\n", address, err)
-			return
-		}
-	}
-
-	// close the stream
-	_, _ = stream.CloseAndRecv()
+	// call Sync RPC
+	_, _ = apaxos.NewApaxosClient(conn).Sync(context.Background(), messages)
 }

@@ -45,7 +45,7 @@ func (c Consensus) Signal(pkt *messages.Packet) {
 	case enum.PacketCommit:
 		c.commitHandler()
 	case enum.PacketSync:
-		c.receiveSyncHandler()
+		c.syncHandler()
 	default:
 		if c.channel != nil {
 			c.channel <- pkt
