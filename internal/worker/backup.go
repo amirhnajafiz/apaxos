@@ -6,9 +6,10 @@ import "github.com/f24-cse535/apaxos/pkg/models"
 // node's memory, and stores it inside MongoDB.
 func (w Worker) snapshotNodeState() error {
 	state := models.State{
-		Clients:      w.Memory.GetClients(),
-		BallotNumber: *w.Memory.GetBallotNumber(),
-		AcceptedNum:  *w.Memory.GetAcceptedNum(),
+		Clients:              w.Memory.GetClients(),
+		LastCommittedMessage: *w.Memory.GetLastCommitedMessage(),
+		BallotNumber:         *w.Memory.GetBallotNumber(),
+		AcceptedNum:          *w.Memory.GetAcceptedNum(),
 	}
 	vals := w.Memory.GetAcceptedVal()
 	ds := w.Memory.GetDatastore()

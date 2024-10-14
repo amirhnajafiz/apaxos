@@ -22,6 +22,7 @@ type Memory struct {
 // ReadFromState is used to load a backup state into the current memory.
 func (m *Memory) ReadFromState(state *models.State) {
 	m.clients = state.Clients
+	m.lastCommitted = &state.LastCommittedMessage
 	m.ballotNumber = &state.BallotNumber
 	m.acceptedNum = &state.AcceptedNum
 
