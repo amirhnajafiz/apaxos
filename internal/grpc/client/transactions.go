@@ -9,12 +9,15 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // TransactionsDialer is used to call RPCs for transactions service.
-type TransactionsDialer struct{}
+type TransactionsDialer struct {
+	Logger *zap.Logger
+}
 
 // connect should be called in the beginning of each method to establish a connection.
 func (t *TransactionsDialer) connect(address string) (*grpc.ClientConn, error) {

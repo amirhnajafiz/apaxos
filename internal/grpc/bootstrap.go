@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/f24-cse535/apaxos/internal/consensus"
@@ -11,6 +10,7 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -21,6 +21,7 @@ type Bootstrap struct {
 	Memory    *local.Memory
 	Database  *database.Database
 	Consensus *consensus.Consensus
+	Logger    *zap.Logger
 }
 
 // ListenAnsServer creates a new gRPC instance
@@ -38,15 +39,17 @@ func (b Bootstrap) ListenAnsServer() error {
 	// register both gRPC services
 	apaxos.RegisterApaxosServer(server, &apaxosServer{
 		Consensus: b.Consensus,
+		Logger:    b.Logger.Named("apaxos"),
 	})
 	transactions.RegisterTransactionsServer(server, &transactionsServer{
 		Consensus: b.Consensus,
 		Memory:    b.Memory,
 		Database:  b.Database,
+		Logger:    b.Logger.Named("transactions"),
 	})
 
 	// starting the server
-	log.Printf("grpc server started on %d ...\n", b.Port)
+	b.Logger.Info("grpc server started", zap.Int("port", b.Port))
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("[grpc] failed to start the server: %v", err)
 	}

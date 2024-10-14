@@ -7,12 +7,15 @@ import (
 
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ApaxosDialer is used to call RPCs for apaxos protocol.
-type ApaxosDialer struct{}
+type ApaxosDialer struct {
+	Logger *zap.Logger
+}
 
 // connect should be called in the beginning of each method to establish a connection.
 func (a *ApaxosDialer) connect(address string) (*grpc.ClientConn, error) {

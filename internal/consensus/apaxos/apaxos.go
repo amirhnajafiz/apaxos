@@ -4,6 +4,8 @@ import (
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
+
+	"go.uber.org/zap"
 )
 
 // Apaxos module is used by the consensus module.
@@ -13,6 +15,7 @@ import (
 // And, the OutChannel which the data will be sent to consensus.
 type Apaxos struct {
 	Dialer client.ApaxosDialer
+	Logger *zap.Logger
 	Memory *local.Memory
 
 	Nodes           map[string]string

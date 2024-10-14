@@ -11,6 +11,7 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
 
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -20,6 +21,7 @@ type transactionsServer struct {
 	Memory    *local.Memory
 	Database  *database.Database
 	Consensus *consensus.Consensus
+	Logger    *zap.Logger
 }
 
 // NewTransaction is called for registering a new transaction.

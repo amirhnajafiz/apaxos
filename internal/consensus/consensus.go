@@ -11,6 +11,8 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+
+	"go.uber.org/zap"
 )
 
 // Consensus module is the core module that runs consensus protocols
@@ -18,6 +20,7 @@ import (
 type Consensus struct {
 	Memory   *local.Memory
 	Database *database.Database
+	Logger   *zap.Logger
 	Dialer   client.ApaxosDialer
 
 	Client  string
