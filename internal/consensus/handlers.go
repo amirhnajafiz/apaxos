@@ -1,9 +1,12 @@
 package consensus
 
 import (
+	"sort"
+
 	"github.com/f24-cse535/apaxos/internal/utils"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+
 	"go.uber.org/zap"
 )
 
@@ -118,14 +121,25 @@ func (c Consensus) commitHandler() {
 	// get our accepted_val
 	acceptedVal := c.Memory.GetAcceptedVal()
 
+	// sort the blocks by their ballot-numbers
+	sort.Slice(acceptedVal, func(i, j int) bool {
+		return utils.CompareBlocks(&acceptedVal[i].Metadata, &acceptedVal[j].Metadata)
+	})
+
 	// now we should execute the transactions
 	for _, block := range acceptedVal {
 		// update our own blocks in memory, to remove previous transactions
 		if block.Metadata.NodeId == c.NodeId {
 			c.Memory.ClearDatastore(block)
 		} else {
+			// get transactions and sort them by sequence number
+			tlist := block.Transactions
+			sort.Slice(tlist, func(i, j int) bool {
+				return tlist[i].SequenceNumber < tlist[j].SequenceNumber
+			})
+
 			// loop in transactions and execute them
-			for _, transaction := range block.Transactions {
+			for _, transaction := range tlist {
 				c.Memory.UpdateBalance(transaction.Sender, transaction.Amount*-1)
 				c.Memory.UpdateBalance(transaction.Reciever, transaction.Amount)
 			}
