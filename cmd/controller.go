@@ -437,6 +437,8 @@ func (c *Controller) newTransaction() error {
 		Amount:   int64(amount),
 	}
 
+	fmt.Printf("sending (%s, %s, %d) to %s\n", t.Sender, t.Reciever, t.Amount, address)
+
 	// call rpc on the node
 	if code, text, err := c.TDialer.NewTransaction(address, &t); err == nil {
 		fmt.Printf("got %d from server: %s\n", code, text)
