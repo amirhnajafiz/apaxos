@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/monitoring/metrics"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
@@ -23,6 +24,7 @@ type Bootstrap struct {
 	Database  *database.Database
 	Consensus *consensus.Consensus
 	Logger    *zap.Logger
+	Metrics   *metrics.Metrics
 
 	livenessInstance *livenessServer
 }

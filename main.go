@@ -7,7 +7,7 @@ import (
 
 	"github.com/f24-cse535/apaxos/cmd"
 	"github.com/f24-cse535/apaxos/internal/config"
-	"github.com/f24-cse535/apaxos/internal/logger"
+	"github.com/f24-cse535/apaxos/internal/monitoring/logger"
 
 	"go.uber.org/zap"
 )
