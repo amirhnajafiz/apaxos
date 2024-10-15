@@ -147,7 +147,9 @@ func (c Consensus) commitHandler() {
 	}
 
 	// now we store the blocks inside MongoDB
-	_ = c.Database.InsertBlocks(acceptedVal)
+	if err := c.Database.InsertBlocks(acceptedVal); err != nil {
+		c.Logger.Error("failed to store blocks inside MongoDB", zap.Error(err))
+	}
 
 	// finally, we clear our accepted_num and accepted_val
 	c.Memory.SetAcceptedNum(nil)
