@@ -21,7 +21,7 @@ type Apaxos struct {
 	Database *database.Database // database is needed to check committed messages
 
 	// Dialer and nodes are needed to make RPC calls
-	Dialer *client.ApaxosDialer
+	Dialer *client.Client
 	Nodes  map[string]string // list of nodes and their addresses is needed for RPC calls
 	NodeId string
 

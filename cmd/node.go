@@ -46,10 +46,7 @@ func (n *Node) Main() error {
 		MajorityTimeout: n.Cfg.GRPC.MajorityTimeout,
 		Majority:        n.Cfg.Majority,
 		Logger:          n.Logger.Named("consensus"),
-		LivenessDialer:  &client.LivenessDialer{},
-		Dialer: &client.ApaxosDialer{
-			Logger: n.Logger.Named("apaxos-dialer"),
-		},
+		Dialer:          client.NewClient(n.Logger.Named("dialer")),
 	}
 
 	// create a worker instance and execute it in a new sub-process

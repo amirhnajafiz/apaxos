@@ -200,7 +200,7 @@ func (c Consensus) livenessHandler() bool {
 
 	// send ping messages to servers
 	for key, value := range c.Nodes {
-		if c.LivenessDialer.Ping(value) {
+		if c.Dialer.Ping(value) {
 			c.Logger.Debug("found alive server", zap.String("node", key))
 			count++
 		}
