@@ -2,8 +2,10 @@ package grpc
 
 import (
 	"context"
+	"time"
 
 	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/monitoring/metrics"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/enum"
@@ -22,6 +24,15 @@ type transactionsServer struct {
 	Database  *database.Database
 	Consensus *consensus.Consensus
 	Logger    *zap.Logger
+	Metrics   *metrics.Metrics
+}
+
+// observeMetrics is used in RPCs to set new metrics values.
+func (s *transactionsServer) observeMetrics(start, end time.Time) {
+	tmp := float64(end.Sub(start).Milliseconds())
+
+	s.Metrics.ObserveLatency(tmp)                    // latency is the time spent for each transaction
+	s.Metrics.ObserveThroughput(float64(1000 / tmp)) // throughput is the number of transactions per second
 }
 
 // NewTransaction is called for registering a new transaction.
@@ -29,16 +40,24 @@ type transactionsServer struct {
 func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
 	s.Logger.Debug("rpc called NewTransaction")
 
+	// to set system metrics
+	start := time.Now()
+
 	// send a message to the consensus module to process a new transaction
 	channel, code, err := s.Consensus.Demand(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
 
+	// set the first end of response
+	end := time.Now()
+
 	s.Logger.Debug("consensus responed", zap.Int("code", code))
 
 	// if the consensus didn't accept our transaction, we return an error
 	if code != enum.ResponseAccepted {
+		s.observeMetrics(start, end)
+
 		return &transactions.TransactionResponse{
 			Status: int64(code),
 			Text:   err.Error(),
@@ -52,8 +71,12 @@ func (s *transactionsServer) NewTransaction(ctx context.Context, req *apaxos.Tra
 		// wait for consensus module response
 		if code != enum.ResponseOK {
 			resp := <-channel
+
+			end = time.Now()
 			response.Text = resp.Payload.(string)
 		}
+
+		s.observeMetrics(start, end)
 
 		return &response, nil
 	}
@@ -111,8 +134,11 @@ func (s *transactionsServer) PrintDB(req *emptypb.Empty, stream transactions.Tra
 func (s *transactionsServer) Performance(ctx context.Context, req *emptypb.Empty) (*transactions.PerformanceResponse, error) {
 	s.Logger.Debug("rpc called Performance")
 
+	// call get values on metrics module
+	lt, th := s.Metrics.GetValues()
+
 	return &transactions.PerformanceResponse{
-		Throughput: 1000.5,
-		Latency:    20.3,
+		Throughput: th,
+		Latency:    lt,
 	}, nil
 }
