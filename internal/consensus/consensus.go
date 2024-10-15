@@ -38,28 +38,15 @@ type Consensus struct {
 }
 
 // Signal is used by the upper layer (gRPC functions) to send their
-// packets to the consensus module without getting any response.
+// packets to the consensus's instance module without waiting for any response.
 func (c Consensus) Signal(pkt *messages.Packet) {
-	// switch case on pkt types to see if you should handle them or
-	// they should go into the channel of apaxos instance.
-	switch pkt.Type {
-	case enum.PacketPrepare: // on prepare packet arrival, call prepare handler
-		c.prepareHandler(pkt.Payload.(*apaxos.PrepareMessage))
-	case enum.PacketAccept:
-		c.acceptHandler(pkt.Payload.(*apaxos.AcceptMessage))
-	case enum.PacketCommit:
-		c.commitHandler()
-	case enum.PacketSync:
-		c.syncHandler(pkt.Payload.(*apaxos.SyncMessage))
-		c.forwardToInstance(pkt)
-	default:
-		c.forwardToInstance(pkt)
+	if c.instanceExists() {
+		c.instance.InChannel <- pkt
 	}
 }
 
-// Demand is used by components to use the consensus logic to perform an
-// operation. When calling demand, the caller waits for consensus to return something.
-func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, error) {
+// Checkout is the main method of our consensus module to submit or decline a new transaction.
+func (c Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, int, error) {
 	// get the payload of input request
 	transaction := pkt.Payload.(*apaxos.Transaction)
 
@@ -91,7 +78,7 @@ func (c Consensus) Demand(pkt *messages.Packet) (chan *messages.Packet, int, err
 	}
 
 	// if no instances exist, we create a new apaxos instance by running begin consensus
-	c.beginConsensus(transaction)
+	c.newInstance(transaction)
 
 	// send an accepted response, so the client waits for a response over the instance out channel
 	return c.instance.OutChannel, enum.ResponseAccepted, nil

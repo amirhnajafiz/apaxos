@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// beginConsensus builds and starts a new apaxos instance.
-func (c Consensus) beginConsensus(transaction *apaxos.Transaction) {
+// newInstance builds and starts a new apaxos instance.
+func (c Consensus) newInstance(transaction *apaxos.Transaction) {
 	// first we create a new instance for the protocol
 	c.instance = &protocol.Apaxos{
 		NodeId:          c.NodeId,

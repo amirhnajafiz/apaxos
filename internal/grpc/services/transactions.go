@@ -44,7 +44,7 @@ func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transacti
 	start := time.Now()
 
 	// send a message to the consensus module to process a new transaction
-	channel, code, err := s.Consensus.Demand(&messages.Packet{
+	channel, code, err := s.Consensus.Checkout(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})

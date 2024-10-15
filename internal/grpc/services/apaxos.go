@@ -23,10 +23,8 @@ type Apaxos struct {
 func (a *Apaxos) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called propose", zap.String("caller", input.NodeId))
 
-	a.Consensus.Signal(&messages.Packet{
-		Type:    enum.PacketPrepare,
-		Payload: input,
-	})
+	// call prepare method of the consensus module
+	a.Consensus.Prepare(input)
 
 	return &emptypb.Empty{}, nil
 }
@@ -35,6 +33,7 @@ func (a *Apaxos) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*em
 func (a *Apaxos) Promise(ctx context.Context, input *apaxos.PromiseMessage) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called promise", zap.String("caller", input.NodeId))
 
+	// send a signal to consensus module
 	a.Consensus.Signal(&messages.Packet{
 		Type:    enum.PacketPromise,
 		Payload: input,
@@ -47,10 +46,8 @@ func (a *Apaxos) Promise(ctx context.Context, input *apaxos.PromiseMessage) (*em
 func (a *Apaxos) Accept(ctx context.Context, input *apaxos.AcceptMessage) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called accept", zap.String("caller", input.NodeId))
 
-	a.Consensus.Signal(&messages.Packet{
-		Type:    enum.PacketAccept,
-		Payload: input,
-	})
+	// call accept method of the consensus module
+	a.Consensus.Accept(input)
 
 	return &emptypb.Empty{}, nil
 }
@@ -59,6 +56,7 @@ func (a *Apaxos) Accept(ctx context.Context, input *apaxos.AcceptMessage) (*empt
 func (a *Apaxos) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called accepted")
 
+	// send an accepted signal to the consensus module
 	a.Consensus.Signal(&messages.Packet{
 		Type: enum.PacketAccepted,
 	})
@@ -70,9 +68,8 @@ func (a *Apaxos) Accepted(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty
 func (a *Apaxos) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called commit")
 
-	a.Consensus.Signal(&messages.Packet{
-		Type: enum.PacketCommit,
-	})
+	// call commit method of the consensus module
+	a.Consensus.Commit()
 
 	return &emptypb.Empty{}, nil
 }
@@ -81,10 +78,8 @@ func (a *Apaxos) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, 
 func (a *Apaxos) Sync(ctx context.Context, input *apaxos.SyncMessage) (*emptypb.Empty, error) {
 	a.Logger.Debug("rpc called sync")
 
-	a.Consensus.Signal(&messages.Packet{
-		Type:    enum.PacketSync,
-		Payload: input,
-	})
+	// call sync method of the consensus module
+	a.Consensus.Sync(input)
 
 	return &emptypb.Empty{}, nil
 }

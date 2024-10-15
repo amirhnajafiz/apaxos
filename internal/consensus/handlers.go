@@ -1,8 +1,6 @@
 package consensus
 
 import (
-	"sort"
-
 	"github.com/f24-cse535/apaxos/internal/utils"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
@@ -10,33 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// prepareHandler get's a prepare message from the proposer.
-func (c Consensus) prepareHandler(msg *apaxos.PrepareMessage) {
-	// now we extract data of the input message
-	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetBallotNumber())
-	lastCommitted := models.BallotNumber{}.FromProtoModel(msg.LastComittedMessage)
-
-	// first we check the given last committed message to our own last committed message
-	// if they matched, then we are probably having a synced proposer.
-	// if they didn't, we check if we had that message committed or not. if we had committed that
-	// message, it means that the proposer should get a sync request.
-	if utils.CompareBallotNumbers(&lastCommitted, c.Memory.GetLastCommittedMessage()) == 0 {
-		// if the last committed messages match, we follow the promise
-		c.promiseHandler(c.Nodes[msg.NodeId], ballotNumber)
-	} else {
-		// if the last committed message was not the same, we check to see if we had that
-		// message committed sometime in past or not.
-		if exist, err := c.Database.IsBlockExists(&lastCommitted); err == nil && exist {
-			// if the message exists, we send a sync message to update the node
-			c.transmitSync(c.Nodes[msg.NodeId])
-		} else {
-			// if the message was not committed before, we follow the promise
-			c.promiseHandler(c.Nodes[msg.NodeId], ballotNumber)
-		}
-	}
-}
-
-// promiseHandler will be called by the prepare handler, to send back a promise message.
+// promiseHandler will be called by the prepare, to send back a promise message.
 func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumber) {
 	// first we get our ballot-number
 	savedBallotNumber := c.Memory.GetBallotNumber()
@@ -85,77 +57,6 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 	c.Dialer.Promise(address, promiseMessage)
 }
 
-// acceptHandler get's a accept message from the proposer.
-func (c Consensus) acceptHandler(msg *apaxos.AcceptMessage) {
-	// first we extract data of the input message
-	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetBallotNumber())
-
-	// then we get our ballot-number
-	savedBallotNumber := c.Memory.GetBallotNumber()
-
-	// now we check the proposer's ballot-number with our own ballot-number.
-	// the ballot-number should be greater than ours.
-	if utils.CompareBallotNumbers(&ballotNumber, savedBallotNumber) < 0 {
-		return
-	}
-
-	// update accepted_num with proposer's ballot number
-	c.Memory.SetAcceptedNum(&ballotNumber)
-
-	// update accepted_val with proposer's give blocks
-	blocks := make([]*models.Block, len(msg.Blocks))
-	for index, block := range msg.Blocks {
-		tmp := models.Block{}.FromProtoModel(block)
-		blocks[index] = &tmp
-	}
-
-	c.Memory.SetAcceptedVal(blocks)
-
-	// send accepted message
-	c.Dialer.Accepted(c.Nodes[msg.NodeId])
-}
-
-// commitHandler get's a commit message and emptys the datastore by executing
-// the transactions, and storing them inside database.
-func (c Consensus) commitHandler() {
-	// get our accepted_val
-	acceptedVal := c.Memory.GetAcceptedVal()
-
-	// sort the blocks by their ballot-numbers
-	sort.Slice(acceptedVal, func(i, j int) bool { // we switch the places of i and j to sort the list in decreasing order
-		return utils.CompareBlocks(&acceptedVal[j].Metadata, &acceptedVal[i].Metadata)
-	})
-
-	// now we should execute the transactions
-	for _, block := range acceptedVal {
-		// update our own blocks in memory, to remove previous transactions
-		if block.Metadata.NodeId == c.NodeId {
-			c.Memory.ClearDatastore(block)
-		} else {
-			// get transactions and sort them by sequence number
-			tlist := block.Transactions
-			sort.Slice(tlist, func(i, j int) bool { // transactions are sorted in increasing order
-				return tlist[i].SequenceNumber < tlist[j].SequenceNumber
-			})
-
-			// loop in transactions and execute them
-			for _, transaction := range tlist {
-				c.Memory.UpdateBalance(transaction.Sender, transaction.Amount*-1)
-				c.Memory.UpdateBalance(transaction.Reciever, transaction.Amount)
-			}
-		}
-	}
-
-	// now we store the blocks inside MongoDB
-	if err := c.Database.InsertBlocks(acceptedVal); err != nil {
-		c.Logger.Error("failed to store blocks inside MongoDB", zap.Error(err))
-	}
-
-	// finally, we clear our accepted_num and accepted_val
-	c.Memory.SetAcceptedNum(nil)
-	c.Memory.SetAcceptedVal(nil)
-}
-
 // transmitSync will be called by the prepare handler to update the proposer.
 func (c Consensus) transmitSync(address string) {
 	// get a clone of the clients
@@ -180,18 +81,6 @@ func (c Consensus) transmitSync(address string) {
 
 	// send the sync message
 	c.Dialer.Sync(address, message)
-}
-
-// syncHandler get's a sync message and updates itself to catch up with others.
-func (c Consensus) syncHandler(msg *apaxos.SyncMessage) {
-	// update clients' balances
-	for _, item := range msg.GetPairs() {
-		c.Memory.SetBalance(item.GetClient(), item.GetBalance())
-	}
-
-	// update last committed message
-	ballotNumber := models.BallotNumber{}.FromProtoModel(msg.GetLastComittedMessage())
-	c.Memory.SetLastCommittedMessage(&ballotNumber)
 }
 
 // liveness handler checks to see if there are enough live servers or not.
