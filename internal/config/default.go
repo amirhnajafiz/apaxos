@@ -15,6 +15,7 @@ func Default() Config {
 		LogLevel:        "debug",
 		Nodes:           make([]Pair, 0),
 		Clients:         make([]Pair, 0),
+		ClientsShards:   make([]Pair, 0),
 		GRPC: grpc.Config{
 			Host:            "127.0.0.1",
 			Port:            8080,
