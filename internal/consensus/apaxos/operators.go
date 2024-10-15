@@ -41,3 +41,29 @@ func (a *Apaxos) broadcastCommit() {
 		a.Dialer.Commit(node)
 	}
 }
+
+// transmitSync will be called by the proposer handler to update the acceptor.
+func (a *Apaxos) transmitSync(address string) {
+	// get a clone of the clients
+	clients := a.Memory.GetClients()
+
+	// create an instance of sync message
+	message := &apaxos.SyncMessage{
+		LastComittedMessage: a.Memory.GetLastCommittedMessage().ToProtoModel(),
+		Pairs:               make([]*apaxos.ClientBalancePair, len(clients)),
+	}
+
+	// add client and their balances
+	index := 0
+	for key, value := range clients {
+		message.Pairs[index] = &apaxos.ClientBalancePair{
+			Client:  key,
+			Balance: value,
+		}
+
+		index++
+	}
+
+	// send the sync message
+	a.Dialer.Sync(address, message)
+}

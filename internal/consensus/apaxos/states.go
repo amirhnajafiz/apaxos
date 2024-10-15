@@ -36,16 +36,13 @@ func (a *Apaxos) waitForPromise() error {
 
 			// got one promise message
 			receivedEvents++
-
-			payload := pkt.Payload.(*apaxos.PromiseMessage)
-			a.promisedMessage = append(a.promisedMessage, payload)
+			a.promisedMessage = append(a.promisedMessage, pkt.Payload.(*apaxos.PromiseMessage))
 
 			// check to see if we got the majority
 			if receivedEvents == a.Majority {
 				if !timer.Stop() {
 					<-timer.C // drain the channel if needed
 				}
-
 				// reset the timer for the rest of the nodes
 				timer.Reset(majorityTimeoutDuration)
 			}
@@ -90,7 +87,6 @@ func (a *Apaxos) waitForAccepted() error {
 				if !timer.Stop() {
 					<-timer.C // drain the channel if needed
 				}
-
 				// reset the timer for the rest of the nodes
 				timer.Reset(majorityTimeoutDuration)
 			}
