@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"os"
@@ -106,7 +107,73 @@ func (c *Controller) testcase() error {
 		return errNumberOfArgs
 	}
 
+	// set path
+	path := c.args[0]
+
+	// open the CSV file
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// create a CSV reader
+	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1 // allow variable number of fields per row
+
+	var currentIndex string
+	var currentList string
+	var currentTuples []string
+
+	// read through the CSV records
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		// handle the index if present
+		if record[0] != "" {
+			if currentIndex != "" {
+				// start the test-set
+				c.execSet(currentIndex, strings.Split(currentList, ","), currentTuples)
+			}
+
+			// start a new block with the new index
+			currentIndex = record[0]
+			currentTuples = []string{} // reset tuples
+			currentList = ""           // reset list
+
+			// if a list is present in the first row, capture it
+			if len(record) > 2 {
+				currentList = strings.Trim(record[2], "[]") // remove square brackets
+			}
+
+			// if a tuple is present in the first row, add it to the tuples
+			if len(record) > 1 {
+				currentTuples = append(currentTuples, strings.Trim(record[1], "()"))
+			}
+		} else {
+			// this is a continuation of the current block
+			if len(record) > 1 && record[1] != "" {
+				currentTuples = append(currentTuples, strings.Trim(record[1], "()"))
+			}
+		}
+	}
+
 	return nil
+}
+
+func (c *Controller) execSet(index string, servers []string, transactions []string) {
+	fmt.Printf("starting set: %s\n", index)
+
+	for _, server := range servers {
+		fmt.Printf("%s ", server)
+	}
+
+	for _, transaction := range transactions {
+		fmt.Printf("%s\n", transaction)
+	}
 }
 
 func (c *Controller) block(address string) {
