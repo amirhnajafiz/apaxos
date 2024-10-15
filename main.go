@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// here is the list of current system commands
 const (
 	ControllerCmdName = "controller"
 	NodeCmdName       = "node"
@@ -26,15 +27,15 @@ func main() {
 
 	// config file path is a flag
 	configPath := flag.String("config", "config.yaml", "this is the config file path.")
-	csvPath := flag.String("csv", "testcase.csv", "this is the testcase file path.")
+	csvPath := flag.String("testcase", "testcase.csv", "this is the testcase file path.")
 
 	// parse flags
 	flag.Parse()
 
-	// load configs
+	// load configs module
 	cfg := config.New(*configPath)
 
-	// create a new zap logger
+	// create a new zap logger instance
 	logr := logger.NewLogger(cfg.LogLevel)
 
 	// create cmd instances and pass needed parameters
@@ -55,7 +56,9 @@ func main() {
 	// user input.
 	switch command {
 	case ControllerCmdName:
-		ctl.Main()
+		if err := ctl.Main(); err != nil {
+			logr.Panic("failed run controller", zap.Error(err))
+		}
 	case NodeCmdName:
 		if err := node.Main(); err != nil {
 			logr.Panic("failed to run node", zap.Error(err))

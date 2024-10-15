@@ -12,4 +12,4 @@ type Controller struct {
 	CSVPath string
 }
 
-func (c Controller) Main() {}
+func (c Controller) Main() error {}
