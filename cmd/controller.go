@@ -245,7 +245,12 @@ func (c *Controller) execSet(index string, servers []string, transactions []stri
 
 	// run transactions
 	for _, transaction := range transactions {
-		parts := strings.Split(transaction, ",")
+		parts := strings.Split(transaction, ", ")
+
+		// trim spaces from each part
+		for i := range parts {
+			parts[i] = strings.TrimSpace(parts[i])
+		}
 
 		// set args base args
 		c.args = make([]string, 0)
@@ -435,7 +440,7 @@ func (c *Controller) newTransaction() error {
 		Amount:   int64(amount),
 	}
 
-	fmt.Printf("sending (%s, %s, %d) to %s\n", t.Sender, t.Reciever, t.Amount, address)
+	fmt.Printf("sending (%s, %s, %d) to %s\n", t.GetSender(), t.GetReciever(), t.GetAmount(), address)
 
 	// call rpc on the node
 	if code, text, err := c.TDialer.NewTransaction(address, &t); err == nil {

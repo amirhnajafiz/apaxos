@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -21,18 +20,12 @@ const (
 func main() {
 	// get argument variables
 	argv := os.Args
-	if len(argv) < 2 {
+	if len(argv) < 3 {
 		panic("not enough arguments to run apaxos!")
 	}
 
-	// config file path is a flag
-	configPath := flag.String("config", "config.yaml", "this is the config file path.")
-
-	// parse flags
-	flag.Parse()
-
-	// load configs module
-	cfg := config.New(*configPath)
+	// load configs into a config struct
+	cfg := config.New(argv[2])
 
 	// create a new zap logger instance
 	logr := logger.NewLogger(cfg.LogLevel)
