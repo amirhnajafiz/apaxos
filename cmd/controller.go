@@ -110,6 +110,12 @@ func (c *Controller) testcase() error {
 }
 
 func (c *Controller) reset() error {
+	for key, value := range c.Cfg.GetNodes() {
+		if err := c.LDialer.ChangeState(value, true); err != nil {
+			fmt.Printf("%s returned error: %v\n", key, err)
+		}
+	}
+
 	return nil
 }
 
