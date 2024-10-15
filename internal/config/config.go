@@ -30,8 +30,9 @@ type Config struct {
 	WorkersInterval int    `koanf:"workers_interval"` // node jobs' interval in seconds
 	LogLevel        string `koanf:"log_level"`        // node logging level (debug, info, warn, error, panic, fatal)
 
-	Nodes   []Pair `koanf:"nodes"`   // a map of all nodes and addresses
-	Clients []Pair `koanf:"clients"` // a map of all clients and balances
+	Nodes         []Pair `koanf:"nodes"`          // a map of all nodes and addresses
+	Clients       []Pair `koanf:"clients"`        // a map of all clients and balances
+	ClientsShards []Pair `koanf:"clients_shards"` // a map of all clients and the nodes
 
 	GRPC    grpc.Config    `koanf:"grpc"`    // gRPC configs
 	MongoDB mongodb.Config `koanf:"mongodb"` // MongoDB configs

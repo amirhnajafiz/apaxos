@@ -35,3 +35,14 @@ func (c Config) GetClients() map[string]string {
 
 	return hashMap
 }
+
+// GetClientShards returns a map of clients and their addresses.
+func (c Config) GetClientShards() map[string]string {
+	hashMap := make(map[string]string)
+
+	for _, pair := range c.ClientsShards {
+		hashMap[pair.Key] = pair.Value
+	}
+
+	return hashMap
+}

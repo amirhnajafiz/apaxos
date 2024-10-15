@@ -167,12 +167,36 @@ func (c *Controller) testcase() error {
 func (c *Controller) execSet(index string, servers []string, transactions []string) {
 	fmt.Printf("starting set: %s\n", index)
 
+	// create a map of living servers
+	hashMap := make(map[string]bool)
 	for _, server := range servers {
-		fmt.Printf("%s ", server)
+		hashMap[server] = true
 	}
 
+	// block servers that are not in hashMap
+	for key, value := range c.Cfg.GetNodes() {
+		if !hashMap[key] {
+			c.block(value)
+		}
+	}
+
+	// run transactions
 	for _, transaction := range transactions {
-		fmt.Printf("%s\n", transaction)
+		parts := strings.Split(transaction, ",")
+
+		// set args
+		c.args = make([]string, 0)
+		c.args = append(c.args, parts...)
+		c.args = append(c.args, c.Cfg.GetClientShards()[c.args[0]])
+
+		if err := c.newTransaction(); err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	// reset nodes
+	if err := c.reset(); err != nil {
+		fmt.Println(err)
 	}
 }
 
