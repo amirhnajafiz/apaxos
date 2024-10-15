@@ -1,0 +1,15 @@
+# config file for controller app
+# list of nodes and their addresses
+nodes:
+  - key: "s1"
+    value: "localhost:50001"
+
+# list of clients and initial balances
+clients:
+  - key: "c1"
+    value: "100"
+
+# clients shards
+clients_shards:
+  - key: "c1"
+    value: "s1"

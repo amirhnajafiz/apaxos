@@ -1,0 +1,29 @@
+# config file for node instances
+# list of nodes and their addresses
+nodes:
+  - key: "s1"
+    value: "localhost:50001"
+
+# list of clients and initial balances
+clients:
+  - key: "c1"
+    value: "100"
+
+# node information
+node_id: "s1"
+client: "c1"
+workers_interval: 10 # in seconds
+log_level: "debug"
+
+# consensus and gRPC values
+majority: 3
+grpc:
+  host: "localhost"
+  port: 50001
+  request_timeout: 10 # in seconds
+  majority_timeout: 10 # in milliseconds
+
+# database configs
+mongodb:
+  uri: "atlas-uri"
+  database: "db"
