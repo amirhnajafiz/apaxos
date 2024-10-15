@@ -20,7 +20,15 @@ import (
 var (
 	errInvalidCommand = errors.New("command not found")
 	errNumberOfArgs   = errors.New("args input are not enough")
+	errEndOfSets      = errors.New("no test-set available")
 )
+
+// test-set is a holder for each testcase in CSV.
+type testSet struct {
+	index        string
+	serverList   []string
+	transactions []string
+}
 
 // Controller is used to communicate with our distributed system using gRPC calls.
 type Controller struct {
@@ -35,6 +43,10 @@ type Controller struct {
 	// commands is a map of all commands that are bound to a function
 	commands map[int]func() error
 	args     []string // args is a list that the command functions use to read their inputs from
+
+	// testcases read from a csv file
+	tests []testSet
+	index int
 }
 
 func (c *Controller) Main() error {
@@ -53,6 +65,7 @@ func (c *Controller) Main() error {
 		6: c.performance,       // performance
 		7: c.aggrigatedBalance, // aggrigated balance <client>
 		8: c.newTransaction,    // new transaction <sender> <receiver> <amount> <node>
+		9: c.next,              // next test-set
 	}
 
 	// in a for loop, read user commands
@@ -121,6 +134,7 @@ exit: close the controller
 6: performance
 7: aggrigated balance <client>
 8: new_transaction <sender> <receiver> <amount> <node>
+9: next (runs the next test-set)
 		`,
 	)
 
@@ -132,6 +146,10 @@ func (c *Controller) testcase() error {
 	if len(c.args) < 1 {
 		return errNumberOfArgs
 	}
+
+	// create a new test-set
+	c.index = 0
+	c.tests = make([]testSet, 0)
 
 	// set CSV path
 	path := c.args[0]
@@ -161,8 +179,12 @@ func (c *Controller) testcase() error {
 		// handle the index if present
 		if record[0] != "" {
 			if currentIndex != "" {
-				// start the test-set by running execSet
-				c.execSet(currentIndex, strings.Split(currentList, ","), currentTransactions)
+				// store a test-set to run in future
+				c.tests = append(c.tests, testSet{
+					index:        currentIndex,
+					serverList:   strings.Split(currentList, ","),
+					transactions: currentTransactions,
+				})
 			}
 
 			// start a new block with the new index
@@ -186,6 +208,22 @@ func (c *Controller) testcase() error {
 			}
 		}
 	}
+
+	return nil
+}
+
+// next runs the next test-set until it reaches the end of sets.
+func (c *Controller) next() error {
+	if c.index >= len(c.tests) {
+		return errEndOfSets
+	}
+
+	// select the current index and execSet
+	set := c.tests[c.index]
+	c.execSet(set.index, set.serverList, set.transactions)
+
+	// go for the next test-set
+	c.index++
 
 	return nil
 }
