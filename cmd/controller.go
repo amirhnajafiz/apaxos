@@ -109,6 +109,12 @@ func (c *Controller) testcase() error {
 	return nil
 }
 
+func (c *Controller) block(address string) {
+	if err := c.LDialer.ChangeState(address, false); err != nil {
+		fmt.Printf("%s returned error: %v\n", address, err)
+	}
+}
+
 func (c *Controller) reset() error {
 	for key, value := range c.Cfg.GetNodes() {
 		if err := c.LDialer.ChangeState(value, true); err != nil {
