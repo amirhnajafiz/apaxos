@@ -16,22 +16,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// list of errors that could happen during the controller run
 var (
 	errInvalidCommand = errors.New("command not found")
 	errNumberOfArgs   = errors.New("args input are not enough")
 )
 
-// Controller is used to communicate with our distributed system
-// using gRPC calls.
+// Controller is used to communicate with our distributed system using gRPC calls.
 type Controller struct {
+	// the config and logger modules
 	Cfg    config.Config
 	Logger *zap.Logger
 
+	// gRPC clients to send messages
 	TDialer client.TransactionsDialer
 	LDialer client.LivenessDialer
 
+	// commands is a map of all commands that are bound to a function
 	commands map[int]func() error
-	args     []string
+	args     []string // args is a list that the command functions use to read their inputs from
 }
 
 func (c *Controller) Main() error {
@@ -41,8 +44,9 @@ func (c *Controller) Main() error {
 
 	// init commands
 	c.commands = map[int]func() error{
+		0: c.help,              // print
 		1: c.testcase,          // testcase <csv path>
-		2: c.reset,             // reset
+		2: c.resetServers,      // reset
 		3: c.printBalance,      // printbalance <client> <node>
 		4: c.printLogs,         // printlogs <node>
 		5: c.printDB,           // printdb <node>
@@ -78,6 +82,7 @@ func (c *Controller) Main() error {
 	return nil
 }
 
+// parseInput get's the user input to run system commands.
 func (c *Controller) parseInput(input string) error {
 	// reset input args
 	c.args = make([]string, 0)
@@ -102,12 +107,33 @@ func (c *Controller) parseInput(input string) error {
 	}
 }
 
+// help command displays controller instructions.
+func (c *Controller) help() error {
+	fmt.Println(
+		`
+exit: close the controller
+0: print help
+1: testcase <csv path>
+2: reset
+3: printbalance <client> <node>
+4: printlogs <node>
+5: printdb <node>
+6: performance
+7: aggrigated balance <client>
+8: new_transaction <sender> <receiver> <amount> <node>
+		`,
+	)
+
+	return nil
+}
+
+// testcase accepts a testcase file to execute test sets.
 func (c *Controller) testcase() error {
 	if len(c.args) < 1 {
 		return errNumberOfArgs
 	}
 
-	// set path
+	// set CSV path
 	path := c.args[0]
 
 	// open the CSV file
@@ -123,7 +149,7 @@ func (c *Controller) testcase() error {
 
 	var currentIndex string
 	var currentList string
-	var currentTuples []string
+	var currentTransactions []string
 
 	// read through the CSV records
 	for {
@@ -135,14 +161,14 @@ func (c *Controller) testcase() error {
 		// handle the index if present
 		if record[0] != "" {
 			if currentIndex != "" {
-				// start the test-set
-				c.execSet(currentIndex, strings.Split(currentList, ","), currentTuples)
+				// start the test-set by running execSet
+				c.execSet(currentIndex, strings.Split(currentList, ","), currentTransactions)
 			}
 
 			// start a new block with the new index
 			currentIndex = record[0]
-			currentTuples = []string{} // reset tuples
-			currentList = ""           // reset list
+			currentTransactions = []string{} // reset transactions
+			currentList = ""                 // reset list
 
 			// if a list is present in the first row, capture it
 			if len(record) > 2 {
@@ -151,12 +177,12 @@ func (c *Controller) testcase() error {
 
 			// if a tuple is present in the first row, add it to the tuples
 			if len(record) > 1 {
-				currentTuples = append(currentTuples, strings.Trim(record[1], "()"))
+				currentTransactions = append(currentTransactions, strings.Trim(record[1], "()"))
 			}
 		} else {
 			// this is a continuation of the current block
 			if len(record) > 1 && record[1] != "" {
-				currentTuples = append(currentTuples, strings.Trim(record[1], "()"))
+				currentTransactions = append(currentTransactions, strings.Trim(record[1], "()"))
 			}
 		}
 	}
@@ -164,6 +190,7 @@ func (c *Controller) testcase() error {
 	return nil
 }
 
+// execSet runs a testcase set.
 func (c *Controller) execSet(index string, servers []string, transactions []string) {
 	fmt.Printf("starting set: %s\n", index)
 
@@ -176,7 +203,7 @@ func (c *Controller) execSet(index string, servers []string, transactions []stri
 	// block servers that are not in hashMap
 	for key, value := range c.Cfg.GetNodes() {
 		if !hashMap[key] {
-			c.block(value)
+			c.blockServer(value)
 		}
 	}
 
@@ -184,29 +211,35 @@ func (c *Controller) execSet(index string, servers []string, transactions []stri
 	for _, transaction := range transactions {
 		parts := strings.Split(transaction, ",")
 
-		// set args
+		// set args base args
 		c.args = make([]string, 0)
 		c.args = append(c.args, parts...)
-		c.args = append(c.args, c.Cfg.GetClientShards()[c.args[0]])
 
+		// set the address based on the client shard
+		address := c.Cfg.GetClientShards()[c.args[0]]
+		c.args = append(c.args, address)
+
+		// submit a new transaction
 		if err := c.newTransaction(); err != nil {
 			fmt.Println(err)
 		}
 	}
 
-	// reset nodes
-	if err := c.reset(); err != nil {
+	// reset all servers to unblock nodes
+	if err := c.resetServers(); err != nil {
 		fmt.Println(err)
 	}
 }
 
-func (c *Controller) block(address string) {
+// block server takes an address and block the server.
+func (c *Controller) blockServer(address string) {
 	if err := c.LDialer.ChangeState(address, false); err != nil {
 		fmt.Printf("%s returned error: %v\n", address, err)
 	}
 }
 
-func (c *Controller) reset() error {
+// reset servers unblocks all of the servers.
+func (c *Controller) resetServers() error {
 	for key, value := range c.Cfg.GetNodes() {
 		if err := c.LDialer.ChangeState(value, true); err != nil {
 			fmt.Printf("%s returned error: %v\n", key, err)
@@ -216,6 +249,7 @@ func (c *Controller) reset() error {
 	return nil
 }
 
+// print balance runs a rpc call to get user balance.
 func (c *Controller) printBalance() error {
 	if len(c.args) < 2 {
 		return errNumberOfArgs
@@ -236,6 +270,7 @@ func (c *Controller) printBalance() error {
 	return nil
 }
 
+// print logs prints the logs of a server.
 func (c *Controller) printLogs() error {
 	if len(c.args) < 1 {
 		return errNumberOfArgs
@@ -273,6 +308,7 @@ func (c *Controller) printLogs() error {
 	return nil
 }
 
+// print db gets database of a node.
 func (c *Controller) printDB() error {
 	if len(c.args) < 1 {
 		return errNumberOfArgs
@@ -310,6 +346,7 @@ func (c *Controller) printDB() error {
 	return nil
 }
 
+// performance loops over servers to get metrics.
 func (c *Controller) performance() error {
 	for key, value := range c.Cfg.GetNodes() {
 		if resp, err := c.TDialer.Performance(value); err == nil {
@@ -322,6 +359,7 @@ func (c *Controller) performance() error {
 	return nil
 }
 
+// aggrigated balance gets the client name and runs the aggrigated balance method.
 func (c *Controller) aggrigatedBalance() error {
 	if len(c.args) < 1 {
 		return errNumberOfArgs
@@ -330,6 +368,7 @@ func (c *Controller) aggrigatedBalance() error {
 	// get the client name
 	client := c.args[0]
 
+	// runs print balance over servers
 	for key, value := range c.Cfg.GetNodes() {
 		if balance, err := c.TDialer.PrintBalance(value, client); err == nil {
 			fmt.Printf("%s: %d\n", key, balance)
@@ -341,6 +380,7 @@ func (c *Controller) aggrigatedBalance() error {
 	return nil
 }
 
+// new transaction runs a new transaction over the system.
 func (c *Controller) newTransaction() error {
 	if len(c.args) < 4 {
 		return errNumberOfArgs

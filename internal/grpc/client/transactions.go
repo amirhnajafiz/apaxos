@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
@@ -153,24 +152,4 @@ func (t *TransactionsDialer) Performance(address string) (*transactions.Performa
 	}
 
 	return resp, nil
-}
-
-// AggregatedBalance will run printbalance function on the given addresses.
-func (t *TransactionsDialer) AggregatedBalance(client string, addresses ...string) map[string]int64 {
-	// create a map of nodes and client's balances
-	balances := make(map[string]int64)
-
-	// call print balance on each given address
-	for _, address := range addresses {
-		// call printBalance
-		balance, err := t.PrintBalance(address, client)
-		if err != nil { // on errors just log
-			log.Println(fmt.Errorf("failed to get the balance from %s: %v", address, err))
-		}
-
-		// update the node and balance in the map
-		balances[address] = balance
-	}
-
-	return balances
 }
