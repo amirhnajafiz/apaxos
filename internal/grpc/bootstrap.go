@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/f24-cse535/apaxos/internal/consensus"
+	"github.com/f24-cse535/apaxos/internal/grpc/services"
 	"github.com/f24-cse535/apaxos/internal/monitoring/metrics"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
@@ -19,14 +20,17 @@ import (
 // Bootstrap is a wrapper that holds
 // every required thing for the gRPC server starting.
 type Bootstrap struct {
-	Port      int
-	Memory    *local.Memory
-	Database  *database.Database
-	Consensus *consensus.Consensus
-	Logger    *zap.Logger
-	Metrics   *metrics.Metrics
+	Port int
 
-	livenessInstance *livenessServer
+	Memory   *local.Memory
+	Database *database.Database
+
+	Consensus *consensus.Consensus
+
+	Logger  *zap.Logger
+	Metrics *metrics.Metrics
+
+	livenessInstance *services.Liveness
 }
 
 // ListenAnsServer creates a new gRPC instance
@@ -44,17 +48,17 @@ func (b *Bootstrap) ListenAnsServer() error {
 	)
 
 	// create a new liveness server
-	b.livenessInstance = &livenessServer{
-		state: true,
+	b.livenessInstance = &services.Liveness{
+		State: true,
 	}
 
 	// register gRPC services
 	liveness.RegisterLivenessServer(server, b.livenessInstance)
-	apaxos.RegisterApaxosServer(server, &apaxosServer{
+	apaxos.RegisterApaxosServer(server, &services.Apaxos{
 		Consensus: b.Consensus,
 		Logger:    b.Logger.Named("apaxos"),
 	})
-	transactions.RegisterTransactionsServer(server, &transactionsServer{
+	transactions.RegisterTransactionsServer(server, &services.Transactions{
 		Consensus: b.Consensus,
 		Memory:    b.Memory,
 		Database:  b.Database,
