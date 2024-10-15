@@ -8,14 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-// promiseHandler will be called by the prepare, to send back a promise message.
+// promiseHandler will be called by the prepare to perform the promise logic.
 func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumber) {
 	// first we get our ballot-number
 	savedBallotNumber := c.Memory.GetBallotNumber()
 
-	// now we check the proposer's ballot-number with our own ballot-number.
-	// the ballot-number should be absolute greater than ours.
+	// now we check the proposer's ballot-number with our own ballot-number
 	if utils.CompareBallotNumbers(&ballotNumber, savedBallotNumber) < 1 {
+		// this means that the input ballot-number is < saved ballot-number
 		return
 	}
 
@@ -28,12 +28,12 @@ func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumb
 		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
 	}
 
-	// now we need to get our current accepted_num and accepted_val
+	// now we need to get our current accepted_num and accepted_val to see what we should send in the promise message
 	acceptedNum := c.Memory.GetAcceptedNum()
-	acceptedVal := c.Memory.GetAcceptedVal()
-
-	// then we check to see if we have accepted something from another proposer before, and it is not committed.
 	if acceptedNum != nil {
+		// get accepted_val
+		acceptedVal := c.Memory.GetAcceptedVal()
+
 		// first we create a blocklist of our accepted_vals
 		blockList := make([]*apaxos.Block, len(acceptedVal))
 		for index, item := range acceptedVal {
