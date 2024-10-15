@@ -81,7 +81,11 @@ func (a *Apaxos) Start() error {
 	a.broadcastAccept(a.acceptedNum, a.acceptedVal)
 
 	// wait for accepted messages (first on majority, then on a timeout)
-	a.waitForAccepted()
+	if err := a.waitForAccepted(); err != nil {
+		a.Logger.Debug("wait for accept error", zap.Error(err))
+
+		return err
+	}
 
 	// send commit message
 	a.broadcastCommit()
