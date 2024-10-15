@@ -27,7 +27,6 @@ func main() {
 
 	// config file path is a flag
 	configPath := flag.String("config", "config.yaml", "this is the config file path.")
-	csvPath := flag.String("testcase", "testcase.csv", "this is the testcase file path.")
 
 	// parse flags
 	flag.Parse()
@@ -40,9 +39,8 @@ func main() {
 
 	// create cmd instances and pass needed parameters
 	ctl := cmd.Controller{
-		Cfg:     cfg,
-		Logger:  logr.Named("controller"),
-		CSVPath: *csvPath,
+		Cfg:    cfg,
+		Logger: logr.Named("controller"),
 	}
 	node := cmd.Node{
 		Cfg:    cfg,
