@@ -123,8 +123,7 @@ func (c *Controller) parseInput(input string) error {
 // help command displays controller instructions.
 func (c *Controller) help() error {
 	fmt.Println(
-		`
-exit: close the controller
+		`exit: close the controller
 0: print help
 1: testcase <csv path>
 2: reset
@@ -134,8 +133,7 @@ exit: close the controller
 6: performance
 7: aggrigated balance <client>
 8: new_transaction <sender> <receiver> <amount> <node>
-9: next (runs the next test-set)
-		`,
+9: next (runs the next test-set)`,
 	)
 
 	return nil
