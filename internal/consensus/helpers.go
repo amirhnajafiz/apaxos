@@ -42,6 +42,7 @@ func (c Consensus) beginConsensus(transaction *apaxos.Transaction) {
 		Dialer:          c.Dialer,
 		Nodes:           c.Nodes,
 		Memory:          c.Memory,
+		Database:        c.Database,
 		Majority:        c.Majority,
 		MajorityTimeout: c.MajorityTimeout,
 		Timeout:         c.RequestTimeout,

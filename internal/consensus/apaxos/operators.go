@@ -21,20 +21,14 @@ func (a *Apaxos) broadcastPropose(b *models.BallotNumber) {
 }
 
 // broadcast accept, calls accept RPC on each node.
-func (a *Apaxos) broadcastAccept(b *models.BallotNumber, blocks []*models.Block) {
-	// convert models block to apaxos.Block
-	list := make([]*apaxos.Block, len(blocks))
-	for index, block := range blocks {
-		list[index] = block.ToProtoModel()
-	}
-
+func (a *Apaxos) broadcastAccept(b *apaxos.BallotNumber, blocks []*apaxos.Block) {
 	for _, node := range a.Nodes {
 		a.Logger.Debug("send accept message", zap.String("to", node))
 
 		a.Dialer.Accept(node, &apaxos.AcceptMessage{
 			NodeId:       a.NodeId,
-			BallotNumber: b.ToProtoModel(),
-			Blocks:       list,
+			BallotNumber: b,
+			Blocks:       blocks,
 		})
 	}
 }
