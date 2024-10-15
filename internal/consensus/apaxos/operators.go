@@ -8,7 +8,7 @@ import (
 )
 
 // broadcase propose, calls propose RPC on each node.
-func (a Apaxos) broadcastPropose(b *models.BallotNumber) {
+func (a *Apaxos) broadcastPropose(b *models.BallotNumber) {
 	for _, node := range a.Nodes {
 		a.Logger.Debug("send prepare message", zap.String("to", node))
 
@@ -21,7 +21,7 @@ func (a Apaxos) broadcastPropose(b *models.BallotNumber) {
 }
 
 // broadcast accept, calls accept RPC on each node.
-func (a Apaxos) broadcastAccept(b *models.BallotNumber, blocks []*models.Block) {
+func (a *Apaxos) broadcastAccept(b *models.BallotNumber, blocks []*models.Block) {
 	// convert models block to apaxos.Block
 	list := make([]*apaxos.Block, len(blocks))
 	for index, block := range blocks {
@@ -40,7 +40,7 @@ func (a Apaxos) broadcastAccept(b *models.BallotNumber, blocks []*models.Block) 
 }
 
 // broadcast commit, calls commit RPC on each node.
-func (a Apaxos) broadcastCommit() {
+func (a *Apaxos) broadcastCommit() {
 	for _, node := range a.Nodes {
 		a.Logger.Debug("send commit message", zap.String("to", node))
 

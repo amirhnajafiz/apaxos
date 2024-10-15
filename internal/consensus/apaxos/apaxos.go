@@ -4,6 +4,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
 )
@@ -29,10 +30,16 @@ type Apaxos struct {
 
 	InChannel  chan *messages.Packet // in channel is used to get inputs from the consensus module
 	OutChannel chan *messages.Packet // out channel is used to return response to the client
+
+	// internal messages
+	promisedMessage []*apaxos.PromiseMessage
 }
 
 // Start will trigger a new apaxos protocol.
-func (a Apaxos) Start() error {
+func (a *Apaxos) Start() error {
+	// create a new promised messages list
+	a.promisedMessage = make([]*apaxos.PromiseMessage, 0)
+
 	// in a for loop send prepare messages to get the majority or sync
 	for {
 		// increase ballot number on each attempt
@@ -42,11 +49,11 @@ func (a Apaxos) Start() error {
 		// send propose message to all
 		a.broadcastPropose(ballotNumber)
 
-		// wait for promise messages (first on majority, then on a timeout)
-		a.waitForPromise()
-
 		// set new ballot-number for retry
 		a.Memory.SetBallotNumber(ballotNumber)
+
+		// wait for promise messages (first on majority, then on a timeout)
+		a.waitForPromise()
 	}
 
 	// Create a message
