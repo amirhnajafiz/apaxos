@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	goclient "github.com/f24-cse535/apaxos/cmd/client"
 	"github.com/f24-cse535/apaxos/internal/config"
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
 
@@ -42,12 +43,12 @@ type Controller struct {
 	Logger *zap.Logger
 
 	// client module to make gRPC calls
-	client *Client
+	client *goclient.Client
 }
 
 func (c Controller) Main() error {
 	// init client to make rpc calls
-	c.client = &Client{
+	c.client = &goclient.Client{
 		Dialer: client.NewClient(c.Logger.Named("client")),
 	}
 
@@ -93,22 +94,22 @@ func (c Controller) parseInput(input string) error {
 		tmp := parts[1]
 		address := c.Cfg.GetClientShards()[tmp]
 
-		c.client.printBalance(tmp, address)
+		c.client.PrintBalance(tmp, address)
 	case "printlogs":
-		c.client.printLogs(parts[1])
+		c.client.PrintLogs(parts[1])
 	case "printdb":
-		c.client.printDB(parts[1])
+		c.client.PrintDB(parts[1])
 	case "performance":
-		c.client.performance(c.Cfg.GetNodes())
+		c.client.Performance(c.Cfg.GetNodes())
 	case "aggrigated":
-		c.client.aggrigatedBalance(parts[1], c.Cfg.GetNodes())
+		c.client.AggrigatedBalance(parts[1], c.Cfg.GetNodes())
 	case "transaction":
 		sender := parts[1]
 		receiver := parts[2]
 		amount, _ := strconv.Atoi(parts[3])
 		address := c.Cfg.GetClientShards()[sender]
 
-		c.client.newTransaction(sender, receiver, amount, address)
+		c.client.Transaction(sender, receiver, amount, address)
 	default:
 		return errInvalidCommand
 	}
@@ -257,14 +258,14 @@ func (c Controller) execSet(set testSet) {
 	// block servers that are not in hashMap
 	for key, value := range c.Cfg.GetNodes() {
 		if !hashMap[key] {
-			c.client.updateServerStatus(value, false)
+			c.client.UpdateServerStatus(value, false)
 		}
 	}
 
 	// run transactions
 	for _, ts := range set.transactions {
 		// submit a new transaction
-		if err := c.client.newTransaction(ts["sender"].(string), ts["receiver"].(string), ts["amount"].(int), ts["address"].(string)); err != nil {
+		if err := c.client.Transaction(ts["sender"].(string), ts["receiver"].(string), ts["amount"].(int), ts["address"].(string)); err != nil {
 			fmt.Println(err)
 		}
 	}
@@ -276,6 +277,6 @@ func (c Controller) execSet(set testSet) {
 // reset servers unblocks all of the servers.
 func (c Controller) resetServers() {
 	for _, value := range c.Cfg.GetNodes() {
-		c.client.updateServerStatus(value, true)
+		c.client.UpdateServerStatus(value, true)
 	}
 }

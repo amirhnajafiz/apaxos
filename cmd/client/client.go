@@ -1,4 +1,4 @@
-package cmd
+package client
 
 import (
 	"fmt"
@@ -12,15 +12,15 @@ type Client struct {
 	Dialer *client.Client
 }
 
-// updateServerStatus is used to change the status of a server.
-func (c Client) updateServerStatus(address string, status bool) {
+// UpdateServerStatus is used to change the status of a server.
+func (c Client) UpdateServerStatus(address string, status bool) {
 	if err := c.Dialer.ChangeState(address, status); err != nil {
 		fmt.Printf("%s returned error: %v\n", address, err)
 	}
 }
 
-// printBalance runs a rpc call to get user balance.
-func (c Client) printBalance(client, address string) error {
+// PrintBalance runs a rpc call to get user balance.
+func (c Client) PrintBalance(client, address string) error {
 	// call RPC call for printBalance
 	balance, err := c.Dialer.PrintBalance(address, client)
 	if err != nil {
@@ -32,8 +32,8 @@ func (c Client) printBalance(client, address string) error {
 	return nil
 }
 
-// printLogs prints the logs of a server.
-func (c Client) printLogs(address string) error {
+// PrintLogs prints the logs of a server.
+func (c Client) PrintLogs(address string) error {
 	// call RPC call for printLogs
 	logs, err := c.Dialer.PrintLogs(address)
 	if err != nil {
@@ -63,8 +63,8 @@ func (c Client) printLogs(address string) error {
 	return nil
 }
 
-// printDB gets database of a node.
-func (c Client) printDB(address string) error {
+// PrintDB gets database of a node.
+func (c Client) PrintDB(address string) error {
 	// call RPC call for printDB
 	blocks, err := c.Dialer.PrintDB(address)
 	if err != nil {
@@ -94,8 +94,8 @@ func (c Client) printDB(address string) error {
 	return nil
 }
 
-// performance loops over servers to get metrics.
-func (c Client) performance(addresses map[string]string) error {
+// Performance loops over servers to get metrics.
+func (c Client) Performance(addresses map[string]string) error {
 	for key, address := range addresses {
 		if resp, err := c.Dialer.Performance(address); err == nil {
 			fmt.Printf("%s: %f TPS, %f ms\n", key, resp.GetThroughput(), resp.GetLatency())
@@ -107,8 +107,8 @@ func (c Client) performance(addresses map[string]string) error {
 	return nil
 }
 
-// aggrigatedBalance gets the client name and runs the aggrigated balance method.
-func (c Client) aggrigatedBalance(client string, addresses map[string]string) error {
+// AggrigatedBalance gets the client name and runs the aggrigated balance method.
+func (c Client) AggrigatedBalance(client string, addresses map[string]string) error {
 	// runs print balance over servers
 	for key, value := range addresses {
 		if balance, err := c.Dialer.PrintBalance(value, client); err == nil {
@@ -121,8 +121,8 @@ func (c Client) aggrigatedBalance(client string, addresses map[string]string) er
 	return nil
 }
 
-// newTransaction runs a new transaction over the system.
-func (c Client) newTransaction(sender string, receiver string, amount int, address string) error {
+// Transaction runs a new transaction over the system.
+func (c Client) Transaction(sender string, receiver string, amount int, address string) error {
 	// create a new transaction
 	t := &apaxos.Transaction{
 		Sender:   sender,
