@@ -3,44 +3,44 @@ package utils
 import (
 	"testing"
 
-	"github.com/f24-cse535/apaxos/pkg/models"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
 func TestCompareBallotNumbers(t *testing.T) {
 	tests := []struct {
 		name     string
-		a        *models.BallotNumber
-		b        *models.BallotNumber
+		a        *apaxos.BallotNumber
+		b        *apaxos.BallotNumber
 		expected int
 	}{
 		{
 			name:     "a.Number > b.Number",
-			a:        &models.BallotNumber{Number: 3, NodeId: "1"},
-			b:        &models.BallotNumber{Number: 2, NodeId: "1"},
+			a:        &apaxos.BallotNumber{Number: 3, NodeId: "1"},
+			b:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
 			expected: 1,
 		},
 		{
 			name:     "a.Number < b.Number",
-			a:        &models.BallotNumber{Number: 2, NodeId: "1"},
-			b:        &models.BallotNumber{Number: 3, NodeId: "1"},
+			a:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
+			b:        &apaxos.BallotNumber{Number: 3, NodeId: "1"},
 			expected: -1,
 		},
 		{
 			name:     "a.Number == b.Number, a.NodeId > b.NodeId",
-			a:        &models.BallotNumber{Number: 2, NodeId: "2"},
-			b:        &models.BallotNumber{Number: 2, NodeId: "1"},
+			a:        &apaxos.BallotNumber{Number: 2, NodeId: "2"},
+			b:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
 			expected: 1,
 		},
 		{
 			name:     "a.Number == b.Number, a.NodeId < b.NodeId",
-			a:        &models.BallotNumber{Number: 2, NodeId: "1"},
-			b:        &models.BallotNumber{Number: 2, NodeId: "2"},
+			a:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
+			b:        &apaxos.BallotNumber{Number: 2, NodeId: "2"},
 			expected: -1,
 		},
 		{
 			name:     "a.Number == b.Number, a.NodeId == b.NodeId",
-			a:        &models.BallotNumber{Number: 2, NodeId: "1"},
-			b:        &models.BallotNumber{Number: 2, NodeId: "1"},
+			a:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
+			b:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
 			expected: 0,
 		},
 	}

@@ -1,21 +1,21 @@
 package utils
 
-import "github.com/f24-cse535/apaxos/pkg/models"
+import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 // CompareBallotNumbers compares two ballot numbers a and b.
 // Returns 1 if a > b, -1 if b > a, and 0 if a == b.
-func CompareBallotNumbers(a, b *models.BallotNumber) int {
-	if a.Number != b.Number {
-		if a.Number > b.Number {
+func CompareBallotNumbers(a, b *apaxos.BallotNumber) int {
+	if a.GetNumber() != b.GetNumber() {
+		if a.GetNumber() > b.GetNumber() {
 			return 1
 		}
 
 		return -1
 	}
 
-	if a.NodeId > b.NodeId {
+	if a.GetNodeId() > b.GetNodeId() {
 		return 1
-	} else if a.NodeId < b.NodeId {
+	} else if a.GetNodeId() < b.GetNodeId() {
 		return -1
 	}
 

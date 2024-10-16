@@ -32,13 +32,13 @@ func (d *Database) InsertBlocks(instances []*models.Block) error {
 }
 
 // IsBlockExists gets a ballot number and returns the existance of a block.
-func (d *Database) IsBlockExists(ballotNumber *models.BallotNumber) (bool, error) {
+func (d *Database) IsBlockExists(number int64, nodeId string) (bool, error) {
 	ctx := context.Background()
 
 	// find a block with matching ballot number.
 	filter := bson.M{
-		"metadata.ballot_number.number":  ballotNumber.Number,
-		"metadata.ballot_number.node_id": ballotNumber.NodeId,
+		"metadata.ballot_number.number":  number,
+		"metadata.ballot_number.node_id": nodeId,
 	}
 
 	var block models.Block
