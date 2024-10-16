@@ -19,7 +19,7 @@ func (b *Bootstrap) selectiveStatusCheckUnaryInterceptor(
 	handler grpc.UnaryHandler,
 ) (interface{}, error) {
 	// if status is true, allow all services to proceed
-	if b.livenessInstance.State {
+	if b.Memory.GetServiceStatus() {
 		return handler(ctx, req)
 	}
 

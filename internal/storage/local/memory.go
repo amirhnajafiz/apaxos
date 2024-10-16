@@ -9,6 +9,7 @@ import (
 
 // Memory is a local storage that is used for each node. It keeps the state of each node.
 type Memory struct {
+	serviceStatus  bool  // is used to keep the service status of the node
 	sequenceNumber int64 // is used for ordering transactions within each block
 
 	clients map[string]int64 // a map of all clients with their balances
@@ -40,6 +41,7 @@ func (m *Memory) ReadFromState(state *models.State) {
 // It accepts the node_id, an initiali balance value within the list of clients.
 func NewMemory(nodeId string, balances map[string]int64) *Memory {
 	return &Memory{
+		serviceStatus:  true,                   // when servers boot-up, they are active
 		sequenceNumber: time.Now().UnixMilli(), // initalized by the system booting timestamp
 		clients:        balances,
 

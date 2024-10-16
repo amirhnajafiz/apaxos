@@ -29,8 +29,6 @@ type Bootstrap struct {
 
 	Logger  *zap.Logger
 	Metrics *metrics.Metrics
-
-	livenessInstance *services.Liveness
 }
 
 // ListenAnsServer creates a new gRPC instance
@@ -47,13 +45,10 @@ func (b *Bootstrap) ListenAnsServer() error {
 		grpc.UnaryInterceptor(b.selectiveStatusCheckUnaryInterceptor), // set an unary interceptor for liveness service
 	)
 
-	// create a new liveness server
-	b.livenessInstance = &services.Liveness{
-		State: true,
-	}
-
-	// register gRPC services
-	liveness.RegisterLivenessServer(server, b.livenessInstance)
+	// register all gRPC services
+	liveness.RegisterLivenessServer(server, &services.Liveness{
+		Memory: b.Memory,
+	})
 	apaxos.RegisterApaxosServer(server, &services.Apaxos{
 		Consensus: b.Consensus,
 		Logger:    b.Logger.Named("apaxos"),

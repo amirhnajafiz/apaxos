@@ -4,6 +4,16 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
+// SetServiceStatus sets a new status for service.
+func (m *Memory) SetServiceStatus(status bool) {
+	m.serviceStatus = status
+}
+
+// GetServiceStatus returns the current service status.
+func (m *Memory) GetServiceStatus() bool {
+	return m.serviceStatus
+}
+
 // GetSequenceNumber is used for labeling transactions
 // inside each node to keep an order of them.
 func (m *Memory) GetSequenceNumber() int64 {
