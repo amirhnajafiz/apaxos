@@ -23,19 +23,12 @@ func (a *Apaxos) processPromiseMessages() {
 			a.selectedBlocks = append(a.selectedBlocks, msg.GetBlocks()...)
 		} else {
 			// in this case, they have sent a ballot-number different than ours
-			// first we check their last committed message to see if they are behind or not
-			if utils.CompareBallotNumbers(lastCommitted, a.Memory.GetLastCommittedMessage()) == 0 {
+			if utils.CompareBallotNumbers(lastCommitted, a.Memory.GetLastCommittedMessage()) >= 0 {
 				// if they are synced, we are going to check their ballot-number
 				a.getAccepteds(msg)
 			} else {
-				// else we need to check their message existance to send them sync or to accept them
-				if exist, err := a.Database.IsBlockExists(lastCommitted.GetNumber(), lastCommitted.GetNodeId()); err == nil && exist {
-					// if we have that message then we try to sync them cause it is committed
-					go a.transmitSync(msg.NodeId)
-				} else {
-					// else we take their message to store
-					a.getAccepteds(msg)
-				}
+				// sync the acceptor that is old
+				go a.transmitSync(msg.NodeId)
 			}
 		}
 	}

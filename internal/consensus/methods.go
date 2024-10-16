@@ -17,19 +17,12 @@ func (c Consensus) Prepare(msg *apaxos.PrepareMessage) {
 	proposerLastCommittedMessage := msg.GetLastComittedMessage()
 
 	// first we check the proposer last committed message to our own last committed message
-	if utils.CompareBallotNumbers(proposerLastCommittedMessage, c.Memory.GetLastCommittedMessage()) == 0 {
-		// if they where same as each, we continue the logic in promise handler
+	if utils.CompareBallotNumbers(proposerLastCommittedMessage, c.Memory.GetLastCommittedMessage()) >= 0 {
+		// if they where same as us or greater, we continue the logic in promise handler
 		c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber)
 	} else {
-		// we check to see if we had that message committed sometime in past or not
-		if exist, err := c.Database.IsBlockExists(
-			proposerLastCommittedMessage.GetNumber(),
-			proposerBallotNumber.GetNodeId(),
-		); err == nil && exist {
-			c.transmitSync(c.Nodes[msg.NodeId]) // the message exists but is old
-		} else {
-			c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber) // the message is new
-		}
+		// proposer is a not syned with us, therefore, we try to sync it
+		c.transmitSync(c.Nodes[msg.NodeId])
 	}
 }
 

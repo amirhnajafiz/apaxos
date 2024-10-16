@@ -31,31 +31,6 @@ func (d *Database) InsertBlocks(instances []*models.Block) error {
 	return nil
 }
 
-// IsBlockExists gets a ballot number and returns the existance of a block.
-func (d *Database) IsBlockExists(number int64, nodeId string) (bool, error) {
-	ctx := context.Background()
-
-	// find a block with matching ballot number.
-	filter := bson.M{
-		"metadata.ballot_number.number":  number,
-		"metadata.ballot_number.node_id": nodeId,
-	}
-
-	var block models.Block
-	err := d.history.FindOne(ctx, filter).Decode(&block)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			// no block found
-			return false, nil
-		}
-
-		return false, fmt.Errorf("failed to run block finding query: %v", err)
-	}
-
-	// block exists
-	return true, nil
-}
-
 // GetBlocks returns a list the current committed blocks.
 func (d *Database) GetBlocks() ([]*models.Block, error) {
 	ctx := context.Background()
