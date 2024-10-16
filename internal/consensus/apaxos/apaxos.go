@@ -5,7 +5,6 @@ import (
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
-	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
@@ -38,7 +37,7 @@ type Apaxos struct {
 	promisedMessage []*apaxos.PromiseMessage
 
 	// selected ballot-number and selected-blocks
-	selectedBallotNumber *models.BallotNumber // we set this in the beginning of the start method
+	selectedBallotNumber *apaxos.BallotNumber // we set this in the beginning of the start method
 	selectedBlocks       []*apaxos.Block      // this will be fulled in createMessage method
 
 	// accepted values to submit to others as accept request

@@ -1,21 +1,20 @@
 package apaxos
 
 import (
-	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
 )
 
 // broadcase propose, calls propose RPC on each node.
-func (a *Apaxos) broadcastPropose(b *models.BallotNumber) {
+func (a *Apaxos) broadcastPropose(b *apaxos.BallotNumber) {
 	for _, node := range a.Nodes {
 		a.Logger.Debug("send prepare message", zap.String("to", node))
 
 		a.Dialer.Propose(node, &apaxos.PrepareMessage{
 			NodeId:              a.NodeId,
-			BallotNumber:        b.ToProtoModel(),
-			LastComittedMessage: a.Memory.GetLastCommittedMessage().ToProtoModel(),
+			BallotNumber:        b,
+			LastComittedMessage: a.Memory.GetLastCommittedMessage(),
 		})
 	}
 }
@@ -49,7 +48,7 @@ func (a *Apaxos) transmitSync(address string) {
 
 	// create an instance of sync message
 	message := &apaxos.SyncMessage{
-		LastComittedMessage: a.Memory.GetLastCommittedMessage().ToProtoModel(),
+		LastComittedMessage: a.Memory.GetLastCommittedMessage(),
 		Pairs:               make([]*apaxos.ClientBalancePair, len(clients)),
 	}
 

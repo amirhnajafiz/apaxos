@@ -6,6 +6,7 @@ import (
 	protocol "github.com/f24-cse535/apaxos/internal/consensus/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+
 	"go.uber.org/zap"
 )
 
