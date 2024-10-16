@@ -1,17 +1,18 @@
 # config file for node instances
 # list of nodes and their addresses
 nodes:
-  - key: "s1"
+  - key: "S1"
     value: "localhost:50001"
 
 # list of clients and initial balances
 clients:
-  - key: "c1"
+  - key: "S1"
     value: "100"
 
 # node information
-node_id: "s1"
-client: "c1"
+node_id: "S1"
+client: "S1"
+workers_enabled: false
 workers_interval: 10 # in seconds
 log_level: "debug"
 
@@ -19,7 +20,7 @@ log_level: "debug"
 majority: 3
 grpc:
   host: "localhost"
-  port: 50001
+  port: 5001
   request_timeout: 10 # in seconds
   majority_timeout: 10 # in milliseconds
 

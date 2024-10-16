@@ -20,8 +20,13 @@ type Worker struct {
 }
 
 // Start triggers a process for running the worker jobs.
-func (w Worker) Start() {
+func (w Worker) Start(enable bool) {
 	w.Logger.Info("worker process started.", zap.Int("interval", w.Interval))
+
+	// block worker if not enabled
+	if !enable {
+		return
+	}
 
 	for {
 		// wait in a period

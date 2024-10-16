@@ -55,7 +55,7 @@ func (n *Node) Main() error {
 		Database: db,
 		Interval: n.Cfg.WorkersInterval,
 		Logger:   n.Logger.Named("worker"),
-	}.Start()
+	}.Start(n.Cfg.WorkersEnabled)
 
 	// create a new gRPC bootstrap instance and execute the server by running the boot commands
 	boot := grpc.Bootstrap{

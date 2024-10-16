@@ -27,6 +27,7 @@ type Config struct {
 	Client   string `koanf:"client"`   // the client id for each node
 	Majority int    `koanf:"majority"` // number of nodes to consider as majority
 
+	WorkersEnabled  bool   `koanf:"workers_enabled"`  // set worker's status
 	WorkersInterval int    `koanf:"workers_interval"` // node jobs' interval in seconds
 	LogLevel        string `koanf:"log_level"`        // node logging level (debug, info, warn, error, panic, fatal)
 
