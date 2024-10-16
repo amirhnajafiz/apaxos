@@ -2,7 +2,6 @@ package apaxos
 
 import (
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
-	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
@@ -15,9 +14,8 @@ import (
 // In order to communicate with this module, there are two channels.
 // The InChannel which the data from consensus will be received. And, the OutChannel which the data will be sent to consensus.
 type Apaxos struct {
-	Logger   *zap.Logger        // logger is needed for tracing
-	Memory   *local.Memory      // memory will be used for reading states
-	Database *database.Database // database is needed to check committed messages
+	Logger *zap.Logger   // logger is needed for tracing
+	Memory *local.Memory // memory will be used for reading states
 
 	// Dialer and nodes are needed to make RPC calls
 	Dialer *client.Client
