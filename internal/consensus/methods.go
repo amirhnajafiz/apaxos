@@ -131,6 +131,8 @@ func (c *Consensus) Sync(msg *apaxos.SyncMessage) {
 
 	// update our last committed message
 	c.Memory.SetLastCommittedMessage(msg.GetLastComittedMessage())
+	c.Memory.SetAcceptedNum(nil)
+	c.Memory.SetAcceptedVal(nil)
 
 	c.Logger.Info(
 		"node is syncronized",
