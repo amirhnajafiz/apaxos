@@ -74,8 +74,17 @@ func (a *Apaxos) Start() error {
 		return err
 	}
 
+	a.Logger.Debug("got majority promise", zap.Int("promises", len(a.promisedMessage)))
+
 	// create accepted_num and accepted_val by checking the promised messages
 	a.processPromiseMessages()
+
+	a.Logger.Debug(
+		"sending promise",
+		zap.Int64("number", a.selectedBallotNumber.Number),
+		zap.String("node", a.selectedBallotNumber.NodeId),
+		zap.Int("blocks", len(a.selectedBlocks)),
+	)
 
 	// send a broadcast accept message to all other servers
 	go a.broadcastAccept(a.selectedBallotNumber, a.selectedBlocks)
@@ -85,6 +94,8 @@ func (a *Apaxos) Start() error {
 		a.Logger.Debug("wait for accepted error", zap.Error(err))
 		return err
 	}
+
+	a.Logger.Debug("got majority accepted, sending commit")
 
 	// send commit message to all other servers
 	go a.broadcastCommit()
