@@ -96,13 +96,24 @@ func (c Client) PrintDB(address string) error {
 
 // Performance loops over servers to get metrics.
 func (c Client) Performance(addresses map[string]string) error {
+	latency := float64(0)
+	throughput := float64(0)
+	count := 0
+
 	for key, address := range addresses {
 		if resp, err := c.Dialer.Performance(address); err == nil {
-			fmt.Printf("%s: %f TPS, %f microseconds\n", key, resp.GetThroughput(), resp.GetLatency())
+			fmt.Printf("%s: %f TPS, %f micro-seconds\n", key, resp.GetThroughput(), resp.GetLatency())
+
+			// update counting values
+			count++
+			latency += resp.GetLatency()
+			throughput += resp.GetThroughput()
 		} else {
 			fmt.Printf("%s: no response: %v\n", key, err)
 		}
 	}
+
+	fmt.Printf("average: %f TPS, %f micro-seconds\n", throughput, latency)
 
 	return nil
 }
