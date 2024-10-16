@@ -63,7 +63,7 @@ func (c *Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error
 	transaction := pkt.Payload.(*apaxos.Transaction)
 
 	// if the receiver is our client then no need to run consensus protocol
-	if transaction.Reciever == c.Client || c.Memory.GetBalance(c.Client) > transaction.GetAmount() {
+	if transaction.Reciever == c.Client || c.checkBalance(transaction) {
 		c.submitTransaction(transaction)
 
 		return nil, nil
@@ -130,7 +130,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 					c.Logger.Info("slow server detected")
 
 					// if the client balance is now enough, then we submit the transaction
-					if c.recheckBalance(transaction) {
+					if c.checkBalance(transaction) {
 						c.submitTransaction(transaction)
 						c.notify(nil)
 
@@ -143,7 +143,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 				}
 			} else {
 				// now we check to see if the client balance is enough or not
-				if c.recheckBalance(transaction) {
+				if c.checkBalance(transaction) {
 					c.submitTransaction(transaction)
 					c.notify(nil)
 				} else {

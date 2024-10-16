@@ -27,9 +27,9 @@ func (c *Consensus) submitTransaction(transaction *apaxos.Transaction) {
 	c.Memory.AddTransactionToDatastore(transaction)
 }
 
-// recheck balance checks to see if the client balance has changed or not.
-func (c *Consensus) recheckBalance(t *apaxos.Transaction) bool {
-	return c.Memory.GetBalance(c.Client) > t.GetAmount()
+// checkBalance checks to see if the client balance has changed or not.
+func (c *Consensus) checkBalance(t *apaxos.Transaction) bool {
+	return c.Memory.GetBalance(c.Client) >= t.GetAmount()
 }
 
 // instance exists return true if the apaxos instance is started and running.
