@@ -98,7 +98,7 @@ func (c Client) PrintDB(address string) error {
 func (c Client) Performance(addresses map[string]string) error {
 	for key, address := range addresses {
 		if resp, err := c.Dialer.Performance(address); err == nil {
-			fmt.Printf("%s: %f TPS, %f ms\n", key, resp.GetThroughput(), resp.GetLatency())
+			fmt.Printf("%s: %f TPS, %f microseconds\n", key, resp.GetThroughput(), resp.GetLatency())
 		} else {
 			fmt.Printf("%s: no response: %v\n", key, err)
 		}

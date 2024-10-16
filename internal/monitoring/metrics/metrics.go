@@ -2,7 +2,7 @@ package metrics
 
 // Metrics is a module that stores a node performance.
 type Metrics struct {
-	latency    float64 // time spent for processing a single transaction in milliseconds
+	latency    float64 // time spent for processing a single transaction in microsecond
 	throughput float64 // transactions per second parameter
 
 	lNumObservations int // to count the number of latency records

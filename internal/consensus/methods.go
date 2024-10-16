@@ -11,7 +11,7 @@ import (
 )
 
 // Prepare get's a prepare message from a propose and decides to send a promise message or not.
-func (c Consensus) Prepare(msg *apaxos.PrepareMessage) {
+func (c *Consensus) Prepare(msg *apaxos.PrepareMessage) {
 	// first we extract some data out of the input message
 	proposerBallotNumber := msg.GetBallotNumber()
 	proposerLastCommittedMessage := msg.GetLastComittedMessage()
@@ -28,7 +28,7 @@ func (c Consensus) Prepare(msg *apaxos.PrepareMessage) {
 }
 
 // Accept get's a accept message from the proposer.
-func (c Consensus) Accept(msg *apaxos.AcceptMessage) {
+func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 	// first we get the proposer's ballot number
 	proposerBallotNumber := msg.GetBallotNumber()
 
@@ -51,7 +51,7 @@ func (c Consensus) Accept(msg *apaxos.AcceptMessage) {
 }
 
 // Commit emptys the datastore and stores the blocks inside database.
-func (c Consensus) Commit() {
+func (c *Consensus) Commit() {
 	// get our accepted_val
 	acceptedVal := c.Memory.GetAcceptedVal()
 
@@ -107,7 +107,7 @@ func (c Consensus) Commit() {
 }
 
 // Sync get's a sync message and updates itself to catch up with others.
-func (c Consensus) Sync(msg *apaxos.SyncMessage) {
+func (c *Consensus) Sync(msg *apaxos.SyncMessage) {
 	// update clients' balances
 	for _, item := range msg.GetPairs() {
 		c.Memory.SetBalance(item.GetClient(), item.GetBalance())

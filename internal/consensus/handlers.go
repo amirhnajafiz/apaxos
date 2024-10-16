@@ -8,7 +8,7 @@ import (
 )
 
 // promiseHandler will be called by the prepare to perform the promise logic.
-func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNumber, synced bool) {
+func (c *Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNumber, synced bool) {
 	// first we get our ballot-number
 	savedBallotNumber := c.Memory.GetBallotNumber()
 
@@ -46,7 +46,7 @@ func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNum
 }
 
 // transmitSync will be called by the prepare handler to update the proposer.
-func (c Consensus) transmitSync(address string) {
+func (c *Consensus) transmitSync(address string) {
 	// get a clone of the clients
 	clients := c.Memory.GetClients()
 
@@ -72,7 +72,7 @@ func (c Consensus) transmitSync(address string) {
 }
 
 // liveness handler checks to see if there are enough live servers or not.
-func (c Consensus) livenessHandler() bool {
+func (c *Consensus) livenessHandler() bool {
 	count := 0
 
 	// send ping messages to servers

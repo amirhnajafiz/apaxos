@@ -38,14 +38,14 @@ type Consensus struct {
 
 // Signal is used by the upper layer (gRPC functions) to send their
 // packets to the consensus's instance module without waiting for any response.
-func (c Consensus) Signal(pkt *messages.Packet) {
+func (c *Consensus) Signal(pkt *messages.Packet) {
 	if c.instanceExists() {
 		c.instance.InChannel <- pkt
 	}
 }
 
 // notify is used to send a notification over user channel.
-func (c Consensus) notify(err error) {
+func (c *Consensus) notify(err error) {
 	if err != nil {
 		c.instance.OutChannel <- &messages.Packet{
 			Payload: err.Error(),
@@ -58,7 +58,7 @@ func (c Consensus) notify(err error) {
 }
 
 // Checkout is the main method of our consensus module to submit or decline a new transaction.
-func (c Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error) {
+func (c *Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error) {
 	// get the payload of input request
 	transaction := pkt.Payload.(*apaxos.Transaction)
 
@@ -82,7 +82,7 @@ func (c Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error)
 }
 
 // newInstance builds and starts a new apaxos instance.
-func (c Consensus) newInstance(transaction *apaxos.Transaction) {
+func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 	// first we create a new instance for the protocol
 	c.instance = &protocol.Apaxos{
 		NodeId:          c.NodeId,
@@ -92,6 +92,7 @@ func (c Consensus) newInstance(transaction *apaxos.Transaction) {
 		Majority:        c.Majority,
 		MajorityTimeout: c.MajorityTimeout,
 		Timeout:         c.RequestTimeout,
+		Logger:          c.Logger.Named("apaxos-instance"),
 		InChannel:       make(chan *messages.Packet),
 		OutChannel:      make(chan *messages.Packet),
 	}
@@ -108,8 +109,13 @@ func (c Consensus) newInstance(transaction *apaxos.Transaction) {
 
 		// in a while loop, try to make consensus
 		for {
+			c.Logger.Debug("a round of apaxos")
+
 			// start apaxos protocol
 			err := c.instance.Start()
+
+			c.Logger.Debug("got an answer")
+
 			if err != nil {
 				c.Logger.Debug("apaxos failed", zap.Error(err))
 
@@ -139,9 +145,11 @@ func (c Consensus) newInstance(transaction *apaxos.Transaction) {
 			} else {
 				// now we check to see if the client balance is enough or not
 				if c.recheckBalance(transaction) {
+					c.Logger.Debug("transaction is OK")
 					c.submitTransaction(transaction)
 					c.notify(nil)
 				} else {
+					c.Logger.Debug("transaction is OK")
 					c.notify(protocol.ErrNotEnoughBalance)
 				}
 
