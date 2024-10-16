@@ -8,6 +8,7 @@ import (
 	"github.com/f24-cse535/apaxos/internal/config"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -25,7 +26,7 @@ func (m *MongoDB) Main() {
 	}
 
 	// send a ping to confirm a successful connection
-	if err := conn.Database(m.Cfg.MongoDB.Database).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+	if err := conn.Database(m.Cfg.MongoDB.Database).RunCommand(context.TODO(), bson.D{primitive.E{Key: "ping", Value: 1}}).Err(); err != nil {
 		panic(err)
 	}
 
