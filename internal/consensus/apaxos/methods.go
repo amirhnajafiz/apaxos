@@ -72,7 +72,7 @@ func (a *Apaxos) waitForPromise() error {
 		case <-timer.C:
 			if receivedEvents < a.Majority {
 				// return error of not getting the majority
-				return ErrNotEnoughServers
+				return ErrRequestTimeout
 			} else {
 				return nil
 			}
@@ -116,7 +116,7 @@ func (a *Apaxos) waitForAccepted() error {
 		case <-timer.C:
 			if receivedEvents < a.Majority {
 				// return error of not getting the majority
-				return ErrNotEnoughServers
+				return ErrRequestTimeout
 			} else {
 				return nil
 			}
