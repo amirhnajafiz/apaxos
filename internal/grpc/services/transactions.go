@@ -8,7 +8,6 @@ import (
 	"github.com/f24-cse535/apaxos/internal/monitoring/metrics"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
 	"github.com/f24-cse535/apaxos/internal/storage/local"
-	"github.com/f24-cse535/apaxos/pkg/enum"
 	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 	"github.com/f24-cse535/apaxos/pkg/rpc/transactions"
@@ -50,7 +49,6 @@ func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transacti
 
 	// send a message to the consensus module to process a new transaction
 	channel, err := s.Consensus.Checkout(&messages.Packet{
-		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
 	if err != nil {

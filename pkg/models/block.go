@@ -5,7 +5,7 @@ import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 // Block metadata model is a struct that acts as
 // a data-model for MongoDB database. It is also used
 // for internal processing.
-type BlockMetadata struct {
+type BlockMetaData struct {
 	NodeId       string       `bson:"node_id"`
 	BallotNumber BallotNumber `bson:"ballot_number"`
 }
@@ -14,7 +14,7 @@ type BlockMetadata struct {
 // a data-model for MongoDB database. It is also used
 // for internal processing.
 type Block struct {
-	Metadata     BlockMetadata
+	Metadata     BlockMetaData
 	Transactions []Transaction `bson:"transactions"`
 }
 
@@ -23,7 +23,7 @@ type Block struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b *BlockMetadata) ToProtoModel() *apaxos.BlockMetaData {
+func (b *BlockMetaData) ToProtoModel() *apaxos.BlockMetaData {
 	return &apaxos.BlockMetaData{
 		NodeId:       b.NodeId,
 		BallotNumber: b.BallotNumber.ToProtoModel(),
@@ -42,7 +42,7 @@ func (b *Block) ToProtoModel() *apaxos.Block {
 	}
 }
 
-func (b *BlockMetadata) FromProtoModel(instance *apaxos.BlockMetaData) {
+func (b *BlockMetaData) FromProtoModel(instance *apaxos.BlockMetaData) {
 	b.NodeId = instance.GetNodeId()
 	b.BallotNumber.FromProtoModel(instance.BallotNumber)
 }
