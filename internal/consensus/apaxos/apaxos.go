@@ -70,7 +70,7 @@ func (a *Apaxos) Start() error {
 	)
 
 	// send a propose message to all existing nodes
-	go a.broadcastPropose(a.selectedBallotNumber)
+	a.broadcastPropose(a.selectedBallotNumber)
 
 	// wait for promise messages (first on majority, then on a timeout)
 	err := a.waitForPromise()
@@ -92,7 +92,7 @@ func (a *Apaxos) Start() error {
 	)
 
 	// send a broadcast accept message to all other servers
-	go a.broadcastAccept(a.selectedBallotNumber, a.selectedBlocks)
+	a.broadcastAccept(a.selectedBallotNumber, a.selectedBlocks)
 
 	// wait for accepted messages (first on majority, then on a timeout)
 	if err := a.waitForAccepted(); err != nil {
@@ -103,10 +103,10 @@ func (a *Apaxos) Start() error {
 	a.Logger.Debug("got majority accepted")
 
 	// send commit message to all other servers
-	go a.broadcastCommit()
+	a.broadcastCommit()
 
 	a.Logger.Debug("sent commit messages, waiting for my own commit")
 
-	// wait for own commit packet
+	// wait for own commit packet in case of race condition
 	return a.waitForOwnCommit()
 }

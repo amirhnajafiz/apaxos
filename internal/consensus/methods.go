@@ -80,7 +80,7 @@ func (c *Consensus) Commit() {
 	// now we should execute the transactions
 	for _, block := range acceptedVal {
 		// update our own blocks in memory, to remove previous transactions
-		if block.Metadata.NodeId == c.NodeId {
+		if block.Metadata.GetNodeId() == c.NodeId {
 			c.Memory.ClearDatastore(block)
 		} else {
 			// get transactions and sort them by sequence number

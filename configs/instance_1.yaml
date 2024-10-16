@@ -38,7 +38,7 @@ grpc:
   host: "localhost"
   port: 5001
   request_timeout: 1000 # in milliseconds
-  majority_timeout: 1000 # in microsends
+  majority_timeout: 10000 # in microsends
 
 # database configs
 mongodb: # username amirhnajafiz password d3tO2kzZCse5f509

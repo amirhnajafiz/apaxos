@@ -37,9 +37,9 @@ func (c *Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNu
 	} else { // if nothing was in accepted fields, we send our own log block
 		// get the current datastore as a block and set the block ballot-number
 		block := c.Memory.GetDatastore()
-		block.Metadata.BallotNumber = ballotNumber     // ballot-number is the same as what the proposer said
-		promiseMessage.Blocks = []*apaxos.Block{block} // set node's block as blocks
-		promiseMessage.BallotNumber = ballotNumber     // set ballot-number as proposer's sent
+		block.Metadata.BallotNumber = c.Memory.GetBallotNumber() // ballot-number is the same as what the proposer said but with our own node_id
+		promiseMessage.Blocks = []*apaxos.Block{block}           // set node's block as blocks
+		promiseMessage.BallotNumber = ballotNumber               // set ballot-number as proposer's sent
 	}
 
 	c.Logger.Debug("promised sent", zap.String("to", address))

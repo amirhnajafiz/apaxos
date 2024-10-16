@@ -190,7 +190,7 @@ func (c Controller) readTests(path string) error {
 		if record[0] != "" {
 			if currentIndex != "" {
 				// first trim the servers names and make them all upper-case
-				servers := strings.Split(currentList, "")
+				servers := strings.Split(currentList, ", ")
 				for index, value := range servers {
 					servers[index] = strings.ToUpper(strings.TrimSpace(value))
 				}
@@ -249,7 +249,7 @@ func (c Controller) readTests(path string) error {
 	}
 
 	// first trim the servers names and make them all upper-case
-	servers := strings.Split(currentList, "")
+	servers := strings.Split(currentList, ", ")
 	for index, value := range servers {
 		servers[index] = strings.ToUpper(strings.TrimSpace(value))
 	}
@@ -294,15 +294,20 @@ func (c Controller) readTests(path string) error {
 func (c Controller) execSet(set *testSet) {
 	fmt.Printf("starting set: %s\n", set.index)
 
+	// reset all servers to unblock nodes
+	c.resetServers()
+
 	// create a map of living servers
 	hashMap := make(map[string]bool)
 	for _, server := range set.serverList {
+		fmt.Printf("active server: %s\n", server)
 		hashMap[server] = true
 	}
 
 	// block servers that are not in hashMap
 	for key, value := range c.Cfg.GetNodes() {
 		if !hashMap[key] {
+			fmt.Printf("blocking server: %s\n", key)
 			c.client.UpdateServerStatus(value, false)
 		}
 	}
@@ -310,7 +315,13 @@ func (c Controller) execSet(set *testSet) {
 	// run transactions
 	for _, ts := range set.transactions {
 		// submit a new transaction
-		if err := c.client.Transaction(ts["sender"].(string), ts["receiver"].(string), ts["amount"].(int), ts["address"].(string)); err != nil {
+		sender := ts["sender"].(string)
+		receiver := ts["receiver"].(string)
+		amount := ts["amount"].(int)
+		node := ts["address"].(string)
+		address := c.Cfg.GetNodes()[node]
+
+		if err := c.client.Transaction(sender, receiver, amount, address); err != nil {
 			fmt.Println(err)
 		}
 	}

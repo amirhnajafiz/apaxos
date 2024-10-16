@@ -12,8 +12,8 @@ type Metrics struct {
 // NewMetrics returns a new metrics instance.
 func NewMetrics() *Metrics {
 	return &Metrics{
-		latency:    0,
-		throughput: 0,
+		latency:    float64(0),
+		throughput: float64(0),
 		records:    0,
 	}
 }
@@ -26,7 +26,7 @@ func (m *Metrics) Observe(duration time.Duration) {
 	// calculate values
 	var throughput float64
 	if value != 0 {
-		throughput = 1000000 * float64(1/value)
+		throughput = 1000000 * float64(1/float64(value))
 	} else {
 		throughput = 0
 	}
@@ -42,7 +42,7 @@ func (m *Metrics) Observe(duration time.Duration) {
 // GetValues is used to export the current metrics. (latency, throughput)
 func (m *Metrics) GetValues() (float64, float64) {
 	if m.records == 0 {
-		return 0, 0
+		return m.latency, m.throughput
 	}
 
 	return m.latency / float64(m.records), m.throughput / float64(m.records)

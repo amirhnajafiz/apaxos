@@ -25,11 +25,9 @@ func (a *Apaxos) processPromiseMessages() {
 			if a.acceptedNum == nil { // empty accepted_num and accepted_val
 				a.acceptedNum = msg.GetBallotNumber()
 				a.acceptedVal = msg.GetBlocks()
-			} else { // then we select the biggest ballot-number as our accepted_val
-				if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.acceptedNum) == 1 {
-					a.acceptedNum = msg.GetBallotNumber()
-					a.acceptedVal = msg.GetBlocks()
-				}
+			} else if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.acceptedNum) == 1 {
+				a.acceptedNum = msg.GetBallotNumber()
+				a.acceptedVal = msg.GetBlocks()
 			}
 		} else {
 			// if they send the same ballot-number, we save their blocks
