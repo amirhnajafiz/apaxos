@@ -122,7 +122,7 @@ func (s *Transactions) PrintDB(req *emptypb.Empty, stream transactions.Transacti
 		}
 	}
 
-	return stream.RecvMsg(nil)
+	return nil
 }
 
 // Performance function returns the node's throughput and latency.
