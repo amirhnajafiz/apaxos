@@ -32,7 +32,7 @@ func (a *ApaxosDialer) Propose(address string, message *apaxos.PrepareMessage) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()
@@ -49,7 +49,7 @@ func (a *ApaxosDialer) Promise(address string, message *apaxos.PromiseMessage) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()
@@ -66,7 +66,7 @@ func (a *ApaxosDialer) Accept(address string, message *apaxos.AcceptMessage) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()
@@ -83,7 +83,7 @@ func (a *ApaxosDialer) Accepted(address string) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()
@@ -100,7 +100,7 @@ func (a *ApaxosDialer) Commit(address string) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()
@@ -117,7 +117,7 @@ func (a *ApaxosDialer) Sync(address string, messages *apaxos.SyncMessage) {
 	// base connection
 	conn, err := a.connect(address)
 	if err != nil {
-		a.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 		return
 	}
 	defer conn.Close()

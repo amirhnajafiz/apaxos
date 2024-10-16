@@ -131,4 +131,10 @@ func (c *Consensus) Sync(msg *apaxos.SyncMessage) {
 
 	// update our last committed message
 	c.Memory.SetLastCommittedMessage(msg.GetLastComittedMessage())
+
+	c.Logger.Info(
+		"node is syncronized",
+		zap.Int64("last_number", msg.GetLastComittedMessage().GetNumber()),
+		zap.String("last_node_id", msg.GetLastComittedMessage().GetNodeId()),
+	)
 }
