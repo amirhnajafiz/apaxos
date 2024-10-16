@@ -31,21 +31,21 @@ func (t *TransactionsDialer) connect(address string) (*grpc.ClientConn, error) {
 }
 
 // NewTransaction is used by the clients to submit a new transaction.
-func (t *TransactionsDialer) NewTransaction(address string, instance *apaxos.Transaction) (int64, string, error) {
+func (t *TransactionsDialer) NewTransaction(address string, instance *apaxos.Transaction) (string, error) {
 	// base connection
 	conn, err := t.connect(address)
 	if err != nil {
-		return 0, "", err
+		return "", err
 	}
 	defer conn.Close()
 
 	// call NewTransaction RPC and get the response
 	resp, err := transactions.NewTransactionsClient(conn).NewTransaction(context.Background(), instance)
 	if err != nil {
-		return resp.GetStatus(), resp.GetText(), fmt.Errorf("failed transaction: %v", err)
+		return "", fmt.Errorf("failed transaction: %v", err)
 	}
 
-	return resp.GetStatus(), resp.GetText(), nil
+	return resp.GetText(), nil
 }
 
 // PrintBalance is used for getting a client balance inside a specific node.
