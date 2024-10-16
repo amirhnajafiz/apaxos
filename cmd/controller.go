@@ -20,6 +20,12 @@ import (
 var (
 	errInvalidCommand = errors.New("command not found")
 	errEndOfSets      = errors.New("no test-set available")
+
+	// currentTest is a holder for executing test sets in testCase array
+	currentTest int
+
+	// testCase is a reference to an array of test sets
+	testCase *[]testSet
 )
 
 // testSet is a type to store test sets.
@@ -37,11 +43,6 @@ type Controller struct {
 
 	// client module to make gRPC calls
 	client *goclient.Client
-
-	// testCase is an array of test sets
-	testCase []testSet
-	// currentTest is a holder for executing test sets in testCase array
-	currentTest int
 }
 
 func (c Controller) Main() error {
@@ -86,13 +87,15 @@ func (c Controller) parseInput(input string) error {
 	case "help":
 		c.printHelp()
 	case "tests":
-		c.currentTest = 0
-		if c.testCase, err = c.readTests(parts[1]); err != nil {
+		if err = c.readTests(parts[1]); err != nil {
 			fmt.Println(err)
 		}
 	case "next":
-		if c.currentTest, err = c.next(); err != nil {
-			fmt.Println(err)
+		if currentTest >= len(*testCase) {
+			fmt.Println(errEndOfSets)
+		} else {
+			c.execSet(&(*testCase)[currentTest])
+			currentTest++
 		}
 	case "ping":
 		c.pintServer(c.Cfg.GetNodes()[parts[1]])
@@ -146,14 +149,15 @@ transaction <sender> <receiver> <amount> | make a transaction for a client`,
 }
 
 // readTests reads a CSV file into current testcase array
-func (c Controller) readTests(path string) ([]testSet, error) {
+func (c Controller) readTests(path string) error {
 	// set testcases into an array
-	testCase := make([]testSet, 0)
+	tmp := make([]testSet, 0)
+	testCase = &tmp
 
 	// open the CSV file
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer file.Close()
 
@@ -205,7 +209,7 @@ func (c Controller) readTests(path string) ([]testSet, error) {
 				}
 
 				// store a test-set
-				testCase = append(testCase, testSet{
+				tmp = append(tmp, testSet{
 					index:        currentIndex,
 					serverList:   servers,
 					transactions: transactions,
@@ -234,30 +238,50 @@ func (c Controller) readTests(path string) ([]testSet, error) {
 		}
 	}
 
-	fmt.Printf("file: %s\n", path)
-	fmt.Printf("reading %d sets.\n", len(testCase))
-
-	return testCase, nil
-}
-
-// next runs the next test-set until it reaches the end of sets.
-func (c Controller) next() (int, error) {
-	// check for set exist
-	if c.currentTest >= len(c.testCase) {
-		return c.currentTest, errEndOfSets
+	// first trim the servers names and make them all upper-case
+	servers := strings.Split(currentList, "")
+	for index, value := range servers {
+		servers[index] = strings.ToUpper(strings.TrimSpace(value))
 	}
 
-	// select the current index and execSet
-	c.execSet(c.testCase[c.currentTest])
+	// now modify transactions
+	transactions := make([]map[string]interface{}, 0)
+	for _, transaction := range currentTransactions {
+		// split them by `,`
+		parts := strings.Split(transaction, ", ")
+		for index, part := range parts {
+			parts[index] = strings.ToUpper(strings.TrimSpace(part)) // make them all upper-case
+		}
 
-	// go for the next test-set
-	c.currentTest++
+		sender := parts[0]
+		receiver := parts[1]
+		amount, _ := strconv.Atoi(parts[2])
+		address := c.Cfg.GetClientShards()[sender]
 
-	return c.currentTest, nil
+		// save the transaction
+		transactions = append(transactions, map[string]interface{}{
+			"sender":   sender,
+			"receiver": receiver,
+			"amount":   amount,
+			"address":  address,
+		})
+	}
+
+	// store a test-set
+	tmp = append(tmp, testSet{
+		index:        currentIndex,
+		serverList:   servers,
+		transactions: transactions,
+	})
+
+	fmt.Printf("file: %s\n", path)
+	fmt.Printf("reading %d sets.\n", len(tmp))
+
+	return nil
 }
 
 // execSet runs a testcase set.
-func (c Controller) execSet(set testSet) {
+func (c Controller) execSet(set *testSet) {
 	fmt.Printf("starting set: %s\n", set.index)
 
 	// create a map of living servers
