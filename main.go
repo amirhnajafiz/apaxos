@@ -15,6 +15,7 @@ import (
 const (
 	ControllerCmdName = "controller"
 	NodeCmdName       = "node"
+	MongoCmdName      = "mongodb"
 )
 
 func main() {
@@ -39,6 +40,9 @@ func main() {
 		Cfg:    cfg,
 		Logger: logr.Named("node"),
 	}
+	db := cmd.MongoDB{
+		Cfg: cfg,
+	}
 
 	// command is the first argument variable
 	command := argv[1]
@@ -54,6 +58,8 @@ func main() {
 		if err := node.Main(); err != nil {
 			logr.Panic("failed to run node", zap.Error(err))
 		}
+	case MongoCmdName:
+		db.Main()
 	default:
 		panic(
 			fmt.Sprintf(
