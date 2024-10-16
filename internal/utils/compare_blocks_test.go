@@ -34,17 +34,7 @@ func TestCompareBlocks(t *testing.T) {
 			expected: false,
 		},
 		{
-			name: "Higher SequenceNumber in blockA",
-			blockA: &apaxos.BlockMetaData{
-				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "1"},
-			},
-			blockB: &apaxos.BlockMetaData{
-				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "1"},
-			},
-			expected: false,
-		},
-		{
-			name: "Same BallotNumber and SequenceNumber",
+			name: "Same BallotNumber",
 			blockA: &apaxos.BlockMetaData{
 				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "1"},
 			},
@@ -70,16 +60,6 @@ func TestCompareBlocks(t *testing.T) {
 			},
 			blockB: &apaxos.BlockMetaData{
 				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "2"},
-			},
-			expected: true,
-		},
-		{
-			name: "Lower SequenceNumber in blockA",
-			blockA: &apaxos.BlockMetaData{
-				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "1"},
-			},
-			blockB: &apaxos.BlockMetaData{
-				BallotNumber: &apaxos.BallotNumber{Number: 1, NodeId: "1"},
 			},
 			expected: true,
 		},

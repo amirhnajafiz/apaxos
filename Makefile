@@ -1,21 +1,26 @@
+# protogen runs a script to export all proto files
 protogen:
 	scripts/proto_gen.sh
 
+# running unit tests
 test:
 	scripts/tests.sh
 
+# compile the project into a main file
 compile:
 	go build -o main
 	chmod +x main
 
-CONFIG = config.yaml
-CSV = testcase.csv
+# the following commands are used to start the cmds
+CONFIG = configs/instance_1.yaml
+CTL_C=configs/controller.yaml
+DB_C=configs/database.yaml
 
 node:
-	./main node --config $(CONFIG)
+	./main node $(CONFIG)
 
 controller:
-	./main controller --config $(CONFIG) --csv ignore
+	./main controller $(CTL_C)
 
-testcase:
-	./main controller --config $(CONFIG) --csv $(CSV)
+db:
+	./main database $(DB_C)
