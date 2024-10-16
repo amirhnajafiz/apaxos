@@ -21,7 +21,7 @@ func Default() Config {
 			Host:            "127.0.0.1",
 			Port:            8080,
 			RequestTimeout:  10, // in milliseconds
-			MajorityTimeout: 10, // in milliseconds
+			MajorityTimeout: 10, // in microseconds
 		},
 		MongoDB: mongodb.Config{
 			URI:      "your atlas connection string",
