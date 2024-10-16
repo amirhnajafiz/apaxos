@@ -86,6 +86,9 @@ func (c Consensus) Commit() {
 		}
 	}
 
+	// not to mention that we should update our last committed message
+	c.Memory.SetLastCommittedMessage(acceptedVal[0].Metadata.GetBallotNumber())
+
 	// now we store the blocks inside MongoDB  using a go-routine to speedup the process
 	go func(input []*apaxos.Block) {
 		// convert blocks to models
