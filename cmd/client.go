@@ -7,6 +7,7 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
+// Client is a simple struct that makes RPC calls to servers.
 type Client struct {
 	Dialer *client.Client
 }

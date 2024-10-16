@@ -1,8 +1,6 @@
 package consensus
 
 import (
-	"errors"
-
 	protocol "github.com/f24-cse535/apaxos/internal/consensus/apaxos"
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
 	"github.com/f24-cse535/apaxos/internal/storage/database"
@@ -58,7 +56,7 @@ func (c Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error)
 
 	// now we check to see if we can run the consensus protocol
 	if c.instanceExists() {
-		return nil, errors.New("cannot run multiple consensus protocols at the same time on this machine")
+		return nil, ErrMultipleInstances
 	}
 
 	// if no instances exist, we create a new apaxos instance by running begin consensus
