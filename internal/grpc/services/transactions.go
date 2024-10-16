@@ -96,13 +96,13 @@ func (s *Transactions) PrintLogs(req *emptypb.Empty, stream transactions.Transac
 	s.Logger.Debug("rpc called PrintLogs")
 
 	// first send the datastore block
-	if err := stream.Send(s.Memory.GetDatastore().ToProtoModel()); err != nil {
+	if err := stream.Send(s.Memory.GetDatastore()); err != nil {
 		return err
 	}
 
 	// send accepted_val blocks
 	for _, block := range s.Memory.GetAcceptedVal() {
-		if err := stream.Send(block.ToProtoModel()); err != nil {
+		if err := stream.Send(block); err != nil {
 			return err
 		}
 	}
