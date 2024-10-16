@@ -81,6 +81,34 @@ func (c *Controller) parseInput(input string) error {
 	switch parts[0] {
 	case "exit":
 		os.Exit(0)
+	case "help":
+		c.printHelp()
+	case "tests":
+		c.readTests(parts[1])
+	case "next":
+		c.next()
+	case "reset":
+		c.resetServers()
+	case "printbalance":
+		tmp := parts[1]
+		address := c.Cfg.GetClientShards()[tmp]
+
+		c.client.printBalance(tmp, address)
+	case "printlogs":
+		c.client.printLogs(parts[1])
+	case "printdb":
+		c.client.printDB(parts[1])
+	case "performance":
+		c.client.performance(c.Cfg.GetNodes())
+	case "aggrigated":
+		c.client.aggrigatedBalance(parts[1], c.Cfg.GetNodes())
+	case "transaction":
+		sender := parts[1]
+		receiver := parts[2]
+		amount, _ := strconv.Atoi(parts[3])
+		address := c.Cfg.GetClientShards()[sender]
+
+		c.client.newTransaction(sender, receiver, amount, address)
 	default:
 		return errInvalidCommand
 	}
@@ -99,7 +127,7 @@ reset | reset all servers status to active
 printbalance <client> | print the balance of a client (based on shards)
 printlogs <node> | print logs of a node
 printdb <node> | print database of a node
-performance | gets the performance of all nodes
+performance | gets performance of all nodes
 aggrigated <client> | gets a clients balance in all servers
 transaction <sender> <receiver> <amount> | make a transaction for a client`,
 	)
