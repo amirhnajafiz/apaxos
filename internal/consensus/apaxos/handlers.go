@@ -66,5 +66,5 @@ func (a *Apaxos) transmitSync(address string) {
 	a.Logger.Info("transmit syncing", zap.String("to", address))
 
 	// send the sync message
-	a.Dialer.Sync(address, message)
+	a.Dialer.Sync(a.Nodes[address], message)
 }
