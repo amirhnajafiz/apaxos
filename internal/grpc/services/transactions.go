@@ -32,7 +32,7 @@ func (s *Transactions) observeMetrics(duration time.Duration) {
 
 	if tmp == 0 {
 		s.Metrics.ObserveLatency(0)
-		s.Metrics.ObserveThroughput(1000000)
+		s.Metrics.ObserveThroughput(0)
 	} else {
 		s.Metrics.ObserveLatency(float64(tmp))              // latency is the time spent for each transaction
 		s.Metrics.ObserveThroughput(float64(1000000 / tmp)) // throughput is the number of transactions per second

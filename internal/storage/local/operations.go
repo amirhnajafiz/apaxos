@@ -52,7 +52,7 @@ func (m *Memory) GetClients() map[string]int64 {
 
 // SetBallotNumber updates the current ballot-number.
 func (m *Memory) SetBallotNumber(instance *apaxos.BallotNumber) {
-	m.ballotNumber = instance
+	m.ballotNumber.Number = instance.GetNumber()
 }
 
 // GetBallotNumber is used to return the current ballot-number.

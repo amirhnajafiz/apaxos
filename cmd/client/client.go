@@ -42,7 +42,7 @@ func (c Client) PrintLogs(address string) error {
 
 	for _, log := range logs {
 		fmt.Printf(
-			"ballot-number: <%d - %s>\n",
+			"\nballot-number: <%d - %s>\n",
 			log.GetMetadata().GetBallotNumber().GetNumber(),
 			log.GetMetadata().GetBallotNumber().GetNodeId(),
 		)
@@ -51,7 +51,7 @@ func (c Client) PrintLogs(address string) error {
 
 		for _, transaction := range log.Transactions {
 			fmt.Printf(
-				"%d. (%s, %s, %d)",
+				"%d. (%s, %s, %d)\n",
 				transaction.GetSequenceNumber(),
 				transaction.GetSender(),
 				transaction.GetReciever(),
@@ -73,7 +73,7 @@ func (c Client) PrintDB(address string) error {
 
 	for _, log := range blocks {
 		fmt.Printf(
-			"ballot-number: <%d - %s>\n",
+			"\nballot-number: <%d - %s>\n",
 			log.GetMetadata().GetBallotNumber().GetNumber(),
 			log.GetMetadata().GetBallotNumber().GetNodeId(),
 		)

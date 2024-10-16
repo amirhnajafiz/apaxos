@@ -89,19 +89,17 @@ func (c Controller) parseInput(input string) error {
 	case "next":
 		c.next()
 	case "ping":
-		tmp := parts[1]
-		c.pintServer(c.Cfg.GetNodes()[tmp])
+		c.pintServer(c.Cfg.GetNodes()[parts[1]])
 	case "reset":
 		c.resetServers()
 	case "printbalance":
 		tmp := parts[1]
 		address := c.Cfg.GetClientShards()[tmp]
-
-		c.client.PrintBalance(tmp, address)
+		c.client.PrintBalance(tmp, c.Cfg.GetNodes()[address])
 	case "printlogs":
-		c.client.PrintLogs(parts[1])
+		c.client.PrintLogs(c.Cfg.GetNodes()[parts[1]])
 	case "printdb":
-		c.client.PrintDB(parts[1])
+		c.client.PrintDB(c.Cfg.GetNodes()[parts[1]])
 	case "performance":
 		c.client.Performance(c.Cfg.GetNodes())
 	case "aggrigated":
