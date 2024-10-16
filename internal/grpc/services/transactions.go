@@ -27,11 +27,16 @@ type Transactions struct {
 }
 
 // observeMetrics is used in RPCs to set new metrics values.
-func (s *Transactions) observeMetrics(start, end time.Time) {
-	tmp := float64(end.Sub(start).Milliseconds())
+func (s *Transactions) observeMetrics(duration time.Duration) {
+	tmp := duration.Microseconds()
 
-	s.Metrics.ObserveLatency(tmp)                    // latency is the time spent for each transaction
-	s.Metrics.ObserveThroughput(float64(1000 / tmp)) // throughput is the number of transactions per second
+	if tmp == 0 {
+		s.Metrics.ObserveLatency(0)
+		s.Metrics.ObserveThroughput(1000000)
+	} else {
+		s.Metrics.ObserveLatency(float64(tmp))              // latency is the time spent for each transaction
+		s.Metrics.ObserveThroughput(float64(1000000 / tmp)) // throughput is the number of transactions per second
+	}
 }
 
 // NewTransaction is called for registering a new transaction.
@@ -55,8 +60,7 @@ func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transacti
 		return nil, err
 	}
 
-	// set the first end of response
-	end := time.Now()
+	elapsed := time.Since(start) // calculate the elapsed time
 
 	// create a response instance
 	response := transactions.TransactionResponse{
@@ -67,12 +71,12 @@ func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transacti
 	if channel != nil {
 		resp := <-channel
 
-		end = time.Now()
+		elapsed = time.Since(start) // calculate the elapsed time
 
 		response.Text = resp.Payload.(string)
 	}
 
-	s.observeMetrics(start, end)
+	s.observeMetrics(elapsed)
 
 	return &response, nil
 }

@@ -110,7 +110,8 @@ func (c Controller) parseInput(input string) error {
 		sender := parts[1]
 		receiver := parts[2]
 		amount, _ := strconv.Atoi(parts[3])
-		address := c.Cfg.GetClientShards()[sender]
+		node := c.Cfg.GetClientShards()[sender]
+		address := c.Cfg.GetNodes()[node]
 
 		c.client.Transaction(sender, receiver, amount, address)
 	default:

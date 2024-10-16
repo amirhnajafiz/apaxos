@@ -34,5 +34,5 @@ func (c Consensus) recheckBalance(t *apaxos.Transaction) bool {
 
 // instance exists return true if the apaxos instance is started and running.
 func (c Consensus) instanceExists() bool {
-	return c.instance == nil
+	return c.instance != nil
 }
