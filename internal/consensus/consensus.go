@@ -113,9 +113,6 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 
 			// start apaxos protocol
 			err := c.instance.Start()
-
-			c.Logger.Debug("got an answer")
-
 			if err != nil {
 				c.Logger.Debug("apaxos failed", zap.Error(err))
 
@@ -145,11 +142,9 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 			} else {
 				// now we check to see if the client balance is enough or not
 				if c.recheckBalance(transaction) {
-					c.Logger.Debug("transaction is OK")
 					c.submitTransaction(transaction)
 					c.notify(nil)
 				} else {
-					c.Logger.Debug("transaction is OK")
 					c.notify(protocol.ErrNotEnoughBalance)
 				}
 
