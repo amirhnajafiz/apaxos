@@ -80,7 +80,7 @@ func (a *Apaxos) Start() error {
 	a.processPromiseMessages()
 
 	// send a broadcast accept message to all other servers
-	go a.broadcastAccept(a.acceptedNum, a.acceptedVal)
+	go a.broadcastAccept(a.selectedBallotNumber, a.selectedBlocks)
 
 	// wait for accepted messages (first on majority, then on a timeout)
 	if err := a.waitForAccepted(); err != nil {

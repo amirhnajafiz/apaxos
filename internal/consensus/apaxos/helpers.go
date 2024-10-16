@@ -5,7 +5,7 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
-// createMessage is used to process all promise messages
+// processPromiseMessages is used to process all promise messages
 // and prepare accepted_val and accepted_num values.
 func (a *Apaxos) processPromiseMessages() {
 	// create a list of blocks
@@ -13,44 +13,32 @@ func (a *Apaxos) processPromiseMessages() {
 
 	// we go through the promissed messages to check everything needed
 	for _, msg := range a.promisedMessage {
-		// get their ballot-number and last committed message
-		ballotNumber := msg.GetBallotNumber()
-		lastCommitted := msg.GetLastComittedMessage()
+		// check to see if we the node is synced or not
+		if utils.CompareBallotNumbers(msg.GetLastComittedMessage(), a.Memory.GetLastCommittedMessage()) != 0 {
+			// sync the old acceptor's log
+			go a.transmitSync(msg.NodeId)
+		}
 
-		// first we check to see if they had a different ballot-number or not
-		if utils.CompareBallotNumbers(a.selectedBallotNumber, ballotNumber) == 0 {
-			// if they send the same ballot-number we save their blocks
-			a.selectedBlocks = append(a.selectedBlocks, msg.GetBlocks()...)
-		} else {
-			// in this case, they have sent a ballot-number different than ours
-			if utils.CompareBallotNumbers(lastCommitted, a.Memory.GetLastCommittedMessage()) >= 0 {
-				// if they are synced, we are going to check their ballot-number
-				a.getAccepteds(msg)
-			} else {
-				// sync the acceptor that is old
-				go a.transmitSync(msg.NodeId)
+		// process their promise messages
+		// check to see if they have a different ballot-number
+		if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.selectedBallotNumber) != 0 {
+			if a.acceptedNum == nil { // empty accepted_num and accepted_val
+				a.acceptedNum = msg.GetBallotNumber()
+				a.acceptedVal = msg.GetBlocks()
+			} else { // then we select the biggest ballot-number as our accepted_val
+				if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.acceptedNum) == 1 {
+					a.acceptedNum = msg.GetBallotNumber()
+					a.acceptedVal = msg.GetBlocks()
+				}
 			}
+		} else {
+			// if they send the same ballot-number, we save their blocks
+			a.selectedBlocks = append(a.selectedBlocks, msg.GetBlocks()...)
 		}
 	}
 
-	// check to see if we need to update accepted_num and accepted_val or no
-	if a.acceptedNum == nil {
-		a.acceptedNum = a.selectedBallotNumber
-		a.acceptedVal = a.selectedBlocks
-	}
-}
-
-// getAccepted extracts the accepted_num and accepted_val of a promise message, then it will update
-// their values if the ballot-number was bigger.
-func (a *Apaxos) getAccepteds(msg *apaxos.PromiseMessage) {
-	if a.acceptedNum == nil { // empty accepted_num and accepted_val
-		a.acceptedNum = msg.GetBallotNumber()
-		a.acceptedVal = msg.GetBlocks()
-	} else {
-		// then we select the biggest ballot-number as our accepted_val
-		if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.acceptedNum) == 1 {
-			a.acceptedNum = msg.GetBallotNumber()
-			a.acceptedVal = msg.GetBlocks()
-		}
+	// check to see if we need anything from previous time
+	if a.acceptedNum != nil {
+		a.selectedBlocks = a.acceptedVal
 	}
 }

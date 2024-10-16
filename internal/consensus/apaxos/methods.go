@@ -25,7 +25,7 @@ func (a *Apaxos) waitForPromise() error {
 		select {
 		case pkt := <-a.InChannel:
 			// if received a sync packet, we should halt
-			if pkt.Type != enum.PacketSync {
+			if pkt.Type == enum.PacketSync {
 				return ErrSlowNode
 			}
 

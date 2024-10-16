@@ -8,7 +8,7 @@ import (
 )
 
 // promiseHandler will be called by the prepare to perform the promise logic.
-func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNumber) {
+func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNumber, synced bool) {
 	// first we get our ballot-number
 	savedBallotNumber := c.Memory.GetBallotNumber()
 
@@ -29,7 +29,7 @@ func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNum
 
 	// now we need to get our current accepted_num and accepted_val to see what we should send in the promise message
 	acceptedNum := c.Memory.GetAcceptedNum()
-	if acceptedNum != nil {
+	if synced && acceptedNum != nil { // if we are syned and there is something we have from previous
 		// then we update the promise message
 		promiseMessage.Blocks = c.Memory.GetAcceptedVal() // set accepted_val as blocks
 		promiseMessage.BallotNumber = acceptedNum         // set accepted_num as ballot-number

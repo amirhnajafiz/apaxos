@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
@@ -28,28 +27,12 @@ func (c Consensus) submitTransaction(transaction *apaxos.Transaction) {
 	c.Memory.AddTransactionToDatastore(transaction)
 }
 
-// failed consensus tells the client about the consensus failure.
-func (c Consensus) failedConsensus(err error) {
-	c.instance.OutChannel <- &messages.Packet{
-		Payload: err.Error(),
-	}
-}
-
-// successful consensus submits the transaction and notifys the client.
-func (c Consensus) successfulConsensus(t *apaxos.Transaction) {
-	c.submitTransaction(t)
-
-	c.instance.OutChannel <- &messages.Packet{
-		Payload: "transaction submitted",
-	}
-}
-
 // recheck balance checks to see if the client balance has changed or not.
 func (c Consensus) recheckBalance(t *apaxos.Transaction) bool {
 	return c.Memory.GetBalance(c.Client) > t.GetAmount()
 }
 
-// instance exists return true if the apaxos instance is started and running
+// instance exists return true if the apaxos instance is started and running.
 func (c Consensus) instanceExists() bool {
 	return c.instance == nil
 }
