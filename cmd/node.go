@@ -19,7 +19,7 @@ type Node struct {
 	Logger *zap.Logger
 }
 
-func (n *Node) Main() error {
+func (n Node) Main() error {
 	// open database connection
 	db, err := database.NewDatabase(n.Cfg.MongoDB, n.Cfg.NodeID)
 	if err != nil {

@@ -28,6 +28,13 @@ type testSet struct {
 	transactions []map[string]interface{}
 }
 
+var (
+	// testCase is an array of test sets
+	testCase []testSet
+	// currentTest is a holder for executing test sets in testCase array
+	currentTest int
+)
+
 // Controller is used to communicate with our distributed system using gRPC calls.
 type Controller struct {
 	// the config and logger modules
@@ -36,15 +43,9 @@ type Controller struct {
 
 	// client module to make gRPC calls
 	client *Client
-
-	// testCase is an array of test sets
-	testCase []testSet
-
-	// currentTest is a holder for executing test sets in testCase array
-	currentTest int
 }
 
-func (c *Controller) Main() error {
+func (c Controller) Main() error {
 	// init client to make rpc calls
 	c.client = &Client{
 		Dialer: client.NewClient(c.Logger.Named("client")),
@@ -71,7 +72,7 @@ func (c *Controller) Main() error {
 }
 
 // parseInput get's the user input to run system commands.
-func (c *Controller) parseInput(input string) error {
+func (c Controller) parseInput(input string) error {
 	// split into parts
 	parts := strings.Split(input, " ")
 
@@ -116,7 +117,7 @@ func (c *Controller) parseInput(input string) error {
 }
 
 // help command displays controller instructions.
-func (c *Controller) printHelp() error {
+func (c Controller) printHelp() error {
 	fmt.Println(
 		`exit: close the controller app
 help | prints help instructions
@@ -135,7 +136,11 @@ transaction <sender> <receiver> <amount> | make a transaction for a client`,
 }
 
 // readTests reads a CSV file into current testcase array
-func (c *Controller) readTests(path string) error {
+func (c Controller) readTests(path string) error {
+	// set testcase
+	testCase = make([]testSet, 0)
+	currentTest = 0
+
 	// open the CSV file
 	file, err := os.Open(path)
 	if err != nil {
@@ -191,7 +196,7 @@ func (c *Controller) readTests(path string) error {
 				}
 
 				// store a test-set
-				c.testCase = append(c.testCase, testSet{
+				testCase = append(testCase, testSet{
 					index:        currentIndex,
 					serverList:   servers,
 					transactions: transactions,
@@ -224,23 +229,23 @@ func (c *Controller) readTests(path string) error {
 }
 
 // next runs the next test-set until it reaches the end of sets.
-func (c *Controller) next() error {
+func (c Controller) next() error {
 	// check for set exist
-	if c.currentTest >= len(c.testCase) {
+	if currentTest >= len(testCase) {
 		return errEndOfSets
 	}
 
 	// select the current index and execSet
-	c.execSet(c.testCase[c.currentTest])
+	c.execSet(testCase[currentTest])
 
 	// go for the next test-set
-	c.currentTest++
+	currentTest++
 
 	return nil
 }
 
 // execSet runs a testcase set.
-func (c *Controller) execSet(set testSet) {
+func (c Controller) execSet(set testSet) {
 	fmt.Printf("starting set: %s\n", set.index)
 
 	// create a map of living servers
@@ -269,7 +274,7 @@ func (c *Controller) execSet(set testSet) {
 }
 
 // reset servers unblocks all of the servers.
-func (c *Controller) resetServers() {
+func (c Controller) resetServers() {
 	for _, value := range c.Cfg.GetNodes() {
 		c.client.updateServerStatus(value, true)
 	}

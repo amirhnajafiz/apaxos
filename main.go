@@ -32,41 +32,36 @@ func main() {
 	logr := logger.NewLogger(cfg.LogLevel)
 
 	// create cmd instances and pass needed parameters
-	ctl := cmd.Controller{
-		Cfg:    cfg,
-		Logger: logr.Named("controller"),
-	}
-	node := cmd.Node{
-		Cfg:    cfg,
-		Logger: logr.Named("node"),
-	}
-	db := cmd.MongoDB{
-		Cfg:    cfg,
-		Logger: logr.Named("mongodb"),
+	commands := map[string]cmd.CMD{
+		ControllerCmdName: cmd.Controller{
+			Cfg:    cfg,
+			Logger: logr.Named("controller"),
+		}, // controller command
+		NodeCmdName: cmd.Node{
+			Cfg:    cfg,
+			Logger: logr.Named("node"),
+		}, // node command
+		MongoCmdName: cmd.MongoDB{
+			Cfg: cfg,
+		}, // mongodb command
 	}
 
 	// command is the first argument variable
 	command := argv[1]
 
-	// then we check the command to run different programs based on the
-	// user input.
-	switch command {
-	case ControllerCmdName:
-		if err := ctl.Main(); err != nil {
-			logr.Panic("failed run controller", zap.Error(err))
+	// then we check the command to run different programs based on the user input.
+	if callback, ok := commands[command]; ok {
+		if err := callback.Main(); err != nil {
+			logr.Panic("failed to run command", zap.Error(err), zap.String("command", command))
 		}
-	case NodeCmdName:
-		if err := node.Main(); err != nil {
-			logr.Panic("failed to run node", zap.Error(err))
-		}
-	case MongoCmdName:
-		db.Main()
-	default:
+		logr.Info("successful run", zap.String("command", command))
+	} else {
 		panic(
 			fmt.Sprintf(
-				"your input command must be the first argument variable, and it should be `%s` or `%s`.",
+				"your input command must be the first argument variable, and it should be `%s`, `%s`, or `%s`.",
 				ControllerCmdName,
 				NodeCmdName,
+				MongoCmdName,
 			),
 		)
 	}
