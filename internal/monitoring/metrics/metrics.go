@@ -41,5 +41,9 @@ func (m *Metrics) Observe(duration time.Duration) {
 
 // GetValues is used to export the current metrics. (latency, throughput)
 func (m *Metrics) GetValues() (float64, float64) {
+	if m.records == 0 {
+		return 0, 0
+	}
+
 	return m.latency / float64(m.records), m.throughput / float64(m.records)
 }

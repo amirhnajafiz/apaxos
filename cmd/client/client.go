@@ -96,8 +96,11 @@ func (c Client) PrintDB(address string) error {
 
 // Performance loops over servers to get metrics.
 func (c Client) Performance(addresses map[string]string) error {
-	latency := float64(0)
-	throughput := float64(0)
+	var (
+		latency    float64 = 0
+		throughput float64 = 0
+	)
+
 	count := 0
 
 	for key, address := range addresses {
@@ -113,7 +116,7 @@ func (c Client) Performance(addresses map[string]string) error {
 		}
 	}
 
-	fmt.Printf("average: %f TPS, %f micro-seconds\n", throughput, latency)
+	fmt.Printf("average: %f TPS, %f micro-seconds\n", throughput/float64(count), latency/float64(count))
 
 	return nil
 }
