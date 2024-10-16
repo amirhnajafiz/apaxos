@@ -100,10 +100,13 @@ func (a *Apaxos) Start() error {
 		return err
 	}
 
-	a.Logger.Debug("got majority accepted, sending commit")
+	a.Logger.Debug("got majority accepted")
 
 	// send commit message to all other servers
 	go a.broadcastCommit()
 
-	return nil
+	a.Logger.Debug("sent commit messages, waiting for my own commit")
+
+	// wait for own commit packet
+	return a.waitForOwnCommit()
 }

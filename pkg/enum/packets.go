@@ -7,4 +7,5 @@ const (
 	PacketPromise PacketType = iota + 1
 	PacketAccepted
 	PacketSync
+	PacketCommit
 )

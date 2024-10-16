@@ -2,4 +2,4 @@
 # database configs
 mongodb: # username amirhnajafiz password d3tO2kzZCse5f509
   uri: "mongodb+srv://amirhnajafiz:d3tO2kzZCse5f509@cluster0.aoxrj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  database: "admin"
+  database: "apaxos"

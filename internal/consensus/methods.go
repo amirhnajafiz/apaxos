@@ -4,6 +4,8 @@ import (
 	"sort"
 
 	"github.com/f24-cse535/apaxos/internal/utils"
+	"github.com/f24-cse535/apaxos/pkg/enum"
+	"github.com/f24-cse535/apaxos/pkg/messages"
 	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
@@ -24,7 +26,7 @@ func (c *Consensus) Prepare(msg *apaxos.PrepareMessage) {
 		// if they where same as us or greater, we continue the logic in promise handler
 		c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber, compareResult == 0)
 	} else {
-		c.Logger.Debug("compare result states a sync needed", zap.Int("result", compareResult))
+		c.Logger.Debug("compare result states a sync needed (out-of-sync node detected)", zap.Int("result", compareResult))
 
 		// proposer is a not syned with us, therefore, we try to sync it by transmitting a sync request
 		c.transmitSync(c.Nodes[msg.NodeId])
@@ -41,7 +43,7 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 
 	// now we check the proposer's ballot-number with our own ballot-number.
 	if utils.CompareBallotNumbers(proposerBallotNumber, savedBallotNumber) < 0 {
-		c.Logger.Debug("no new or equal ballot number")
+		c.Logger.Debug("no greater or equal ballot number")
 
 		// this means the the proposer's ballot-number is <= our saved ballot-number
 		return
@@ -51,6 +53,8 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 	c.Memory.SetAcceptedNum(proposerBallotNumber)
 	// update accepted_val with proposer's give blocks
 	c.Memory.SetAcceptedVal(msg.Blocks)
+
+	c.Logger.Debug("accepted sent", zap.String("to", msg.NodeId))
 
 	// send accepted message
 	c.Dialer.Accepted(c.Nodes[msg.NodeId])
@@ -109,6 +113,13 @@ func (c *Consensus) Commit() {
 	// finally, we clear our accepted_num and accepted_val
 	c.Memory.SetAcceptedNum(nil)
 	c.Memory.SetAcceptedVal(nil)
+
+	// signal the instance for a commit message receive
+	c.Signal(&messages.Packet{
+		Type: enum.PacketCommit,
+	})
+
+	c.Logger.Debug("comitted")
 }
 
 // Sync get's a sync message and updates itself to catch up with others.

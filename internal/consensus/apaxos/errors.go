@@ -7,4 +7,5 @@ var (
 	ErrNotEnoughServers = errors.New("did not get majority responses")
 	ErrRequestTimeout   = errors.New("did not get enough responses")
 	ErrNotEnoughBalance = errors.New("not enough balance to process")
+	ErrCommitTimeout    = errors.New("waited to long for own commitment")
 )

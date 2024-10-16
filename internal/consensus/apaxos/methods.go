@@ -7,6 +7,29 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
+// waitForOwnCommit blocks the apaxos instance until it gets datastore is committed.
+func (a *Apaxos) waitForOwnCommit() error {
+	// set a request timeout and a majority timeout
+	timeoutDuration := time.Duration(a.Timeout) * time.Millisecond
+
+	// set the timer to request timeout first
+	timer := time.NewTimer(timeoutDuration)
+	defer timer.Stop()
+
+	// go inside a loop
+	for {
+		select {
+		case pkt := <-a.InChannel:
+			// if received a commit packet of our own
+			if pkt.Type == enum.PacketCommit {
+				return nil
+			}
+		case <-timer.C:
+			return ErrCommitTimeout
+		}
+	}
+}
+
 // waitForPromise state goes into a for loop to get a majority of promise messages.
 func (a *Apaxos) waitForPromise() error {
 	// start with 0 events

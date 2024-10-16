@@ -14,7 +14,7 @@ func (c *Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNu
 
 	// now we check the proposer's ballot-number with our own ballot-number
 	if utils.CompareBallotNumbers(ballotNumber, savedBallotNumber) < 1 {
-		c.Logger.Debug("no new ballot-number")
+		c.Logger.Debug("no greater ballot-number")
 
 		// this means that the input ballot-number is < saved ballot-number
 		return
@@ -42,6 +42,8 @@ func (c *Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNu
 		promiseMessage.Blocks = []*apaxos.Block{block} // set node's block as blocks
 		promiseMessage.BallotNumber = ballotNumber     // set ballot-number as proposer's sent
 	}
+
+	c.Logger.Debug("promised sent", zap.String("to", address))
 
 	// send the promise message
 	c.Dialer.Promise(address, promiseMessage)
