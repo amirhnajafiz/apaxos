@@ -42,8 +42,14 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 	savedBallotNumber := c.Memory.GetBallotNumber()
 
 	// now we check the proposer's ballot-number with our own ballot-number.
-	if utils.CompareBallotNumbers(proposerBallotNumber, savedBallotNumber) < 0 {
-		c.Logger.Debug("no greater or equal ballot number")
+	if proposerBallotNumber.GetNumber() < savedBallotNumber.GetNumber() {
+		c.Logger.Debug(
+			"no greater or equal ballot number",
+			zap.Int64("saved_number", savedBallotNumber.GetNumber()),
+			zap.String("saved_node_id", savedBallotNumber.GetNodeId()),
+			zap.Int64("proposer_number", proposerBallotNumber.GetNumber()),
+			zap.String("proposer_node_id", proposerBallotNumber.GetNodeId()),
+		)
 
 		// this means the the proposer's ballot-number is <= our saved ballot-number
 		return
@@ -62,7 +68,8 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 
 // Commit emptys the datastore and stores the blocks inside database.
 func (c *Consensus) Commit() {
-	// get our accepted_val
+	// get our accepteds
+	acceptedNum := c.Memory.GetAcceptedNum()
 	acceptedVal := c.Memory.GetAcceptedVal()
 
 	// sort the blocks by their ballot-numbers
@@ -91,7 +98,7 @@ func (c *Consensus) Commit() {
 	}
 
 	// not to mention that we should update our last committed message
-	c.Memory.SetLastCommittedMessage(acceptedVal[0].Metadata.GetBallotNumber())
+	c.Memory.SetLastCommittedMessage(acceptedNum)
 
 	// now we store the blocks inside MongoDB  using a go-routine to speedup the process
 	// convert blocks to models

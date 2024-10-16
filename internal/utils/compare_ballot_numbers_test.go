@@ -39,8 +39,8 @@ func TestCompareBallotNumbers(t *testing.T) {
 		},
 		{
 			name:     "a.Number == b.Number, a.NodeId == b.NodeId",
-			a:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
-			b:        &apaxos.BallotNumber{Number: 2, NodeId: "1"},
+			a:        &apaxos.BallotNumber{Number: 2, NodeId: "S1"},
+			b:        &apaxos.BallotNumber{Number: 2, NodeId: "S1"},
 			expected: 0,
 		},
 	}

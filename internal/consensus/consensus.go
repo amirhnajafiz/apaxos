@@ -121,7 +121,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 				case errors.Is(err, protocol.ErrRequestTimeout):
 					// in this case, we first check to see if we have enough servers up and running or not
 					if !c.livenessHandler() {
-						c.notify(protocol.ErrNotEnoughBalance)
+						c.notify(protocol.ErrNotEnoughServers)
 						return
 					}
 				case errors.Is(err, protocol.ErrSlowNode):
@@ -138,8 +138,6 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 					}
 				default:
 					c.Logger.Error("consensus error", zap.Error(err))
-					c.notify(err)
-					return
 				}
 			} else {
 				// now we check to see if the client balance is enough or not

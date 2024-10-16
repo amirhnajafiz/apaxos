@@ -40,7 +40,7 @@ func (a *ApaxosDialer) Propose(address string, message *apaxos.PrepareMessage) {
 	// call Propose RPC
 	_, err = apaxos.NewApaxosClient(conn).Propose(context.Background(), message)
 	if err != nil {
-		a.Logger.Error("failed to call propose rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call propose rpc", zap.String("address", address), zap.Error(err))
 	}
 }
 
@@ -57,7 +57,7 @@ func (a *ApaxosDialer) Promise(address string, message *apaxos.PromiseMessage) {
 	// call Promise RPC
 	_, err = apaxos.NewApaxosClient(conn).Promise(context.Background(), message)
 	if err != nil {
-		a.Logger.Error("failed to call promise rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call promise rpc", zap.String("address", address), zap.Error(err))
 	}
 }
 
@@ -74,7 +74,7 @@ func (a *ApaxosDialer) Accept(address string, message *apaxos.AcceptMessage) {
 	// call Accept RPC
 	_, err = apaxos.NewApaxosClient(conn).Accept(context.Background(), message)
 	if err != nil {
-		a.Logger.Error("failed to call accept rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call accept rpc", zap.String("address", address), zap.Error(err))
 	}
 }
 
@@ -91,7 +91,7 @@ func (a *ApaxosDialer) Accepted(address string) {
 	// call Accepted RPC
 	_, err = apaxos.NewApaxosClient(conn).Accepted(context.Background(), &emptypb.Empty{})
 	if err != nil {
-		a.Logger.Error("failed to call accepted rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call accepted rpc", zap.String("address", address), zap.Error(err))
 	}
 }
 
@@ -108,7 +108,7 @@ func (a *ApaxosDialer) Commit(address string) {
 	// call Commit RPC
 	_, err = apaxos.NewApaxosClient(conn).Commit(context.Background(), &emptypb.Empty{})
 	if err != nil {
-		a.Logger.Error("failed to call commit rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call commit rpc", zap.String("address", address), zap.Error(err))
 	}
 }
 
@@ -125,6 +125,6 @@ func (a *ApaxosDialer) Sync(address string, messages *apaxos.SyncMessage) {
 	// call Sync RPC
 	_, err = apaxos.NewApaxosClient(conn).Sync(context.Background(), messages)
 	if err != nil {
-		a.Logger.Error("failed to call sync rpc", zap.String("address", address), zap.Error(err))
+		a.Logger.Info("failed to call sync rpc", zap.String("address", address), zap.Error(err))
 	}
 }

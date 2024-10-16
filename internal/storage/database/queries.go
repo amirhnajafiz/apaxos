@@ -16,6 +16,10 @@ import (
 func (d *Database) InsertBlocks(instances []*models.Block) error {
 	ctx := context.Background()
 
+	if len(instances) == 0 {
+		return nil
+	}
+
 	// convert models.Block to interface type
 	var interfaceObjects []interface{}
 	for _, obj := range instances {

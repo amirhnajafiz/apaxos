@@ -33,7 +33,7 @@ func (l *LivenessDialer) Ping(address string) bool {
 	// base connection
 	conn, err := l.connect(address)
 	if err != nil {
-		l.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
+		l.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
 
 		return false
 	}
