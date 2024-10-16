@@ -18,6 +18,8 @@ func NewClient(logr *zap.Logger) *Client {
 		TransactionsDialer: TransactionsDialer{
 			Logger: logr.Named("transactions"),
 		},
-		LivenessDialer: LivenessDialer{},
+		LivenessDialer: LivenessDialer{
+			Logger: logr.Named("liveness"),
+		},
 	}
 }

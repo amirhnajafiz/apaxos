@@ -3,16 +3,19 @@ package client
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand/v2"
 
 	"github.com/f24-cse535/apaxos/pkg/rpc/liveness"
+
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 // LivenessDialer is used to call RPC methods for checking a server
 // liveness status.
-type LivenessDialer struct{}
+type LivenessDialer struct {
+	Logger *zap.Logger
+}
 
 // connect should be called in the beginning of each method to establish a connection.
 func (l *LivenessDialer) connect(address string) (*grpc.ClientConn, error) {
@@ -31,7 +34,7 @@ func (l *LivenessDialer) Ping(address string) bool {
 	// base connection
 	conn, err := l.connect(address)
 	if err != nil {
-		log.Printf("failed to call %s: %v\n", address, err)
+		l.Logger.Error("failed to connect", zap.String("address", address), zap.Error(err))
 
 		return false
 	}
@@ -42,7 +45,7 @@ func (l *LivenessDialer) Ping(address string) bool {
 		Random: rand.Int64(), // a non-negative number
 	})
 	if err != nil {
-		log.Printf("failed to ping server %s: %v\n", address, err)
+		l.Logger.Error("failed to call ping RPC", zap.String("address", address), zap.Error(err))
 
 		return false
 	}
