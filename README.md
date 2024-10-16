@@ -1,54 +1,73 @@
 # APAXOS
 
-This project is a distributed transaction management service. Clients send their transactions to servers (there is user-level sharding that manages each client's account on one single machine). These servers store them inside a local storage as a block of transactions. After that, they try to run each transaction.
+This project is a distributed transaction management service. The goal is to replicate transactions over various number of nodes, keep the data consistant, and tolerate node failures. To achive these goals, we are going to use `PAXOS` consensus protocl. However, we are going to modify this protocol to handle multiple values in a single instance.
 
-They are going to run `apaxos` consensus protocol when a client sends a request that has an amount more than the current balance of the client. By running this protocol, a leader node collects all logs, forms a huge block of transactions (or a list of transaction blocks), and replicates them over servers.
+## System's flow
 
-Then, as the majority of servers get that list of blocks, each server starts running these transactions and stores them in a persistante storage.
+Clients send their transactions to servers (there is user-level sharding that map each client's account to one single machine). Servers store them inside a local storage as a block of transactions. After that, they run each transaction.
 
-## Components
+They are going to run `apaxos` consensus protocol when a client sends a request that has an amount more than the current balance of that client. By running this protocol, a leader node collects all other node's transactions and forms a huge block of transactions (or a list of transaction blocks). Then it replicates them over other servers.
 
-The needed components to implement such system goes as follow:
+Finally, as the majority of servers get that major block, each server starts running these transactions and stores them in a persistante storage (in our case its `MongoDB`).
 
-- gRPC server
-  - get's requests from both other nodes and clients
-- proposer
-  - send's propose request with a _ballot number_
-  - waits for the majority + a timeout perioud
-  - collects all logs to create a _major block_
-- acceptor
-  - get's propose requests and compare ballot number with _accepted num_
-  - returns the promise with accepted num and _accepted val_
-  - get's the commit request
-  - clears the block list
-- learner
-  - does the transaction process to update the values
-  - returns the client response
+## System components
 
-## Data types
+In this section, there is a list of the system components:
+
+- `gRPC` server
+  - gets requests from both other nodes and clients
+  - contains a `apaxos` server, `transactions` server, and `liveness` server
+  - it uses a consensus module to run `apaxos` instances
+- `consensus`
+  - running an apaxos instance:
+    1. sends prepare requests with a _ballot number_
+    2. waits for the majority/a timeout perioud
+    3. collects all transactions to create a _major block_
+    4. sends accept requests with a _major block_
+    5. waits for the majority/a timeout perioud
+    6. sends a commit message
+  - handling input requests:
+    1. gets propose requests and compare ballot number with its own ballot number
+    2. returns the promise with accepted num and _accepted val_ or its own transactions
+    3. gets the commit request, clears the block list and executes the transactions
+- `database`
+  - connects to a `MongoDB` cluster
+- `memory`
+  - uses local memory of the node to keep data
+- `worker`
+  - runs backup tasks to keep track of node's states
+
+### System functions
+
+- new transaction file
+- new transaction
+- print balance (X)
+- print logs
+- print db
+- performance (latency, throughput)
+- aggregated balance (X)
+
+### Data types
 
 - Block
   - List of transactions (array of transactions)
-  - ID: server id of that block
-  - UID: a unique Id to check the block
-  - Seq number: provided by the server that has it
   - Ballot Number
 - Transaction
   - Sender
   - Reciever
   - Amount
+  - Sequence number
 - Major Block (Block List)
+  - Ballot Number
   - List of Blocks (array of blocks) ordered by their Ballot Number
 - Ballot Number
-  - Contains a N number and ID of server
+  - Contains a `N` number and `ID` of server
 
 ## Phases
 
 1. Propose, Promise, and Sync
 2. Accept, and Accepted
 3. Commit
-
-## Requests
 
 ### Propose
 
@@ -79,55 +98,14 @@ store the accepted val and removes it to accept future messages.
 During the propose process, or the accept process. If a server sends an old commit block in return, the propose
 sends a sync request and the list of blocks that where stored after that block. So, the node will be synced.
 
+## User/System diagram
+
+![system diagram](.github/assets/diagram.svg)
+
 ## Requirements
 
 - Programming language: `Golang 1.23`
 - Communication: `gRPC v2`, `protoc3`
-- Datastores: `MongoDB` and `Redis`
-
-## Functions
-
-- new transaction file
-- new transaction
-- print balance (X)
-- print logs
-- print db
-- performance (latency, throughput)
-- aggregated balance (X)
-
-## Design
-
-### Services
-
-1. A centeralized process that:
-   1. Sends function requests using gRPC
-   2. Creates nodes
-   3. Deletes nodes
-2. A node process that:
-   1. Listens on a gRPC server
-   2. Get's input requests that should be send to:
-      1. Proposer sub-process
-      2. Acceptor sub-process
-      3. Learner sub-process
-   3. A dialar module to call other nodes using gRPC
-3. A MongoDB server
-   1. Servers have their own collections using their SID as prefix
-      1. Collections are block list and history
-4. A Redis server
-   1. Servers have their own key-value pairs using their SID as prefix
-      1. They store their accepted num, accepted val, and clients balances
-
-### Schema
-
-```
-client   =>    centeralized process
-                          ||
-                          \/
-                   Node S1 gRPC   =>   Dispatcher  => Proposer, Acceptor, Learner
-                          ||
-                          \/
-                   Dialer gRPC
-                          ||
-                          \/
-  Redis  <=  Other Nodes gRPC  => MongoDB
-```
+- Database: `MongoDB`
+- Logging: `zap logger`
+- Configs: `koanf`
