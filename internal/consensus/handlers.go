@@ -2,55 +2,43 @@ package consensus
 
 import (
 	"github.com/f24-cse535/apaxos/internal/utils"
-	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
 )
 
 // promiseHandler will be called by the prepare to perform the promise logic.
-func (c Consensus) promiseHandler(address string, ballotNumber models.BallotNumber) {
+func (c Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNumber) {
 	// first we get our ballot-number
 	savedBallotNumber := c.Memory.GetBallotNumber()
 
 	// now we check the proposer's ballot-number with our own ballot-number
-	if utils.CompareBallotNumbers(&ballotNumber, savedBallotNumber) < 1 {
+	if utils.CompareBallotNumbers(ballotNumber, savedBallotNumber) < 1 {
 		// this means that the input ballot-number is < saved ballot-number
 		return
 	}
 
 	// if the proposer's ballot-number was absolute greater, we update our ballot-number
-	c.Memory.SetBallotNumber(&ballotNumber)
+	c.Memory.SetBallotNumber(ballotNumber)
 
 	// then we create a promise message with init fields of our node_id and our last_committed_message
 	promiseMessage := &apaxos.PromiseMessage{
 		NodeId:              c.NodeId,
-		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
+		LastComittedMessage: c.Memory.GetLastCommittedMessage(),
 	}
 
 	// now we need to get our current accepted_num and accepted_val to see what we should send in the promise message
 	acceptedNum := c.Memory.GetAcceptedNum()
 	if acceptedNum != nil {
-		// get accepted_val
-		acceptedVal := c.Memory.GetAcceptedVal()
-
-		// first we create a blocklist of our accepted_vals
-		blockList := make([]*apaxos.Block, len(acceptedVal))
-		for index, item := range acceptedVal {
-			blockList[index] = item.ToProtoModel()
-		}
-
 		// then we update the promise message
-		promiseMessage.Blocks = blockList                        // set accepted_val as blocks
-		promiseMessage.BallotNumber = acceptedNum.ToProtoModel() // set accepted_num as ballot-number
+		promiseMessage.Blocks = c.Memory.GetAcceptedVal() // set accepted_val as blocks
+		promiseMessage.BallotNumber = acceptedNum         // set accepted_num as ballot-number
 	} else { // if nothing was in accepted fields, we send our own log block
 		// get the current datastore as a block and set the block ballot-number
 		block := c.Memory.GetDatastore()
-		block.Metadata.BallotNumber = ballotNumber // ballot-number is the same as what the proposer said
-
-		// then update the promise message
-		promiseMessage.Blocks = []*apaxos.Block{block.ToProtoModel()} // set node's block as blocks
-		promiseMessage.BallotNumber = ballotNumber.ToProtoModel()     // set ballot-number as proposer's sent
+		block.Metadata.BallotNumber = ballotNumber     // ballot-number is the same as what the proposer said
+		promiseMessage.Blocks = []*apaxos.Block{block} // set node's block as blocks
+		promiseMessage.BallotNumber = ballotNumber     // set ballot-number as proposer's sent
 	}
 
 	// send the promise message
@@ -64,7 +52,7 @@ func (c Consensus) transmitSync(address string) {
 
 	// create an instance of sync message
 	message := &apaxos.SyncMessage{
-		LastComittedMessage: c.Memory.GetLastCommittedMessage().ToProtoModel(),
+		LastComittedMessage: c.Memory.GetLastCommittedMessage(),
 		Pairs:               make([]*apaxos.ClientBalancePair, len(clients)),
 	}
 

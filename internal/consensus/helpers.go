@@ -2,7 +2,6 @@ package consensus
 
 import (
 	"github.com/f24-cse535/apaxos/pkg/messages"
-	"github.com/f24-cse535/apaxos/pkg/models"
 	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 
 	"go.uber.org/zap"
@@ -18,16 +17,15 @@ func (c Consensus) submitTransaction(transaction *apaxos.Transaction) {
 		zap.String("receiver", transaction.Reciever),
 	)
 
-	// save the transaction into datastore
-	t := models.Transaction{}.FromProtoModel(transaction)
-	t.SequenceNumber = c.Memory.GetSequenceNumber()
+	// set a unique sequence number for transaction
+	transaction.SequenceNumber = c.Memory.GetSequenceNumber()
 
 	// make changes into memory for client's balances
-	c.Memory.UpdateBalance(t.Sender, t.Amount*-1)
-	c.Memory.UpdateBalance(t.Reciever, t.Amount)
+	c.Memory.UpdateBalance(transaction.GetSender(), transaction.GetAmount()*-1)
+	c.Memory.UpdateBalance(transaction.GetReciever(), transaction.GetAmount())
 
 	// save it into datastore
-	c.Memory.AddTransactionToDatastore(t)
+	c.Memory.AddTransactionToDatastore(transaction)
 }
 
 // failed consensus tells the client about the consensus failure.
