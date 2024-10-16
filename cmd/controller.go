@@ -29,13 +29,6 @@ type testSet struct {
 	transactions []map[string]interface{}
 }
 
-var (
-	// testCase is an array of test sets
-	testCase []testSet
-	// currentTest is a holder for executing test sets in testCase array
-	currentTest int
-)
-
 // Controller is used to communicate with our distributed system using gRPC calls.
 type Controller struct {
 	// the config and logger modules
@@ -44,6 +37,11 @@ type Controller struct {
 
 	// client module to make gRPC calls
 	client *goclient.Client
+
+	// testCase is an array of test sets
+	testCase []testSet
+	// currentTest is a holder for executing test sets in testCase array
+	currentTest int
 }
 
 func (c Controller) Main() error {
@@ -77,6 +75,9 @@ func (c Controller) parseInput(input string) error {
 	// split into parts
 	parts := strings.Split(input, " ")
 
+	// create an error holder
+	var err error
+
 	// take out the command by parsing the first part
 	// switch on the input command and run functions
 	switch parts[0] {
@@ -85,9 +86,14 @@ func (c Controller) parseInput(input string) error {
 	case "help":
 		c.printHelp()
 	case "tests":
-		c.readTests(parts[1])
+		c.currentTest = 0
+		if c.testCase, err = c.readTests(parts[1]); err != nil {
+			fmt.Println(err)
+		}
 	case "next":
-		c.next()
+		if c.currentTest, err = c.next(); err != nil {
+			fmt.Println(err)
+		}
 	case "ping":
 		c.pintServer(c.Cfg.GetNodes()[parts[1]])
 	case "reset":
@@ -140,15 +146,14 @@ transaction <sender> <receiver> <amount> | make a transaction for a client`,
 }
 
 // readTests reads a CSV file into current testcase array
-func (c Controller) readTests(path string) error {
-	// set testcase
-	testCase = make([]testSet, 0)
-	currentTest = 0
+func (c Controller) readTests(path string) ([]testSet, error) {
+	// set testcases into an array
+	testCase := make([]testSet, 0)
 
 	// open the CSV file
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
@@ -229,23 +234,26 @@ func (c Controller) readTests(path string) error {
 		}
 	}
 
-	return nil
+	fmt.Printf("file: %s\n", path)
+	fmt.Printf("reading %d sets.\n", len(testCase))
+
+	return testCase, nil
 }
 
 // next runs the next test-set until it reaches the end of sets.
-func (c Controller) next() error {
+func (c Controller) next() (int, error) {
 	// check for set exist
-	if currentTest >= len(testCase) {
-		return errEndOfSets
+	if c.currentTest >= len(c.testCase) {
+		return c.currentTest, errEndOfSets
 	}
 
 	// select the current index and execSet
-	c.execSet(testCase[currentTest])
+	c.execSet(c.testCase[c.currentTest])
 
 	// go for the next test-set
-	currentTest++
+	c.currentTest++
 
-	return nil
+	return c.currentTest, nil
 }
 
 // execSet runs a testcase set.
