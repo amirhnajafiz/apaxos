@@ -9,6 +9,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // LivenessDialer is used to call RPC methods for checking a server
@@ -19,9 +20,7 @@ type LivenessDialer struct {
 
 // connect should be called in the beginning of each method to establish a connection.
 func (l *LivenessDialer) connect(address string) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-
-	conn, err := grpc.NewClient(address, opts...)
+	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("[grpc/client/livenessDialer] failed to open connection to %s: %v", address, err)
 	}

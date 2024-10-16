@@ -10,6 +10,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -20,9 +21,7 @@ type TransactionsDialer struct {
 
 // connect should be called in the beginning of each method to establish a connection.
 func (t *TransactionsDialer) connect(address string) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-
-	conn, err := grpc.NewClient(address, opts...)
+	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("[grpc/client/transactionsdialer] failed to open connectio to %s: %v", address, err)
 	}

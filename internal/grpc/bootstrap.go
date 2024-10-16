@@ -58,6 +58,7 @@ func (b *Bootstrap) ListenAnsServer() error {
 		Memory:    b.Memory,
 		Database:  b.Database,
 		Logger:    b.Logger.Named("transactions"),
+		Metrics:   b.Metrics,
 	})
 
 	// starting the server

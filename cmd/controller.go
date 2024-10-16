@@ -88,6 +88,9 @@ func (c Controller) parseInput(input string) error {
 		c.readTests(parts[1])
 	case "next":
 		c.next()
+	case "ping":
+		tmp := parts[1]
+		c.pintServer(c.Cfg.GetNodes()[tmp])
 	case "reset":
 		c.resetServers()
 	case "printbalance":
@@ -125,6 +128,7 @@ help | prints help instructions
 tests  <csv path> | loads a csv test file
 next | runs the next test-set
 reset | reset all servers status to active
+ping <node> | send a ping message to a node
 printbalance <client> | print the balance of a client (based on shards)
 printlogs <node> | print logs of a node
 printdb <node> | print database of a node
@@ -279,4 +283,9 @@ func (c Controller) resetServers() {
 	for _, value := range c.Cfg.GetNodes() {
 		c.client.UpdateServerStatus(value, true)
 	}
+}
+
+// ping server sends a ping request to a node to check it's availability.
+func (c Controller) pintServer(address string) {
+	fmt.Println(c.client.Dialer.Ping(address))
 }
