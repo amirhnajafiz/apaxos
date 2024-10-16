@@ -38,48 +38,45 @@ func (s *Transactions) observeMetrics(start, end time.Time) {
 // NewTransaction is called for registering a new transaction.
 // The handler sends a demand to consensus and waits for a response.
 func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
-	s.Logger.Debug("rpc called NewTransaction")
+	s.Logger.Debug(
+		"rpc called NewTransaction",
+		zap.String("sender", req.GetSender()),
+		zap.String("receiver", req.GetReciever()),
+		zap.Int64("amount", req.GetAmount()),
+	)
 
 	// to set system metrics
 	start := time.Now()
 
 	// send a message to the consensus module to process a new transaction
-	channel, code, err := s.Consensus.Checkout(&messages.Packet{
+	channel, err := s.Consensus.Checkout(&messages.Packet{
 		Type:    enum.PacketTransaction,
 		Payload: req,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// set the first end of response
 	end := time.Now()
 
-	s.Logger.Debug("consensus responed", zap.Int("code", code))
-
-	// if the consensus didn't accept our transaction, we return an error
-	if code != enum.ResponseAccepted {
-		s.observeMetrics(start, end)
-
-		return &transactions.TransactionResponse{
-			Status: int64(code),
-			Text:   err.Error(),
-		}, err
-	} else { // else, it means that the consensus module has accepted our transaction
-		// now we have to see that we should wait for a response, or the transaction is submitted
-		response := transactions.TransactionResponse{
-			Status: int64(code),
-		}
-
-		// wait for consensus module response
-		if code != enum.ResponseOK {
-			resp := <-channel
-
-			end = time.Now()
-			response.Text = resp.Payload.(string)
-		}
-
-		s.observeMetrics(start, end)
-
-		return &response, nil
+	// create a response instance
+	response := transactions.TransactionResponse{
+		Text: "transaction submitted",
 	}
+
+	// if we got a channel, we should wait for consensus module response over it
+	if channel != nil {
+		resp := <-channel
+
+		end = time.Now()
+
+		response.Text = resp.Payload.(string)
+	}
+
+	s.observeMetrics(start, end)
+
+	return &response, nil
 }
 
 // PrintBalance is a simple operation that reads the client balance from node's memory.

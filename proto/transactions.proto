@@ -18,8 +18,7 @@ service Transactions {
 
 // defining client messages requests-responses
 message TransactionResponse {
-  int64 status = 1;
-  string text = 2;
+  string text = 1;
 }
 
 message PrintBalanceRequest {
