@@ -18,7 +18,6 @@ import (
 // list of errors that could happen during the controller run
 var (
 	errInvalidCommand = errors.New("command not found")
-	errNumberOfArgs   = errors.New("args input are not enough")
 	errEndOfSets      = errors.New("no test-set available")
 )
 
