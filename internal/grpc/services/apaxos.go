@@ -24,7 +24,7 @@ func (a *Apaxos) Propose(ctx context.Context, input *apaxos.PrepareMessage) (*em
 	a.Logger.Debug("rpc called propose", zap.String("caller", input.NodeId))
 
 	// call prepare method of the consensus module
-	a.Consensus.Prepare(input)
+	go a.Consensus.Prepare(input)
 
 	return &emptypb.Empty{}, nil
 }
@@ -47,7 +47,7 @@ func (a *Apaxos) Accept(ctx context.Context, input *apaxos.AcceptMessage) (*empt
 	a.Logger.Debug("rpc called accept", zap.String("caller", input.NodeId))
 
 	// call accept method of the consensus module
-	a.Consensus.Accept(input)
+	go a.Consensus.Accept(input)
 
 	return &emptypb.Empty{}, nil
 }
@@ -69,7 +69,7 @@ func (a *Apaxos) Commit(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, 
 	a.Logger.Debug("rpc called commit")
 
 	// call commit method of the consensus module
-	a.Consensus.Commit()
+	go a.Consensus.Commit()
 
 	return &emptypb.Empty{}, nil
 }
@@ -79,7 +79,7 @@ func (a *Apaxos) Sync(ctx context.Context, input *apaxos.SyncMessage) (*emptypb.
 	a.Logger.Debug("rpc called sync")
 
 	// call sync method of the consensus module
-	a.Consensus.Sync(input)
+	go a.Consensus.Sync(input)
 
 	return &emptypb.Empty{}, nil
 }
