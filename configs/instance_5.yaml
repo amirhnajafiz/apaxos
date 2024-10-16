@@ -37,7 +37,7 @@ majority: 3
 grpc:
   host: "localhost"
   port: 5005
-  request_timeout: 1000 # in milliseconds
+  request_timeout: 10000 # in milliseconds
   majority_timeout: 1000 # in microsends
 
 # database configs

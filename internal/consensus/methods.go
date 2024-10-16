@@ -19,9 +19,13 @@ func (c *Consensus) Prepare(msg *apaxos.PrepareMessage) {
 	// first we check the proposer last committed message to our own last committed message
 	compareResult := utils.CompareBallotNumbers(proposerLastCommittedMessage, c.Memory.GetLastCommittedMessage())
 	if compareResult >= 0 {
+		c.Logger.Debug("compare result states a sync client", zap.Int("result", compareResult))
+
 		// if they where same as us or greater, we continue the logic in promise handler
 		c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber, compareResult == 0)
 	} else {
+		c.Logger.Debug("compare result states a sync needed", zap.Int("result", compareResult))
+
 		// proposer is a not syned with us, therefore, we try to sync it by transmitting a sync request
 		c.transmitSync(c.Nodes[msg.NodeId])
 	}
@@ -37,6 +41,8 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 
 	// now we check the proposer's ballot-number with our own ballot-number.
 	if utils.CompareBallotNumbers(proposerBallotNumber, savedBallotNumber) < 0 {
+		c.Logger.Debug("no new or equal ballot number")
+
 		// this means the the proposer's ballot-number is <= our saved ballot-number
 		return
 	}

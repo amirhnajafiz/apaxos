@@ -48,12 +48,20 @@ type Apaxos struct {
 // then it sends accept messages, then it waits on accepted messages, finally, it
 // sends commit messages.
 func (a *Apaxos) Start() error {
+	defer func() {
+		// set new ballot-number in memory for next attempts
+		a.Memory.SetBallotNumber(a.selectedBallotNumber)
+	}()
+
 	// create a new promised messages list to get all promise messages
 	a.promisedMessage = make([]*apaxos.PromiseMessage, 0)
 
 	// get the current ballot-number from memory to increase ballot number on each attempt
-	a.selectedBallotNumber = a.Memory.GetBallotNumber()
-	a.selectedBallotNumber.Number++
+	tmp := a.Memory.GetBallotNumber()
+	a.selectedBallotNumber = &apaxos.BallotNumber{
+		NodeId: tmp.GetNodeId(),
+		Number: tmp.GetNumber() + 1,
+	}
 
 	a.Logger.Debug(
 		"sending prepare",
@@ -63,9 +71,6 @@ func (a *Apaxos) Start() error {
 
 	// send a propose message to all existing nodes
 	go a.broadcastPropose(a.selectedBallotNumber)
-
-	// set new ballot-number in memory for next attempts
-	a.Memory.SetBallotNumber(a.selectedBallotNumber)
 
 	// wait for promise messages (first on majority, then on a timeout)
 	err := a.waitForPromise()

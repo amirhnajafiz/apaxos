@@ -75,7 +75,7 @@ func (a *Apaxos) waitForAccepted() error {
 		select {
 		case pkt := <-a.InChannel:
 			// if the packet is not promised then don't count
-			if pkt.Type != enum.PacketPromise {
+			if pkt.Type != enum.PacketAccepted {
 				continue
 			}
 
