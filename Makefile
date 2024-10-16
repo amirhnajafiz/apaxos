@@ -23,4 +23,4 @@ controller:
 	./main controller $(CTL_C)
 
 db:
-	./main database $(DB_C)
+	./main mongodb $(DB_C)

@@ -41,7 +41,8 @@ func main() {
 		Logger: logr.Named("node"),
 	}
 	db := cmd.MongoDB{
-		Cfg: cfg,
+		Cfg:    cfg,
+		Logger: logr.Named("mongodb"),
 	}
 
 	// command is the first argument variable
