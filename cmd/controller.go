@@ -101,6 +101,10 @@ func (c Controller) parseInput(input string) error {
 		c.pintServer(c.Cfg.GetNodes()[parts[1]])
 	case "reset":
 		c.resetServers()
+	case "block":
+		c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], false)
+	case "unblock":
+		c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], true)
 	case "printbalance":
 		tmp := parts[1]
 		address := c.Cfg.GetClientShards()[tmp]
@@ -131,12 +135,18 @@ func (c Controller) parseInput(input string) error {
 // help command displays controller instructions.
 func (c Controller) printHelp() error {
 	fmt.Println(
-		`exit: close the controller app
+		`
+exit: close the controller app
 help | prints help instructions
+
 tests  <csv path> | loads a csv test file
 next | runs the next test-set
+
 reset | reset all servers status to active
+block <node> | get a node out of access
+unblock <node> | restore a single node 
 ping <node> | send a ping message to a node
+
 printbalance <client> | print the balance of a client (based on shards)
 printlogs <node> | print logs of a node
 printdb <node> | print database of a node
