@@ -7,11 +7,17 @@ func (w Worker) snapshotNodeState() error {
 	// build a new state (snapshot)
 	state := models.State{
 		Clients:              w.Memory.GetClients(),
-		LastCommittedMessage: *w.Memory.GetLastCommittedMessage(),
-		BallotNumber:         *w.Memory.GetBallotNumber(),
-		AcceptedNum:          *w.Memory.GetAcceptedNum(),
-		Datastore:            *w.Memory.GetDatastore(),
+		LastCommittedMessage: models.BallotNumber{},
+		BallotNumber:         models.BallotNumber{},
+		AcceptedNum:          models.BallotNumber{},
+		Datastore:            models.Block{},
 	}
+
+	// set the state values from memory reads
+	state.LastCommittedMessage.FromProtoModel(w.Memory.GetLastCommittedMessage())
+	state.BallotNumber.FromProtoModel(w.Memory.GetBallotNumber())
+	state.AcceptedNum.FromProtoModel(w.Memory.GetAcceptedNum())
+	state.Datastore.FromProtoModel(w.Memory.GetDatastore())
 
 	// copy accepted_val and current datastore
 	vals := w.Memory.GetAcceptedVal()
@@ -19,7 +25,7 @@ func (w Worker) snapshotNodeState() error {
 	// converting addresses to values
 	state.AcceptedVal = make([]models.Block, len(vals))
 	for index, item := range vals {
-		state.AcceptedVal[index] = *item
+		state.AcceptedVal[index].FromProtoModel(item)
 	}
 
 	// store the snapshot in MongoDB

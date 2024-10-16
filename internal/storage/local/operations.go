@@ -1,6 +1,8 @@
 package local
 
-import "github.com/f24-cse535/apaxos/pkg/models"
+import (
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+)
 
 // GetSequenceNumber is used for labeling transactions
 // inside each node to keep an order of them.
@@ -39,43 +41,43 @@ func (m *Memory) GetClients() map[string]int64 {
 }
 
 // SetBallotNumber updates the current ballot-number.
-func (m *Memory) SetBallotNumber(instance *models.BallotNumber) {
+func (m *Memory) SetBallotNumber(instance *apaxos.BallotNumber) {
 	m.ballotNumber = instance
 }
 
 // GetBallotNumber is used to return the current ballot-number.
-func (m *Memory) GetBallotNumber() *models.BallotNumber {
+func (m *Memory) GetBallotNumber() *apaxos.BallotNumber {
 	return m.ballotNumber
 }
 
 // SetAcceptedNum is used to update the current accepted_num.
-func (m *Memory) SetAcceptedNum(instance *models.BallotNumber) {
+func (m *Memory) SetAcceptedNum(instance *apaxos.BallotNumber) {
 	m.acceptedNum = instance
 }
 
 // GetAcceptedNum is used to return the current accepted_num.
-func (m *Memory) GetAcceptedNum() *models.BallotNumber {
+func (m *Memory) GetAcceptedNum() *apaxos.BallotNumber {
 	return m.acceptedNum
 }
 
 // SetAcceptedVal is used to update the current accepted_val.
-func (m *Memory) SetAcceptedVal(instance []*models.Block) {
+func (m *Memory) SetAcceptedVal(instance []*apaxos.Block) {
 	m.acceptedVal = instance
 }
 
 // GetAcceptedVal is used to return the current accepted_val.
-func (m *Memory) GetAcceptedVal() []*models.Block {
+func (m *Memory) GetAcceptedVal() []*apaxos.Block {
 	return m.acceptedVal
 }
 
 // AddTransactionToDatastore stores a transaction into datastore.
-func (m *Memory) AddTransactionToDatastore(instance models.Transaction) {
+func (m *Memory) AddTransactionToDatastore(instance *apaxos.Transaction) {
 	m.datastore.Transactions = append(m.datastore.Transactions, instance)
 }
 
 // ClearDatastore gets a block and removes the transactions from datastore
 // that are inside that block.
-func (m *Memory) ClearDatastore(instance *models.Block) {
+func (m *Memory) ClearDatastore(instance *apaxos.Block) {
 	// create a map to store elements of block for quick lookup
 	hashMap := make(map[int64]bool)
 	for _, transaction := range instance.Transactions {
@@ -83,7 +85,7 @@ func (m *Memory) ClearDatastore(instance *models.Block) {
 	}
 
 	// create a new datastore
-	datastore := make([]models.Transaction, 0)
+	datastore := make([]*apaxos.Transaction, 0)
 	for _, transaction := range m.datastore.Transactions {
 		// add transactions that are not in the given block
 		if !hashMap[transaction.SequenceNumber] {
@@ -96,21 +98,21 @@ func (m *Memory) ClearDatastore(instance *models.Block) {
 }
 
 // GetDatastore returns the datastore block.
-func (m *Memory) GetDatastore() *models.Block {
+func (m *Memory) GetDatastore() *apaxos.Block {
 	return m.datastore
 }
 
 // SetDatastore only updates the datastore transactions list.
-func (m *Memory) SetDatastore(instance []models.Transaction) {
+func (m *Memory) SetDatastore(instance []*apaxos.Transaction) {
 	m.datastore.Transactions = instance
 }
 
 // SetLastCommittedMessage updates last committed value.
-func (m *Memory) SetLastCommittedMessage(instance *models.BallotNumber) {
+func (m *Memory) SetLastCommittedMessage(instance *apaxos.BallotNumber) {
 	m.lastCommitted = instance
 }
 
 // GetLastCommittedMessage returns the current last committed value.
-func (m *Memory) GetLastCommittedMessage() *models.BallotNumber {
+func (m *Memory) GetLastCommittedMessage() *apaxos.BallotNumber {
 	return m.lastCommitted
 }

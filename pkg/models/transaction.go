@@ -16,7 +16,7 @@ type Transaction struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (t Transaction) ToProtoModel() *apaxos.Transaction {
+func (t *Transaction) ToProtoModel() *apaxos.Transaction {
 	return &apaxos.Transaction{
 		Sender:         t.Sender,
 		Reciever:       t.Reciever,
@@ -25,11 +25,9 @@ func (t Transaction) ToProtoModel() *apaxos.Transaction {
 	}
 }
 
-func (t Transaction) FromProtoModel(instance *apaxos.Transaction) Transaction {
+func (t *Transaction) FromProtoModel(instance *apaxos.Transaction) {
 	t.Sender = instance.GetSender()
 	t.Reciever = instance.GetReciever()
 	t.Amount = instance.GetAmount()
 	t.SequenceNumber = instance.GetSequenceNumber()
-
-	return t
 }

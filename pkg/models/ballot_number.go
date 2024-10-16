@@ -14,16 +14,14 @@ type BallotNumber struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b BallotNumber) ToProtoModel() *apaxos.BallotNumber {
+func (b *BallotNumber) ToProtoModel() *apaxos.BallotNumber {
 	return &apaxos.BallotNumber{
 		Number: b.Number,
 		NodeId: b.NodeId,
 	}
 }
 
-func (b BallotNumber) FromProtoModel(instance *apaxos.BallotNumber) BallotNumber {
+func (b *BallotNumber) FromProtoModel(instance *apaxos.BallotNumber) {
 	b.Number = instance.GetNumber()
 	b.NodeId = instance.GetNodeId()
-
-	return b
 }

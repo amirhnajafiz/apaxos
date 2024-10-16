@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/f24-cse535/apaxos/pkg/models"
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
 )
 
 // Memory is a local storage that is used for each node. It keeps the state of each node.
@@ -12,28 +13,27 @@ type Memory struct {
 
 	clients map[string]int64 // a map of all clients with their balances
 
-	ballotNumber  *models.BallotNumber // the ballot number of each node
-	lastCommitted *models.BallotNumber // apaxos last committed message for sync
-	acceptedNum   *models.BallotNumber // apaxos accepted num
+	ballotNumber  *apaxos.BallotNumber // the ballot number of each node
+	lastCommitted *apaxos.BallotNumber // apaxos last committed message for sync
+	acceptedNum   *apaxos.BallotNumber // apaxos accepted num
 
-	datastore   *models.Block   // local transactions datastore for each node
-	acceptedVal []*models.Block // apaxos accepted var
+	datastore   *apaxos.Block   // local transactions datastore for each node
+	acceptedVal []*apaxos.Block // apaxos accepted var
 }
 
 // ReadFromState is used to load a backup state into the current memory.
 func (m *Memory) ReadFromState(state *models.State) {
 	m.clients = state.Clients
 
-	m.lastCommitted = &state.LastCommittedMessage
-	m.ballotNumber = &state.BallotNumber
-	m.acceptedNum = &state.AcceptedNum
+	m.lastCommitted = state.LastCommittedMessage.ToProtoModel()
+	m.ballotNumber = state.BallotNumber.ToProtoModel()
+	m.acceptedNum = state.AcceptedNum.ToProtoModel()
+	m.datastore = state.Datastore.ToProtoModel()
 
-	m.acceptedVal = make([]*models.Block, len(state.AcceptedVal))
+	m.acceptedVal = make([]*apaxos.Block, len(state.AcceptedVal))
 	for index, item := range state.AcceptedVal {
-		m.acceptedVal[index] = &item
+		m.acceptedVal[index] = item.ToProtoModel()
 	}
-
-	m.datastore = &state.Datastore
 }
 
 // NewMemory returns an instance of the memory struct.
@@ -45,20 +45,20 @@ func NewMemory(nodeId string, balances map[string]int64) *Memory {
 
 		acceptedNum: nil,
 
-		acceptedVal: make([]*models.Block, 0),
-		datastore: &models.Block{
-			Metadata: models.BlockMetadata{
+		acceptedVal: make([]*apaxos.Block, 0),
+		datastore: &apaxos.Block{
+			Metadata: &apaxos.BlockMetaData{
 				NodeId: nodeId,
 			},
-			Transactions: make([]models.Transaction, 0),
+			Transactions: make([]*apaxos.Transaction, 0),
 		},
 
-		lastCommitted: &models.BallotNumber{
+		lastCommitted: &apaxos.BallotNumber{ // initialize the last committed as zero
 			Number: 0,
 			NodeId: "",
 		},
 
-		ballotNumber: &models.BallotNumber{ // initialize the ballot number for each node
+		ballotNumber: &apaxos.BallotNumber{ // initialize the ballot number for each node
 			Number: 0,
 			NodeId: nodeId,
 		},

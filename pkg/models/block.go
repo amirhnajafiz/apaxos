@@ -23,14 +23,14 @@ type Block struct {
 // Each model comes with two methods to create proto-model from
 // the existing model, and a build a data-model from the given proto-model.
 
-func (b BlockMetadata) ToProtoModel() *apaxos.BlockMetaData {
+func (b *BlockMetadata) ToProtoModel() *apaxos.BlockMetaData {
 	return &apaxos.BlockMetaData{
 		NodeId:       b.NodeId,
 		BallotNumber: b.BallotNumber.ToProtoModel(),
 	}
 }
 
-func (b Block) ToProtoModel() *apaxos.Block {
+func (b *Block) ToProtoModel() *apaxos.Block {
 	list := make([]*apaxos.Transaction, len(b.Transactions))
 	for index, value := range b.Transactions {
 		list[index] = value.ToProtoModel()
@@ -42,22 +42,18 @@ func (b Block) ToProtoModel() *apaxos.Block {
 	}
 }
 
-func (b BlockMetadata) FromProtoModel(instance *apaxos.BlockMetaData) BlockMetadata {
+func (b *BlockMetadata) FromProtoModel(instance *apaxos.BlockMetaData) {
 	b.NodeId = instance.GetNodeId()
-	b.BallotNumber = BallotNumber{}.FromProtoModel(instance.BallotNumber)
-
-	return b
+	b.BallotNumber.FromProtoModel(instance.BallotNumber)
 }
 
-func (b Block) FromProtoModel(instance *apaxos.Block) Block {
+func (b *Block) FromProtoModel(instance *apaxos.Block) {
 	list := make([]Transaction, len(instance.Transactions))
 
 	for index, value := range instance.Transactions {
-		list[index] = Transaction{}.FromProtoModel(value)
+		list[index].FromProtoModel(value)
 	}
 
 	b.Transactions = list
-	b.Metadata = BlockMetadata{}.FromProtoModel(instance.GetMetadata())
-
-	return b
+	b.Metadata.FromProtoModel(instance.GetMetadata())
 }
