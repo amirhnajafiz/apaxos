@@ -26,19 +26,6 @@ type Transactions struct {
 	Metrics   *metrics.Metrics
 }
 
-// observeMetrics is used in RPCs to set new metrics values.
-func (s *Transactions) observeMetrics(duration time.Duration) {
-	tmp := duration.Microseconds()
-
-	if tmp == 0 {
-		s.Metrics.ObserveLatency(0)
-		s.Metrics.ObserveThroughput(0)
-	} else {
-		s.Metrics.ObserveLatency(float64(tmp))              // latency is the time spent for each transaction
-		s.Metrics.ObserveThroughput(float64(1000000 / tmp)) // throughput is the number of transactions per second
-	}
-}
-
 // NewTransaction is called for registering a new transaction.
 // The handler sends a demand to consensus and waits for a response.
 func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transaction) (*transactions.TransactionResponse, error) {
@@ -70,13 +57,12 @@ func (s *Transactions) NewTransaction(ctx context.Context, req *apaxos.Transacti
 	// if we got a channel, we should wait for consensus module response over it
 	if channel != nil {
 		resp := <-channel
-
 		elapsed = time.Since(start) // calculate the elapsed time
-
 		response.Text = resp.Payload.(string)
 	}
 
-	s.observeMetrics(elapsed)
+	// update metrics
+	s.Metrics.Observe(elapsed)
 
 	return &response, nil
 }
