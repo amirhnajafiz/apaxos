@@ -90,22 +90,21 @@ func (c *Consensus) Commit() {
 	c.Memory.SetLastCommittedMessage(acceptedVal[0].Metadata.GetBallotNumber())
 
 	// now we store the blocks inside MongoDB  using a go-routine to speedup the process
-	go func(input []*apaxos.Block) {
-		// convert blocks to models
-		blocks := make([]*models.Block, len(input))
-		for index, block := range input {
-			blocks[index].FromProtoModel(block)
-		}
+	// convert blocks to models
+	blocks := make([]*models.Block, len(acceptedVal))
+	for index, block := range acceptedVal {
+		blocks[index] = &models.Block{}
+		blocks[index].FromProtoModel(block)
+	}
 
-		// try to store them
-		for {
-			if err := c.Database.InsertBlocks(blocks); err != nil {
-				c.Logger.Error("failed to store blocks inside MongoDB", zap.Error(err))
-			} else {
-				break
-			}
+	// try to store them
+	for {
+		if err := c.Database.InsertBlocks(blocks); err != nil {
+			c.Logger.Error("failed to store blocks inside MongoDB", zap.Error(err))
+		} else {
+			break
 		}
-	}(acceptedVal)
+	}
 
 	// finally, we clear our accepted_num and accepted_val
 	c.Memory.SetAcceptedNum(nil)

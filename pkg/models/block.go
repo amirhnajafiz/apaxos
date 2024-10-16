@@ -1,6 +1,8 @@
 package models
 
-import "github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+import (
+	"github.com/f24-cse535/apaxos/pkg/rpc/apaxos"
+)
 
 // Block metadata model is a struct that acts as
 // a data-model for MongoDB database. It is also used
@@ -44,16 +46,25 @@ func (b *Block) ToProtoModel() *apaxos.Block {
 
 func (b *BlockMetaData) FromProtoModel(instance *apaxos.BlockMetaData) {
 	b.NodeId = instance.GetNodeId()
+
+	b.BallotNumber = BallotNumber{}
 	b.BallotNumber.FromProtoModel(instance.BallotNumber)
 }
 
 func (b *Block) FromProtoModel(instance *apaxos.Block) {
+	// initialize the Transactions slice
 	list := make([]Transaction, len(instance.Transactions))
 
 	for index, value := range instance.Transactions {
-		list[index].FromProtoModel(value)
+		// properly initialize each Transaction before calling FromProtoModel
+		t := Transaction{}
+		t.FromProtoModel(value)
+		list[index] = t
 	}
 
 	b.Transactions = list
+
+	// ensure that b.Metadata is initialized before calling FromProtoModel
+	b.Metadata = BlockMetaData{} // assuming Metadata is a pointer type
 	b.Metadata.FromProtoModel(instance.GetMetadata())
 }
