@@ -21,12 +21,12 @@ func NewMetrics() *Metrics {
 // Observe get's a duration time and updates system metrics.
 func (m *Metrics) Observe(duration time.Duration) {
 	// get microseconds
-	value := duration.Microseconds()
+	value := duration.Nanoseconds()
 
 	// calculate values
 	var throughput float64
 	if value != 0 {
-		throughput = 1000000 * float64(1/float64(value))
+		throughput = 1000000000 * float64(1/float64(value))
 	} else {
 		throughput = 0
 	}
@@ -35,7 +35,7 @@ func (m *Metrics) Observe(duration time.Duration) {
 	m.records++
 
 	// calculate the average value
-	m.latency += float64(value)
+	m.latency += float64(value / 1000)
 	m.throughput += throughput
 }
 
