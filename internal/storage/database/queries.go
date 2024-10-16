@@ -7,7 +7,6 @@ import (
 	"github.com/f24-cse535/apaxos/pkg/models"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -73,11 +72,11 @@ func (d *Database) GetLastState() (*models.State, error) {
 	ctx := context.Background()
 
 	// find the last inserted item by sorting `_id` in descending order and limiting to 1
-	filter := bson.D{primitive.E{Key: "_id", Value: "-1"}}
+	filter := bson.M{"$natural": -1}
 	opts := options.FindOne().SetSort(filter)
 
 	var state models.State
-	err := d.states.FindOne(ctx, bson.D{}, opts).Decode(&state)
+	err := d.states.FindOne(ctx, bson.M{}, opts).Decode(&state)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
