@@ -26,7 +26,10 @@ func (c *Consensus) Prepare(msg *apaxos.PrepareMessage) {
 		// if they where same as us or greater, we continue the logic in promise handler
 		c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber, compareResult == 0)
 	} else {
-		c.Logger.Warn("compare result states a sync needed (out-of-sync node detected)", zap.Int("result", compareResult))
+		c.Logger.Warn(
+			"compare last committed messages states a sync needed (out-of-sync node detected)",
+			zap.Int("result", compareResult),
+		)
 
 		// proposer is a not syned with us, therefore, we try to sync it by transmitting a sync request
 		c.transmitSync(c.Nodes[msg.NodeId])
@@ -59,6 +62,12 @@ func (c *Consensus) Accept(msg *apaxos.AcceptMessage) {
 	c.Memory.SetAcceptedNum(proposerBallotNumber)
 	// update accepted_val with proposer's give blocks
 	c.Memory.SetAcceptedVal(msg.Blocks)
+
+	c.Logger.Info(
+		"accept",
+		zap.String("from", proposerBallotNumber.GetNodeId()),
+		zap.Int64("number", proposerBallotNumber.GetNumber()),
+	)
 
 	c.Logger.Info("accepted sent", zap.String("to", msg.NodeId))
 
@@ -100,28 +109,25 @@ func (c *Consensus) Commit() {
 	// not to mention that we should update our last committed message
 	c.Memory.SetLastCommittedMessage(acceptedNum)
 
-	// now we store the blocks inside MongoDB  using a go-routine to speedup the process
-	// convert blocks to models
+	// now we store the blocks inside MongoDB
 	blocks := make([]*models.Block, len(acceptedVal))
 	for index, block := range acceptedVal {
-		blocks[index] = &models.Block{}
-		blocks[index].FromProtoModel(block)
+		if len(block.Transactions) > 0 { // only save the blocks that have transactions
+			blocks[index] = &models.Block{}
+			blocks[index].FromProtoModel(block)
+		}
 	}
 
-	// try to store them
-	for {
-		if err := c.Database.InsertBlocks(blocks); err != nil {
-			c.Logger.Warn("failed to store blocks inside MongoDB", zap.Error(err))
-		} else {
-			break
-		}
+	// query execution on MongoDB
+	if err := c.Database.InsertBlocks(blocks); err != nil {
+		c.Logger.Warn("failed to store blocks inside MongoDB", zap.Error(err))
 	}
 
 	// finally, we clear our accepted_num and accepted_val
 	c.Memory.SetAcceptedNum(nil)
 	c.Memory.SetAcceptedVal(nil)
 
-	// signal the instance for a commit message receive
+	// signal the apaxos instance for a commit message
 	c.Signal(&messages.Packet{
 		Type: enum.PacketCommit,
 	})

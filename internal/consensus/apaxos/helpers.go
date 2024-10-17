@@ -19,8 +19,7 @@ func (a *Apaxos) processPromiseMessages() {
 			go a.transmitSync(msg.NodeId)
 		}
 
-		// process their promise messages
-		// check to see if they have a different ballot-number
+		// process their promise messages, check to see if they have a different ballot-number
 		if utils.CompareBallotNumbers(msg.GetBallotNumber(), a.selectedBallotNumber) != 0 {
 			if a.acceptedNum == nil { // empty accepted_num and accepted_val
 				a.acceptedNum = msg.GetBallotNumber()
