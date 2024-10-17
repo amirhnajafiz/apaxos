@@ -30,7 +30,7 @@ node_id: "S3"
 client: "S3"
 workers_enabled: false
 workers_interval: 10 # in seconds
-log_level: "debug"
+log_level: "info"
 
 # consensus and gRPC values
 majority: 3
