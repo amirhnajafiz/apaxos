@@ -2,6 +2,25 @@
 
 This project is a distributed transaction management service. The goal is to replicate transactions over various number of nodes, keep the data consistant, and tolerate node failures. To achive these goals, we are going to use `PAXOS` consensus protocl. However, we are going to modify this protocol to handle multiple values in a single instance.
 
+## Sections
+
+- [APAXOS](#apaxos)
+  - [Sections](#sections)
+  - [System's flow](#systems-flow)
+  - [System components](#system-components)
+    - [System functions](#system-functions)
+    - [Data types](#data-types)
+  - [Phases](#phases)
+    - [Propose](#propose)
+    - [Promise](#promise)
+    - [Accept](#accept)
+    - [Accepted](#accepted)
+    - [Commit](#commit)
+    - [Sync](#sync)
+  - [User/System diagram](#usersystem-diagram)
+  - [Requirements](#requirements)
+  - [How to run?](#how-to-run)
+
 ## System's flow
 
 Clients send their transactions to servers (there is user-level sharding that map each client's account to one single machine). Servers store them inside a local storage as a block of transactions. After that, they run each transaction.
