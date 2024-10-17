@@ -102,14 +102,14 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 		// after this go-routine finished, clear the protocol instance
 		defer func() {
 			c.instance = nil
-			c.Logger.Debug("apaxos terminated")
+			c.Logger.Info("apaxos terminated")
 		}()
 
-		c.Logger.Debug("apaxos started")
+		c.Logger.Info("apaxos started")
 
 		// in a while loop, try to make consensus
 		for {
-			c.Logger.Debug("a round of apaxos")
+			c.Logger.Info("a round of apaxos")
 
 			// start apaxos protocol
 			err := c.instance.Start()
@@ -127,7 +127,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 				case errors.Is(err, protocol.ErrSlowNode):
 					// if we hit slow-node, it means that we got synced, so we should check the status of balance before
 					// rerunning the consensus protocol.
-					c.Logger.Info("slow server detected")
+					c.Logger.Warn("slow server detected")
 
 					// if the client balance is now enough, then we submit the transaction
 					if c.checkBalance(transaction) {
@@ -137,7 +137,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 						return
 					}
 				default:
-					c.Logger.Info("consensus error", zap.Error(err))
+					c.Logger.Warn("consensus error", zap.Error(err))
 				}
 			} else {
 				// now we check to see if the client balance is enough or not

@@ -42,7 +42,7 @@ func (c *Consensus) promiseHandler(address string, ballotNumber *apaxos.BallotNu
 		promiseMessage.BallotNumber = ballotNumber               // set ballot-number as proposer's sent
 	}
 
-	c.Logger.Debug("promised sent", zap.String("to", address))
+	c.Logger.Info("promised sent", zap.String("to", address))
 
 	// send the promise message
 	c.Dialer.Promise(address, promiseMessage)

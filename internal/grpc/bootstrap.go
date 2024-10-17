@@ -43,6 +43,7 @@ func (b *Bootstrap) ListenAnsServer() error {
 	// create a new grpc instance
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(b.selectiveStatusCheckUnaryInterceptor), // set an unary interceptor for liveness service
+		grpc.UnaryInterceptor(b.logPerRPCUnaryInterceptor),            // set a log per RPC interceptor
 	)
 
 	// register all gRPC services

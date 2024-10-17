@@ -3,12 +3,25 @@ package grpc
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
 // package name for the liveness service.
 const livenessServicePrefix = "/liveness."
+
+// logPerRPC logs request info per each RPC call.
+func (b *Bootstrap) logPerRPCUnaryInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (interface{}, error) {
+	b.Logger.Info("rpc called", zap.String("method", info.FullMethod))
+
+	return handler(ctx, req)
+}
 
 // selectiveStatusCheck interceptor checks the status
 // of a service before running the gRPC function.
