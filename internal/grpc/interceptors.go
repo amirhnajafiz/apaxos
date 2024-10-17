@@ -11,23 +11,22 @@ import (
 // package name for the liveness service.
 const livenessServicePrefix = "/liveness."
 
-// logging stream is used to print a log on each stream RPC.
-func (b *Bootstrap) loggingStreamInterceptor(
+// stream interceptor is used to print a log on each stream RPC.
+func (b *Bootstrap) allStreamInterceptor(
 	srv interface{},
 	ss grpc.ServerStream,
 	info *grpc.StreamServerInfo,
 	handler grpc.StreamHandler,
 ) error {
-	// Log the method being called
-	b.Logger.Info("rpc called", zap.String("method", info.FullMethod))
+	// log the method being called
+	b.Logger.Info("stream rpc called", zap.String("method", info.FullMethod))
 
-	// Proceed to the actual handler
+	// proceed to the actual handler
 	return handler(srv, ss)
 }
 
-// selectiveStatusCheck interceptor checks the status
-// of a service before running the gRPC function.
-func (b *Bootstrap) selectiveStatusCheckUnaryInterceptor(
+// allUnaryInterceptor interceptor checks the status of a service before running the gRPC function.
+func (b *Bootstrap) allUnaryInterceptor(
 	ctx context.Context,
 	req interface{},
 	info *grpc.UnaryServerInfo,
@@ -36,6 +35,7 @@ func (b *Bootstrap) selectiveStatusCheckUnaryInterceptor(
 	// if status is true, allow all services to proceed
 	if b.Memory.GetServiceStatus() {
 		b.Logger.Info("rpc called", zap.String("method", info.FullMethod))
+
 		return handler(ctx, req)
 	}
 

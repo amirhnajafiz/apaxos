@@ -37,13 +37,13 @@ func (b *Bootstrap) ListenAnsServer() error {
 	// on the local network, listen to a port
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", b.Port))
 	if err != nil {
-		return fmt.Errorf("[grcp] failed to start the listener server: %v", err)
+		return fmt.Errorf("failed to start the listener server: %v", err)
 	}
 
 	// create a new grpc instance
 	server := grpc.NewServer(
-		grpc.UnaryInterceptor(b.selectiveStatusCheckUnaryInterceptor), // set an unary interceptor for liveness service
-		grpc.StreamInterceptor(b.loggingStreamInterceptor),            // set an stream interceptor for logging
+		grpc.UnaryInterceptor(b.allUnaryInterceptor),   // set an unary interceptor
+		grpc.StreamInterceptor(b.allStreamInterceptor), // set a stream interceptor
 	)
 
 	// register all gRPC services
@@ -65,7 +65,7 @@ func (b *Bootstrap) ListenAnsServer() error {
 	// starting the server
 	b.Logger.Info("grpc server started", zap.Int("port", b.Port))
 	if err := server.Serve(listener); err != nil {
-		return fmt.Errorf("[grpc] failed to start the server: %v", err)
+		return fmt.Errorf("failed to start the server: %v", err)
 	}
 
 	return nil
