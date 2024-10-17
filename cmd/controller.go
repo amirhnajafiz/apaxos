@@ -23,7 +23,6 @@ var (
 
 	// currentTest is a holder for executing test sets in testCase array
 	currentTest int
-
 	// testCase is a reference to an array of test sets
 	testCase *[]testSet
 )
@@ -79,20 +78,17 @@ func (c Controller) parseInput(input string) error {
 	// create an error holder
 	var err error
 
-	// take out the command by parsing the first part
-	// switch on the input command and run functions
+	// take out the command by parsing the first part and switch on the input command and run functions
 	switch parts[0] {
 	case "exit":
 		os.Exit(0)
 	case "help":
 		c.printHelp()
 	case "tests":
-		if err = c.readTests(parts[1]); err != nil {
-			fmt.Println(err)
-		}
+		err = c.readTests(parts[1])
 	case "next":
 		if currentTest >= len(*testCase) {
-			fmt.Println(errEndOfSets)
+			err = errEndOfSets
 		} else {
 			c.execSet(&(*testCase)[currentTest])
 			currentTest++
@@ -102,34 +98,30 @@ func (c Controller) parseInput(input string) error {
 	case "reset":
 		c.resetServers()
 	case "block":
-		c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], false)
+		err = c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], false)
 	case "unblock":
-		c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], true)
+		err = c.client.UpdateServerStatus(c.Cfg.GetNodes()[parts[1]], true)
 	case "printbalance":
-		tmp := parts[1]
-		address := c.Cfg.GetClientShards()[tmp]
-		c.client.PrintBalance(tmp, c.Cfg.GetNodes()[address])
+		err = c.client.PrintBalance(parts[1], c.Cfg.GetNodes()[c.Cfg.GetClientShards()[parts[1]]])
 	case "printlogs":
-		c.client.PrintLogs(c.Cfg.GetNodes()[parts[1]])
+		err = c.client.PrintLogs(c.Cfg.GetNodes()[parts[1]])
 	case "printdb":
-		c.client.PrintDB(c.Cfg.GetNodes()[parts[1]])
+		err = c.client.PrintDB(c.Cfg.GetNodes()[parts[1]])
 	case "performance":
-		c.client.Performance(c.Cfg.GetNodes())
+		err = c.client.Performance(c.Cfg.GetNodes())
 	case "aggrigated":
-		c.client.AggrigatedBalance(parts[1], c.Cfg.GetNodes())
+		err = c.client.AggrigatedBalance(parts[1], c.Cfg.GetNodes())
 	case "transaction":
 		sender := parts[1]
 		receiver := parts[2]
 		amount, _ := strconv.Atoi(parts[3])
-		node := c.Cfg.GetClientShards()[sender]
-		address := c.Cfg.GetNodes()[node]
 
-		c.client.Transaction(sender, receiver, amount, address)
+		c.client.Transaction(sender, receiver, amount, c.Cfg.GetNodes()[c.Cfg.GetClientShards()[sender]])
 	default:
 		return errInvalidCommand
 	}
 
-	return nil
+	return err
 }
 
 // help command displays controller instructions.
@@ -284,8 +276,7 @@ func (c Controller) readTests(path string) error {
 		transactions: transactions,
 	})
 
-	fmt.Printf("file: %s\n", path)
-	fmt.Printf("reading %d sets.\n", len(tmp))
+	fmt.Printf("file %s, loading %d sets.\n", path, len(tmp))
 
 	return nil
 }
@@ -319,6 +310,7 @@ func (c Controller) execSet(set *testSet) {
 		receiver := ts["receiver"].(string)
 		amount := ts["amount"].(int)
 		node := ts["address"].(string)
+
 		address := c.Cfg.GetNodes()[node]
 
 		if err := c.client.Transaction(sender, receiver, amount, address); err != nil {
@@ -333,7 +325,9 @@ func (c Controller) execSet(set *testSet) {
 // reset servers unblocks all of the servers.
 func (c Controller) resetServers() {
 	for _, value := range c.Cfg.GetNodes() {
-		c.client.UpdateServerStatus(value, true)
+		if err := c.client.UpdateServerStatus(value, true); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

@@ -22,7 +22,7 @@ func main() {
 	// get argument variables
 	argv := os.Args
 	if len(argv) < 3 {
-		panic("not enough arguments to run apaxos!")
+		panic("you did not provide enough arguments to run! (command - type - configpath)")
 	}
 
 	// load configs into a config struct
@@ -52,8 +52,9 @@ func main() {
 	// then we check the command to run different programs based on the user input.
 	if callback, ok := commands[command]; ok {
 		if err := callback.Main(); err != nil {
-			logr.Panic("failed to run command", zap.Error(err), zap.String("command", command))
+			logr.Panic("failed to run the command", zap.Error(err), zap.String("command", command))
 		}
+
 		logr.Info("successful run", zap.String("command", command))
 	} else {
 		panic(

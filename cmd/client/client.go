@@ -13,10 +13,12 @@ type Client struct {
 }
 
 // UpdateServerStatus is used to change the status of a server.
-func (c Client) UpdateServerStatus(address string, status bool) {
+func (c Client) UpdateServerStatus(address string, status bool) error {
 	if err := c.Dialer.ChangeState(address, status); err != nil {
-		fmt.Printf("%s returned error: %v\n", address, err)
+		return err
 	}
+
+	return nil
 }
 
 // PrintBalance runs a rpc call to get user balance.
@@ -127,8 +129,6 @@ func (c Client) AggrigatedBalance(client string, addresses map[string]string) er
 	for key, value := range addresses {
 		if balance, err := c.Dialer.PrintBalance(value, client); err == nil {
 			fmt.Printf("%s: %d\n", key, balance)
-		} else {
-			fmt.Printf("%s: no response: %v\n", key, err)
 		}
 	}
 
@@ -148,9 +148,9 @@ func (c Client) Transaction(sender string, receiver string, amount int, address 
 
 	// call rpc on the node
 	if text, err := c.Dialer.NewTransaction(address, t); err == nil {
-		fmt.Printf("server: %s\n", text)
+		fmt.Printf("%s\n", text)
 	} else {
-		fmt.Printf("%s: returned error: %v\n", address, err)
+		fmt.Printf("%s returned with an error: %v\n", address, err)
 	}
 
 	return nil
