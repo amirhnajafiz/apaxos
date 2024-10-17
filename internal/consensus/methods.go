@@ -126,7 +126,7 @@ func (c *Consensus) Commit() {
 		Type: enum.PacketCommit,
 	})
 
-	c.Logger.Info("comitted")
+	c.Logger.Info("committed")
 }
 
 // Sync get's a sync message and updates itself to catch up with others.
