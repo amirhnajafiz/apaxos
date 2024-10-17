@@ -109,3 +109,85 @@ sends a sync request and the list of blocks that where stored after that block. 
 - Database: `MongoDB`
 - Logging: `zap logger`
 - Configs: `koanf`
+
+## How to run?
+
+All nodes need a `.yaml` config file. This file stores the required data that is needed to start up a node. An example config file is like this:
+
+```yaml
+# config file for node instances
+# list of nodes and their addresses
+nodes:
+  - key: "S1"
+    value: "localhost:5001"
+
+# list of clients and initial balances
+clients:
+  - key: "S1"
+    value: "100"
+
+# node information
+node_id: "S1"
+client: "S1"
+workers_enabled: false
+workers_interval: 5 # in seconds
+log_level: "debug"
+
+# consensus and gRPC values
+majority: 3
+grpc:
+  host: "localhost"
+  port: 5001
+  request_timeout: 1000 # in milliseconds
+  majority_timeout: 10000 # in microsends
+
+# database configs
+mongodb: # username amirhnajafiz password d3tO2kzZCse5f509
+  uri: ""
+  database: "apaxos"
+```
+
+After compiling the application by running `make compile`, you can run `./main node config_1.yaml` to start a node.
+
+Now to communicate with the system, you can use the default controller. Again, you needa config file like this:
+
+```yaml
+# config file for controller app
+# list of nodes and their addresses
+nodes:
+  - key: "S1"
+    value: "localhost:5001"
+
+# list of clients and initial balances
+clients:
+  - key: "S1"
+    value: "100"
+
+# clients shards
+clients_shards:
+  - key: "S1"
+    value: "S1"
+```
+
+Then you can run `./main controller config-ctl.yaml` and use the cli:
+
+```sh
+$ help
+exit: close the controller app
+help | prints help instructions
+
+tests  <csv path> | loads a csv test file
+next | runs the next test-set
+
+reset | reset all servers status to active
+block <node> | get a node out of access
+unblock <node> | restore a single node 
+ping <node> | send a ping message to a node
+
+printbalance <client> | print the balance of a client (based on shards)
+printlogs <node> | print logs of a node
+printdb <node> | print database of a node
+performance | gets performance of all nodes
+aggrigated <client> | gets a clients balance in all servers
+transaction <sender> <receiver> <amount> | make a transaction for a client
+```
