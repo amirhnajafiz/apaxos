@@ -15,9 +15,13 @@ compile:
 CONFIG = configs/instance_1.yaml
 CTL_C=configs/controller.yaml
 DB_C=configs/database.yaml
+NUMBER=1
 
 node:
 	./main node $(CONFIG)
+
+apply:
+	./scripts/apply.sh $(NUMBER)
 
 controller:
 	./main controller $(CTL_C)
