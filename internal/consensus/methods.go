@@ -26,7 +26,7 @@ func (c *Consensus) Prepare(msg *apaxos.PrepareMessage) {
 		// if they where same as us or greater, we continue the logic in promise handler
 		c.promiseHandler(c.Nodes[msg.NodeId], proposerBallotNumber, compareResult == 0)
 	} else {
-		c.Logger.Debug("compare result states a sync needed (out-of-sync node detected)", zap.Int("result", compareResult))
+		c.Logger.Info("compare result states a sync needed (out-of-sync node detected)", zap.Int("result", compareResult))
 
 		// proposer is a not syned with us, therefore, we try to sync it by transmitting a sync request
 		c.transmitSync(c.Nodes[msg.NodeId])
@@ -111,7 +111,7 @@ func (c *Consensus) Commit() {
 	// try to store them
 	for {
 		if err := c.Database.InsertBlocks(blocks); err != nil {
-			c.Logger.Error("failed to store blocks inside MongoDB", zap.Error(err))
+			c.Logger.Info("failed to store blocks inside MongoDB", zap.Error(err))
 		} else {
 			break
 		}

@@ -28,7 +28,7 @@ func (d *Database) InsertBlocks(instances []*models.Block) error {
 
 	// use insert many to store blocks
 	if _, err := d.history.InsertMany(ctx, interfaceObjects); err != nil {
-		return fmt.Errorf("[storage/database] failed to insert objects: %v", err)
+		return fmt.Errorf("failed to insert objects: %v", err)
 	}
 
 	return nil
@@ -41,7 +41,7 @@ func (d *Database) GetBlocks() ([]*models.Block, error) {
 	// fetch all blocks
 	cursor, err := d.history.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, fmt.Errorf("[storage/database] failed to fetch all blocks: %v", err)
+		return nil, fmt.Errorf("failed to fetch all blocks: %v", err)
 	}
 	defer cursor.Close(ctx)
 
@@ -51,7 +51,7 @@ func (d *Database) GetBlocks() ([]*models.Block, error) {
 	for cursor.Next(ctx) {
 		var block models.Block
 		if err := cursor.Decode(&block); err != nil {
-			return nil, fmt.Errorf("[storage/database] failed to decode object: %v", err)
+			return nil, fmt.Errorf("failed to decode object: %v", err)
 		}
 
 		blocks = append(blocks, &block)
@@ -65,7 +65,7 @@ func (d *Database) InsertState(instance *models.State) error {
 	ctx := context.Background()
 
 	if _, err := d.states.InsertOne(ctx, instance); err != nil {
-		return fmt.Errorf("[storage/database] failed to store state: %v", err)
+		return fmt.Errorf("failed to store state: %v", err)
 	}
 
 	return nil
@@ -86,7 +86,7 @@ func (d *Database) GetLastState() (*models.State, error) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("[storage/database] failed to load snapshot: %v", err)
+		return nil, fmt.Errorf("failed to load snapshot: %v", err)
 	}
 
 	return &state, nil

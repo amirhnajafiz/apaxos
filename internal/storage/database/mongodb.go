@@ -29,7 +29,7 @@ func NewDatabase(cfg mongodb.Config, prefix string) (*Database, error) {
 	// open a new connection to MongoDB cluster
 	conn, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.URI))
 	if err != nil {
-		return nil, fmt.Errorf("[storage/database] failed to open a MongoDB connection: %v", err)
+		return nil, fmt.Errorf("failed to open a MongoDB connection: %v", err)
 	}
 
 	// create pointers to collections

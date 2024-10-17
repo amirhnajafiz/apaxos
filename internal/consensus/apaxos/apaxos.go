@@ -63,7 +63,7 @@ func (a *Apaxos) Start() error {
 		Number: tmp.GetNumber() + 1,
 	}
 
-	a.Logger.Debug(
+	a.Logger.Info(
 		"sending prepare",
 		zap.Int64("number", a.selectedBallotNumber.Number),
 		zap.String("node", a.selectedBallotNumber.NodeId),
@@ -79,12 +79,12 @@ func (a *Apaxos) Start() error {
 		return err
 	}
 
-	a.Logger.Debug("got majority promise", zap.Int("promises", len(a.promisedMessage)))
+	a.Logger.Info("got majority promise", zap.Int("promises", len(a.promisedMessage)))
 
 	// create accepted_num and accepted_val by checking the promised messages
 	a.processPromiseMessages()
 
-	a.Logger.Debug(
+	a.Logger.Info(
 		"sending promise",
 		zap.Int64("number", a.selectedBallotNumber.Number),
 		zap.String("node", a.selectedBallotNumber.NodeId),
@@ -100,12 +100,12 @@ func (a *Apaxos) Start() error {
 		return err
 	}
 
-	a.Logger.Debug("got majority accepted")
+	a.Logger.Info("got majority accepted")
 
 	// send commit message to all other servers
 	a.broadcastCommit()
 
-	a.Logger.Debug("sent commit messages, waiting for my own commit")
+	a.Logger.Info("sent commit messages, waiting for my own commit")
 
 	// wait for own commit packet in case of race condition
 	return a.waitForOwnCommit()

@@ -137,7 +137,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 						return
 					}
 				default:
-					c.Logger.Error("consensus error", zap.Error(err))
+					c.Logger.Info("consensus error", zap.Error(err))
 				}
 			} else {
 				// now we check to see if the client balance is enough or not

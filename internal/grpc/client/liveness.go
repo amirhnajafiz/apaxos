@@ -33,7 +33,7 @@ func (l *LivenessDialer) Ping(address string) bool {
 	// base connection
 	conn, err := l.connect(address)
 	if err != nil {
-		l.Logger.Info("failed to connect", zap.String("address", address), zap.Error(err))
+		l.Logger.Debug("failed to connect", zap.String("address", address), zap.Error(err))
 
 		return false
 	}
@@ -44,7 +44,7 @@ func (l *LivenessDialer) Ping(address string) bool {
 		Random: rand.Int64(), // a non-negative number
 	})
 	if err != nil {
-		l.Logger.Error("failed to call ping RPC", zap.String("address", address), zap.Error(err))
+		l.Logger.Debug("failed to call ping RPC", zap.String("address", address), zap.Error(err))
 
 		return false
 	}
