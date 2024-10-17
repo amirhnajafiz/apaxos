@@ -107,18 +107,16 @@ func (c Client) Performance(addresses map[string]string) error {
 
 	for key, address := range addresses {
 		if resp, err := c.Dialer.Performance(address); err == nil {
-			fmt.Printf("%s: %f TPS, %f micro-seconds\n", key, resp.GetThroughput(), resp.GetLatency())
-
 			// update counting values
 			count++
 			latency += resp.GetLatency()
 			throughput += resp.GetThroughput()
 		} else {
-			fmt.Printf("%s: no response: %v\n", key, err)
+			fmt.Printf("no response from %s: %v\n", key, err)
 		}
 	}
 
-	fmt.Printf("average: %f TPS, %f micro-seconds\n", throughput/float64(count), latency/float64(count))
+	fmt.Printf("%f  TPS ,  %f  micro-seconds\n", throughput/float64(count), latency/float64(count))
 
 	return nil
 }
