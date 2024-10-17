@@ -2,6 +2,8 @@ package consensus
 
 import (
 	"errors"
+	"math/rand"
+	"time"
 
 	protocol "github.com/f24-cse535/apaxos/internal/consensus/apaxos"
 	"github.com/f24-cse535/apaxos/internal/grpc/client"
@@ -105,11 +107,21 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 			c.Logger.Info("apaxos terminated")
 		}()
 
+		// round is used to prevent infinite loop (paxos liveloop)
+		round := 0
+
 		c.Logger.Info("apaxos started")
 
 		// in a while loop, try to make consensus
 		for {
-			c.Logger.Info("a round of apaxos")
+			round++
+			c.Logger.Info("begin one round of apaxos", zap.Int("round", round))
+
+			// if apaxos was not ok on the first, or second attempt, we wait for random milliseconds
+			if round > 2 {
+				duration := time.Duration(rand.Intn(491)+10) * time.Millisecond // wait for 10 to 500 milliseconds
+				time.Sleep(duration)
+			}
 
 			// start apaxos protocol
 			err := c.instance.Start()
