@@ -30,13 +30,14 @@ func (n Node) Main() error {
 	mem := local.NewMemory(n.Cfg.NodeID, n.Cfg.GetBalances())
 
 	// check for previous state (aka snapshot)
-	ss, err := db.GetLastState()
-	if err == nil && ss != nil { // if ss exists, read from the previous state
-		mem.ReadFromState(ss)
-
-		n.Logger.Info("snapshot loaded")
-	} else {
-		n.Logger.Info("failed to load snapshot", zap.Error(err))
+	if n.Cfg.CheckSnapshots {
+		ss, err := db.GetLastState()
+		if err == nil && ss != nil { // if ss exists, read from the previous state
+			mem.ReadFromState(ss)
+			n.Logger.Info("snapshot loaded")
+		} else {
+			n.Logger.Info("failed to load snapshot", zap.Error(err))
+		}
 	}
 
 	// create a new consensus module

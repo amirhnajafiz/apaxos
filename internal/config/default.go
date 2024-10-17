@@ -11,6 +11,7 @@ func Default() Config {
 		NodeID:          "unique",
 		Client:          "unique",
 		Majority:        0,
+		CheckSnapshots:  false,
 		WorkersEnabled:  false,
 		WorkersInterval: 10, // in seconds
 		LogLevel:        "debug",
