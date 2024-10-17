@@ -28,8 +28,9 @@ clients:
 # node information
 node_id: "S1"
 client: "S1"
-workers_enabled: false
-workers_interval: 5 # in seconds
+check_snapshots: false
+workers_enabled: true
+workers_interval: 10 # in seconds
 log_level: "info"
 
 # consensus and gRPC values

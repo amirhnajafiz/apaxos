@@ -28,7 +28,8 @@ clients:
 # node information
 node_id: "S5"
 client: "S5"
-workers_enabled: false
+check_snapshots: false
+workers_enabled: true
 workers_interval: 10 # in seconds
 log_level: "info"
 

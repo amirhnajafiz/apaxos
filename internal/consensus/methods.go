@@ -110,11 +110,15 @@ func (c *Consensus) Commit() {
 	c.Memory.SetLastCommittedMessage(acceptedNum)
 
 	// now we store the blocks inside MongoDB
-	blocks := make([]*models.Block, len(acceptedVal))
-	for index, block := range acceptedVal {
+	blocks := make([]*models.Block, 0)
+	for _, block := range acceptedVal {
 		if len(block.Transactions) > 0 { // only save the blocks that have transactions
-			blocks[index] = &models.Block{}
-			blocks[index].FromProtoModel(block)
+			// convert to models.block
+			tmp := models.Block{}
+			tmp.FromProtoModel(block)
+
+			// append to blocks
+			blocks = append(blocks, &tmp)
 		}
 	}
 
