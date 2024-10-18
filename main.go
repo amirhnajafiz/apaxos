@@ -22,7 +22,7 @@ func main() {
 	// get argument variables
 	argv := os.Args
 	if len(argv) < 3 {
-		panic("you did not provide enough arguments to run! (command - type - configpath)")
+		panic("you did not provide enough arguments to run! (./main <command> <configpath>)")
 	}
 
 	// load configs into a config struct
