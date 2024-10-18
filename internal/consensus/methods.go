@@ -93,15 +93,14 @@ func (c *Consensus) Commit() {
 			c.Memory.ClearDatastore(block)
 		} else {
 			// get transactions and sort them by sequence number
-			tlist := block.Transactions
+			tlist := block.GetTransactions()
 			sort.Slice(tlist, func(i, j int) bool { // transactions are sorted in increasing order
-				return tlist[i].SequenceNumber < tlist[j].SequenceNumber
+				return tlist[i].GetSequenceNumber() < tlist[j].GetSequenceNumber()
 			})
 
 			// loop in transactions and execute them
 			for _, transaction := range tlist {
-				c.Memory.UpdateBalance(transaction.Sender, transaction.Amount*-1)
-				c.Memory.UpdateBalance(transaction.Reciever, transaction.Amount)
+				c.submitTransaction(transaction, false)
 			}
 		}
 	}

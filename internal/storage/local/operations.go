@@ -90,15 +90,15 @@ func (m *Memory) AddTransactionToDatastore(instance *apaxos.Transaction) {
 func (m *Memory) ClearDatastore(instance *apaxos.Block) {
 	// create a map to store elements of block for quick lookup
 	hashMap := make(map[int64]bool)
-	for _, transaction := range instance.Transactions {
-		hashMap[transaction.SequenceNumber] = true
+	for _, transaction := range instance.GetTransactions() {
+		hashMap[transaction.GetSequenceNumber()] = true
 	}
 
 	// create a new datastore
 	datastore := make([]*apaxos.Transaction, 0)
 	for _, transaction := range m.datastore.Transactions {
 		// add transactions that are not in the given block
-		if !hashMap[transaction.SequenceNumber] {
+		if !hashMap[transaction.GetSequenceNumber()] {
 			datastore = append(datastore, transaction)
 		}
 	}

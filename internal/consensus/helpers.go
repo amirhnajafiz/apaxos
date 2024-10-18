@@ -7,7 +7,7 @@ import (
 )
 
 // submitTransaction is used to store a transaction into datastore, and update balances.
-func (c *Consensus) submitTransaction(transaction *apaxos.Transaction) {
+func (c *Consensus) submitTransaction(transaction *apaxos.Transaction, store bool) {
 	// set a unique sequence number for transaction
 	transaction.SequenceNumber = c.Memory.GetSequenceNumber()
 
@@ -24,7 +24,9 @@ func (c *Consensus) submitTransaction(transaction *apaxos.Transaction) {
 	c.Memory.UpdateBalance(transaction.GetReciever(), transaction.GetAmount())
 
 	// save it into datastore
-	c.Memory.AddTransactionToDatastore(transaction)
+	if store {
+		c.Memory.AddTransactionToDatastore(transaction)
+	}
 }
 
 // checkBalance checks to see if the client balance has changed or not.

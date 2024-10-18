@@ -15,8 +15,10 @@ func (a *Apaxos) processPromiseMessages() {
 	for _, msg := range a.promisedMessage {
 		// check to see if we the node is synced or not
 		if utils.CompareBallotNumbers(msg.GetLastComittedMessage(), a.Memory.GetLastCommittedMessage()) != 0 {
+			a.Logger.Info("out-of-sync node detected")
+
 			// sync the old acceptor's log
-			go a.transmitSync(msg.NodeId)
+			a.transmitSync(msg.NodeId)
 		}
 
 		// process their promise messages, check to see if they have a different ballot-number

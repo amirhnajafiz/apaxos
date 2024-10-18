@@ -10,7 +10,7 @@ import (
 // waitForOwnCommit blocks the apaxos instance until it gets datastore is committed.
 func (a *Apaxos) waitForOwnCommit() error {
 	// set a request timeout and a majority timeout
-	timeoutDuration := time.Duration(a.Timeout) * time.Millisecond
+	timeoutDuration := time.Duration(a.Timeout*100) * time.Millisecond
 
 	// set the timer to request timeout first
 	timer := time.NewTimer(timeoutDuration)

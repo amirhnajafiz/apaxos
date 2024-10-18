@@ -66,7 +66,7 @@ func (c *Consensus) Checkout(pkt *messages.Packet) (chan *messages.Packet, error
 
 	// if the receiver is our client then no need to run consensus protocol
 	if transaction.Reciever == c.Client || c.checkBalance(transaction) {
-		c.submitTransaction(transaction)
+		c.submitTransaction(transaction, true)
 
 		return nil, nil
 	}
@@ -117,6 +117,9 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 			round++
 			c.Logger.Info("begin one round of apaxos", zap.Int("round", round))
 
+			// clear the channel
+			c.instance.InChannel = make(chan *messages.Packet)
+
 			// if apaxos was not ok on the first, or second attempt, we wait for random milliseconds
 			if round > 2 {
 				duration := time.Duration(rand.Intn(491)+10) * time.Millisecond // wait for 10 to 500 milliseconds
@@ -143,7 +146,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 
 					// if the client balance is now enough, then we submit the transaction
 					if c.checkBalance(transaction) {
-						c.submitTransaction(transaction)
+						c.submitTransaction(transaction, true)
 						c.notify(nil)
 
 						return
@@ -154,7 +157,7 @@ func (c *Consensus) newInstance(transaction *apaxos.Transaction) {
 			} else {
 				// now we check to see if the client balance is enough or not
 				if c.checkBalance(transaction) {
-					c.submitTransaction(transaction)
+					c.submitTransaction(transaction, true)
 					c.notify(nil)
 				} else {
 					c.notify(protocol.ErrNotEnoughBalance)
