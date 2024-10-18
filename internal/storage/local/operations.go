@@ -85,6 +85,14 @@ func (m *Memory) AddTransactionToDatastore(instance *apaxos.Transaction) {
 	m.datastore.Transactions = append(m.datastore.Transactions, instance)
 }
 
+// RerunTransactions is used to update the current balances after sync.
+func (m *Memory) RerunTransactions() {
+	for _, transaction := range m.datastore.Transactions {
+		m.UpdateBalance(transaction.GetSender(), transaction.GetAmount()*-1)
+		m.UpdateBalance(transaction.GetReciever(), transaction.GetAmount())
+	}
+}
+
 // ClearDatastore gets a block and removes the transactions from datastore
 // that are inside that block.
 func (m *Memory) ClearDatastore(instance *apaxos.Block) {

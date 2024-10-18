@@ -145,6 +145,9 @@ func (c *Consensus) Sync(msg *apaxos.SyncMessage) {
 		c.Memory.SetBalance(item.GetClient(), item.GetBalance())
 	}
 
+	// update client's balances with our datastore transactions
+	c.Memory.RerunTransactions()
+
 	// update our last committed message
 	c.Memory.SetLastCommittedMessage(msg.GetLastComittedMessage())
 	c.Memory.SetAcceptedNum(nil)
