@@ -1,0 +1,47 @@
+# config file for node instances
+# list of nodes and their addresses
+nodes:
+  - key: "S1"
+    value: "localhost:5001"
+  - key: "S2"
+    value: "localhost:5002"
+  - key: "S3"
+    value: "localhost:5003"
+  - key: "S4"
+    value: "localhost:5004"
+  - key: "S5"
+    value: "localhost:5005"
+
+# list of clients and initial balances
+clients:
+  - key: "S1"
+    value: "100"
+  - key: "S2"
+    value: "100"
+  - key: "S3"
+    value: "100"
+  - key: "S4"
+    value: "100"
+  - key: "S5"
+    value: "100"
+
+# node information
+node_id: "S1"
+client: "S1"
+check_snapshots: false
+workers_enabled: true
+workers_interval: 10 # in seconds
+log_level: "info"
+
+# consensus and gRPC values
+majority: 3
+grpc:
+  host: "localhost"
+  port: 5001
+  request_timeout: 1000 # in milliseconds
+  majority_timeout: 10000 # in microsends
+
+# database configs
+mongodb: # username amirhnajafiz password d3tO2kzZCse5f509
+  uri: "mongodb+srv://amirhnajafiz:d3tO2kzZCse5f509@cluster0.aoxrj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  database: "apaxos"

@@ -1,0 +1,16 @@
+# build files
+vendor/
+main
+
+# ides
+.vscode/
+.idea/
+
+# os
+.DS_Store
+
+# personal
+test/
+config.yml
+config.yaml
+
